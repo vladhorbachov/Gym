@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/home_graph"
+    app:startDestination="@id/navHome">
+
+    <fragment
+        android:id="@+id/navHome"
+        android:name="com.gymshark.ui.home.HomeFragment"
+        android:label="HomeFragment" />
+    <fragment
+        android:id="@+id/navStats"
+        android:name="com.gymshark.ui.home.StatsFragment"
+        android:label="StatsFragment" />
+    <fragment
+        android:id="@+id/navMeal"
+        android:name="com.gymshark.ui.home.MealFragment"
+        android:label="MealFragment" />
+    <fragment
+        android:id="@+id/navTraining"
+        android:name="com.gymshark.ui.home.training.TrainingFragment"
+        android:label="TrainingFragment" />
+    <fragment
+        android:id="@+id/navProfile"
+        android:name="com.gymshark.ui.home.profile.ProfileFragment"
+        android:label="ProfileFragment" />
+</navigation>

@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+<!--    xmlns:app="http://schemas.android.com/apk/res-auto"-->
+<!--<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"-->
+<!--    xmlns:app="http://schemas.android.com/apk/res-auto"-->
+<!--    android:layout_width="match_parent"-->
+<!--    android:layout_height="match_parent">-->
+
+<!--    <LinearLayout-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:orientation="vertical"-->
+<!--        android:padding="16dp">-->
+
+<!--        <com.google.android.material.textfield.TextInputLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content">-->
+<!--            <com.google.android.material.textfield.TextInputEditText-->
+<!--                android:id="@+id/etUserId"-->
+<!--                android:hint="User ID"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"/>-->
+<!--        </com.google.android.material.textfield.TextInputLayout>-->
+
+<!--        <com.google.android.material.textfield.TextInputLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content">-->
+<!--            <com.google.android.material.textfield.TextInputEditText-->
+<!--                android:id="@+id/etName"-->
+<!--                android:hint="Name"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"/>-->
+<!--        </com.google.android.material.textfield.TextInputLayout>-->
+
+<!--        <com.google.android.material.textfield.TextInputLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content">-->
+<!--            <com.google.android.material.textfield.TextInputEditText-->
+<!--                android:id="@+id/etAge"-->
+<!--                android:hint="Age"-->
+<!--                android:inputType="number"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"/>-->
+<!--        </com.google.android.material.textfield.TextInputLayout>-->
+
+<!--        <com.google.android.material.materialswitch.MaterialSwitch-->
+<!--            android:id="@+id/switchSex"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="Male"/>-->
+
+<!--        <com.google.android.material.textfield.TextInputLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content">-->
+<!--            <com.google.android.material.textfield.TextInputEditText-->
+<!--                android:id="@+id/etWeight"-->
+<!--                android:hint="Weight (kg)"-->
+<!--                android:inputType="numberDecimal"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"/>-->
+<!--        </com.google.android.material.textfield.TextInputLayout>-->
+
+<!--        <com.google.android.material.textfield.TextInputLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content">-->
+<!--            <com.google.android.material.textfield.TextInputEditText-->
+<!--                android:id="@+id/etHeight"-->
+<!--                android:hint="Height (cm)"-->
+<!--                android:inputType="number"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"/>-->
+<!--        </com.google.android.material.textfield.TextInputLayout>-->
+
+<!--        <com.google.android.material.textfield.TextInputLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content">-->
+<!--            <com.google.android.material.textfield.TextInputEditText-->
+<!--                android:id="@+id/etMinBPM"-->
+<!--                android:hint="Min BPM"-->
+<!--                android:inputType="number"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"/>-->
+<!--        </com.google.android.material.textfield.TextInputLayout>-->
+
+<!--        <com.google.android.material.textfield.TextInputLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content">-->
+<!--            <com.google.android.material.textfield.TextInputEditText-->
+<!--                android:id="@+id/etMaxBPM"-->
+<!--                android:hint="Max BPM"-->
+<!--                android:inputType="number"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"/>-->
+<!--        </com.google.android.material.textfield.TextInputLayout>-->
+
+<!--        <com.google.android.material.textfield.TextInputLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content">-->
+<!--            <com.google.android.material.textfield.TextInputEditText-->
+<!--                android:id="@+id/etAvgBPM"-->
+<!--                android:hint="Avg BPM"-->
+<!--                android:inputType="number"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"/>-->
+<!--        </com.google.android.material.textfield.TextInputLayout>-->
+
+<!--        <com.google.android.material.textview.MaterialTextView-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="Training days"/>-->
+
+<!--        <com.google.android.material.chip.ChipGroup-->
+<!--            android:id="@+id/chipGroupDays"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            app:singleSelection="false"-->
+<!--            app:selectionRequired="false"-->
+<!--            app:chipSpacingVertical="4dp"-->
+<!--            app:chipSpacingHorizontal="4dp">-->
+
+<!--            <com.google.android.material.chip.Chip-->
+<!--                android:id="@+id/chMon"-->
+<!--                style="@style/DayChip"-->
+<!--                android:checkable="true"-->
+<!--                android:text="Mon"/>-->
+<!--            <com.google.android.material.chip.Chip-->
+<!--                android:id="@+id/chTue"-->
+<!--                style="@style/DayChip"-->
+<!--                android:checkable="true"-->
+<!--                android:text="Tue"/>-->
+<!--            <com.google.android.material.chip.Chip-->
+<!--                android:id="@+id/chWed"-->
+<!--                style="@style/DayChip"-->
+<!--                android:checkable="true"-->
+<!--                android:text="Wed"/>-->
+<!--            <com.google.android.material.chip.Chip-->
+<!--                android:id="@+id/chThu"-->
+<!--                style="@style/DayChip"-->
+<!--                android:checkable="true"-->
+<!--                android:text="Thu"/>-->
+<!--            <com.google.android.material.chip.Chip-->
+<!--                android:id="@+id/chFri"-->
+<!--                style="@style/DayChip"-->
+<!--                android:checkable="true"-->
+<!--                android:text="Fri"/>-->
+<!--            <com.google.android.material.chip.Chip-->
+<!--                android:id="@+id/chSat"-->
+<!--                style="@style/DayChip"-->
+<!--                android:checkable="true"-->
+<!--                android:text="Sat"/>-->
+<!--            <com.google.android.material.chip.Chip-->
+<!--                android:id="@+id/chSun"-->
+<!--                style="@style/DayChip"-->
+<!--                android:checkable="true"-->
+<!--                android:text="Sun"/>-->
+<!--        </com.google.android.material.chip.ChipGroup>-->
+
+<!--        <com.google.android.material.button.MaterialButton-->
+<!--            android:id="@+id/btnSaveUser"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="Save"/>-->
+
+<!--        <com.google.android.material.button.MaterialButton-->
+<!--            android:id="@+id/btnLogout"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="Sign out"-->
+<!--            style="@style/Widget.Material3.Button.TonalButton"/>-->
+
+<!--    </LinearLayout>-->
+<!--</ScrollView>-->

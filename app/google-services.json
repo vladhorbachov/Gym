@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "307641599230",
+    "project_id": "fitness-27e4a",
+    "storage_bucket": "fitness-27e4a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:307641599230:android:b1e6cf3d6a671746de51af",
+        "android_client_info": {
+          "package_name": "com.gymshark"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "307641599230-f8ijkc1o9d8cqp4lasciid75hkbh5vfp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.gymshark",
+            "certificate_hash": "e95f244814801e071b1a3e3c03e98ee33ab106b9"
+          }
+        },
+        {
+          "client_id": "307641599230-quung09esmchmuva8lhiildr1t65rv3i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAk1ttzwGY-JIz9kq6iOp5v-5VrVmGHEoY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "307641599230-quung09esmchmuva8lhiildr1t65rv3i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

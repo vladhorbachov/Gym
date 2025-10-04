@@ -1,0 +1,215 @@
+{
+  "version": 3,
+  "list": [
+    {
+      "id": 0,
+      "name": "Жим штанги лежачи",
+      "baseCategory": "Груди",
+      "subCategory": "Базова вправа",
+      "difficulty": 3
+    },
+    {
+      "id": 0,
+      "name": "Жим гантелей на лаві",
+      "baseCategory": "Груди",
+      "subCategory": "Базова вправа",
+      "difficulty": 2
+    },
+    {
+      "id": 0,
+      "name": "Віджимання",
+      "baseCategory": "Груди",
+      "subCategory": "Власна вага",
+      "difficulty": 1
+    },
+    {
+      "id": 0,
+      "name": "Зведення рук у тренажері",
+      "baseCategory": "Груди",
+      "subCategory": "Ізоляційна вправа",
+      "difficulty": 2
+    },
+    {
+      "id": 0,
+      "name": "Жим на похилій лаві",
+      "baseCategory": "Груди",
+      "subCategory": "Базова вправа",
+      "difficulty": 3
+    },
+    {
+      "id": 0,
+      "name": "Армійський жим",
+      "baseCategory": "Плечі",
+      "subCategory": "Базова вправа",
+      "difficulty": 3
+    },
+    {
+      "id": 0,
+      "name": "Жим гантелей сидячи",
+      "baseCategory": "Плечі",
+      "subCategory": "Базова вправа",
+      "difficulty": 2
+    },
+    {
+      "id": 0,
+      "name": "Підйоми гантелей у сторони",
+      "baseCategory": "Плечі",
+      "subCategory": "Ізоляційна вправа",
+      "difficulty": 2
+    },
+    {
+      "id": 0,
+      "name": "Підйоми гантелей перед собою",
+      "baseCategory": "Плечі",
+      "subCategory": "Ізоляційна вправа",
+      "difficulty": 2
+    },
+    {
+      "id": 0,
+      "name": "Зворотні розведення на дельти",
+      "baseCategory": "Плечі",
+      "subCategory": "Ізоляційна вправа",
+      "difficulty": 2
+    },
+    {
+      "id": 0,
+      "name": "Присідання зі штангою",
+      "baseCategory": "Ноги",
+      "subCategory": "Базова вправа",
+      "difficulty": 3
+    },
+    {
+      "id": 0,
+      "name": "Жим ногами у тренажері",
+      "baseCategory": "Ноги",
+      "subCategory": "Базова вправа",
+      "difficulty": 2
+    },
+    {
+      "id": 0,
+      "name": "Випади з гантелями",
+      "baseCategory": "Ноги",
+      "subCategory": "Ізоляційна вправа",
+      "difficulty": 2
+    },
+    {
+      "id": 0,
+      "name": "Згинання ніг у тренажері",
+      "baseCategory": "Ноги",
+      "subCategory": "Ізоляційна вправа",
+      "difficulty": 2
+    },
+    {
+      "id": 0,
+      "name": "Підйоми на носки стоячи",
+      "baseCategory": "Ноги",
+      "subCategory": "Ізоляційна вправа",
+      "difficulty": 1
+    },
+    {
+      "id": 0,
+      "name": "Підтягування широким хватом",
+      "baseCategory": "Спина",
+      "subCategory": "Базова вправа",
+      "difficulty": 3
+    },
+    {
+      "id": 0,
+      "name": "Тяга штанги у нахилі",
+      "baseCategory": "Спина",
+      "subCategory": "Базова вправа",
+      "difficulty": 3
+    },
+    {
+      "id": 0,
+      "name": "Тяга горизонтального блока",
+      "baseCategory": "Спина",
+      "subCategory": "Базова вправа",
+      "difficulty": 2
+    },
+    {
+      "id": 0,
+      "name": "Тяга верхнього блока",
+      "baseCategory": "Спина",
+      "subCategory": "Базова вправа",
+      "difficulty": 2
+    },
+    {
+      "id": 0,
+      "name": "Гіперекстензії",
+      "baseCategory": "Спина",
+      "subCategory": "Власна вага",
+      "difficulty": 1
+    },
+    {
+      "id": 0,
+      "name": "Підйоми штанги на біцепс",
+      "baseCategory": "Біцепс",
+      "subCategory": "Базова вправа",
+      "difficulty": 2
+    },
+    {
+      "id": 0,
+      "name": "Підйоми гантелей молотком",
+      "baseCategory": "Біцепс",
+      "subCategory": "Ізоляційна вправа",
+      "difficulty": 2
+    },
+    {
+      "id": 0,
+      "name": "Концентровані підйоми гантелі",
+      "baseCategory": "Біцепс",
+      "subCategory": "Ізоляційна вправа",
+      "difficulty": 2
+    },
+    {
+      "id": 0,
+      "name": "Підйоми на біцепс у Смітті",
+      "baseCategory": "Біцепс",
+      "subCategory": "Базова вправа",
+      "difficulty": 3
+    },
+    {
+      "id": 0,
+      "name": "Згинання рук у тренажері Скотта",
+      "baseCategory": "Біцепс",
+      "subCategory": "Ізоляційна вправа",
+      "difficulty": 2
+    },
+    {
+      "id": 0,
+      "name": "Французький жим",
+      "baseCategory": "Тріцепс",
+      "subCategory": "Ізоляційна вправа",
+      "difficulty": 2
+    },
+    {
+      "id": 0,
+      "name": "Віджимання на брусах",
+      "baseCategory": "Тріцепс",
+      "subCategory": "Базова вправа",
+      "difficulty": 3
+    },
+    {
+      "id": 0,
+      "name": "Розгинання рук у кросовері",
+      "baseCategory": "Тріцепс",
+      "subCategory": "Ізоляційна вправа",
+      "difficulty": 2
+    },
+    {
+      "id": 0,
+      "name": "Жим вузьким хватом",
+      "baseCategory": "Тріцепс",
+      "subCategory": "Базова вправа",
+      "difficulty": 3
+    },
+    {
+      "id": 0,
+      "name": "Віджимання з вузькою постановкою рук",
+      "baseCategory": "Тріцепс",
+      "subCategory": "Власна вага",
+      "difficulty": 1
+    }
+  ]
+}

@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- User basic data -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="User ID">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etUserId"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Name">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Age">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etAge"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/swSex"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Male (off = Female)" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Weight (kg)">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etWeight"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Height (cm)">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etHeight"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Min BPM">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etMinBpm"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Max BPM">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etMaxBpm"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Avg BPM">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etAvgBpm"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Pentagon -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pentagon values:" />
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etStrength"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="Strength"
+            android:inputType="number" />
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etPower"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="Power"
+            android:inputType="number" />
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etAgility"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="Agility"
+            android:inputType="number" />
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etEndurance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="Endurance"
+            android:inputType="number" />
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etMobility"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="Mobility"
+            android:inputType="number" />
+
+        <!-- Series -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Series:" />
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etCurrentSeries"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="Current"
+            android:inputType="number" />
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etMaxSeries"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="Max Series"
+            android:inputType="number" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/swSeriesActive"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Series Active" />
+
+        <TextView
+            android:id="@+id/tvSelectedDays"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Selected days: none" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPickDays"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Pick Training Days" />
+
+        <!-- Save -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSave"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Save" />
+    </LinearLayout>
+</ScrollView>

@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">My Application</string>
+    <string name="default_web_client_id" translatable="false">307641599230-quung09esmchmuva8lhiildr1t65rv3i.apps.googleusercontent.com</string>
+    <string name="email_6">Перевір email і пароль (мін. 6 символів)</string>
+    <string name="home">Home</string>
+    <string name="stats">Stats</string>
+
+</resources>
