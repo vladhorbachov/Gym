@@ -28,9 +28,19 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentProfileBinding.bind(view)
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            val user = vm.loadUser(binding.etUserId.text.toString())
+            user?.trainingDay?.days?.forEach { selectedDays.add(it) }
+            binding.tvSelectedDays.text =
+                if (selectedDays.isEmpty()) "Selected days: none"
+                else "Selected days: " + selectedDays.joinToString { daysOfWeek[it] }
+        }
+
         binding.btnPickDays.setOnClickListener { showDayPicker() }
         binding.btnSave.setOnClickListener { saveUser() }
     }
+
 
     private fun showDayPicker() {
         val checkedItems = BooleanArray(daysOfWeek.size) { selectedDays.contains(it) }

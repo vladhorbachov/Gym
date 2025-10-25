@@ -6,7 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.gymshark.databinding.FragmentOnboardingoneBinding
-import com.gymshark.utils.WaveView
+import com.gymshark.utils.view.WaveView
+
 
 class OnboardingFragmentOne : Fragment() {
 

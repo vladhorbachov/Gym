@@ -1,4 +1,4 @@
-package com.gymshark.utils
+package com.gymshark.utils.view
 
 import android.content.Context
 import android.graphics.Canvas
