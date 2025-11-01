@@ -23,5 +23,13 @@
     <fragment
         android:id="@+id/navProfile"
         android:name="com.gymshark.ui.home.profile.ProfileFragment"
-        android:label="ProfileFragment" />
+        android:label="ProfileFragment" >
+        <action
+            android:id="@+id/action_navProfile_to_trainingSetsFragment"
+            app:destination="@id/trainingSetsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/trainingSetsFragment"
+        android:name="com.gymshark.ui.home.profile.TrainingSetsFragment"
+        android:label="TrainingSetsFragment" />
 </navigation>

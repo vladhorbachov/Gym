@@ -189,6 +189,12 @@
             android:layout_height="wrap_content"
             android:text="Pick Training Days" />
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPickTrainingSet"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Pick Training Sets" />
+
         <!-- Save -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSave"

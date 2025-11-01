@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.gymshark.R
@@ -39,6 +40,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
         binding.btnPickDays.setOnClickListener { showDayPicker() }
         binding.btnSave.setOnClickListener { saveUser() }
+        binding.btnPickTrainingSet.setOnClickListener { showSetPicker() }
     }
 
 
@@ -57,6 +59,10 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             }
             .setNegativeButton("Cancel", null)
             .show()
+    }
+
+    private fun showSetPicker() {
+        findNavController().navigate(R.id.action_navProfile_to_trainingSetsFragment)
     }
 
     private fun saveUser() = with(binding) {
