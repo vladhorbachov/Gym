@@ -11,9 +11,11 @@ class SetsDayView @JvmOverloads constructor(
     attrs: AttributeSet? = null
 ) : ConstraintLayout(context, attrs) {
 
-    private val binding = ViewSetsBinding.inflate(LayoutInflater.from(context), this)
+    val binding = ViewSetsBinding.inflate(LayoutInflater.from(context), this)
     fun setDay(s: String) {
         binding.textView.text = s
 
     }
+
+
 }

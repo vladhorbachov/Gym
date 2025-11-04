@@ -15,6 +15,10 @@ import com.gymshark.data.models.TrainingDay
 import com.gymshark.databinding.FragmentProfileBinding
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import java.time.DayOfWeek
+import java.time.format.TextStyle
+import java.util.Calendar
+import java.util.Locale
 
 class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
@@ -23,8 +27,14 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
     private val vm: ProfileViewModel by viewModel()
 
-    private val daysOfWeek = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
-    private val selectedDays = mutableSetOf<Int>()
+    private val calendarDaysOrder = listOf(
+        Calendar.MONDAY, Calendar.TUESDAY, Calendar.WEDNESDAY,
+        Calendar.THURSDAY, Calendar.FRIDAY, Calendar.SATURDAY, Calendar.SUNDAY
+    )
+
+    private val selectedDays =
+        mutableSetOf<Int>()
+    private val locale: Locale get() = Locale.getDefault()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -32,10 +42,9 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
         viewLifecycleOwner.lifecycleScope.launch {
             val user = vm.loadUser(binding.etUserId.text.toString())
+            selectedDays.clear()
             user?.trainingDay?.days?.forEach { selectedDays.add(it) }
-            binding.tvSelectedDays.text =
-                if (selectedDays.isEmpty()) "Selected days: none"
-                else "Selected days: " + selectedDays.joinToString { daysOfWeek[it] }
+            renderSelectedDays()
         }
 
         binding.btnPickDays.setOnClickListener { showDayPicker() }
@@ -43,20 +52,27 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         binding.btnPickTrainingSet.setOnClickListener { showSetPicker() }
     }
 
+    private fun renderSelectedDays() {
+        binding.tvSelectedDays.text =
+            if (selectedDays.isEmpty()) "Selected days: none"
+            else "Selected days: " + selectedDays
+                .sortedBy { calendarDaysOrder.indexOf(it).takeIf { i -> i >= 0 } ?: 99 }
+                .joinToString { calendarLabel(it) }
+    }
 
     private fun showDayPicker() {
-        val checkedItems = BooleanArray(daysOfWeek.size) { selectedDays.contains(it) }
+        val labels = calendarDaysOrder.map { calendarLabel(it) }.toTypedArray()
+        val checked = BooleanArray(calendarDaysOrder.size) { idx ->
+            selectedDays.contains(calendarDaysOrder[idx])
+        }
+
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Pick training days")
-            .setMultiChoiceItems(daysOfWeek.toTypedArray(), checkedItems) { _, which, isChecked ->
-                if (isChecked) selectedDays.add(which) else selectedDays.remove(which)
+            .setMultiChoiceItems(labels, checked) { _, which, isChecked ->
+                val calValue = calendarDaysOrder[which]
+                if (isChecked) selectedDays.add(calValue) else selectedDays.remove(calValue)
             }
-            .setPositiveButton("OK") { dialog, _ ->
-                binding.tvSelectedDays.text =
-                    if (selectedDays.isEmpty()) "Selected days: none"
-                    else "Selected days: " + selectedDays.joinToString { daysOfWeek[it] }
-                dialog.dismiss()
-            }
+            .setPositiveButton("OK") { d, _ -> renderSelectedDays(); d.dismiss() }
             .setNegativeButton("Cancel", null)
             .show()
     }
@@ -83,7 +99,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                 endurance = etEndurance.text.toString().toIntOrNull() ?: 0,
                 mobility = etMobility.text.toString().toIntOrNull() ?: 0,
             ),
-            trainingDay = TrainingDay(selectedDays.toMutableList()),
+            trainingDay = TrainingDay(selectedDays.sorted().toMutableList()),
             series = Series(
                 current = etCurrentSeries.text.toString().toIntOrNull() ?: 0,
                 maxSeries = etMaxSeries.text.toString().toIntOrNull() ?: 0,
@@ -97,8 +113,15 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
+    private fun calendarLabel(calendarValue: Int): String =
+        when (calendarValue) {
+            Calendar.MONDAY -> DayOfWeek.MONDAY
+            Calendar.TUESDAY -> DayOfWeek.TUESDAY
+            Calendar.WEDNESDAY -> DayOfWeek.WEDNESDAY
+            Calendar.THURSDAY -> DayOfWeek.THURSDAY
+            Calendar.FRIDAY -> DayOfWeek.FRIDAY
+            Calendar.SATURDAY -> DayOfWeek.SATURDAY
+            Calendar.SUNDAY -> DayOfWeek.SUNDAY
+            else -> null
+        }?.getDisplayName(TextStyle.SHORT, locale) ?: "?"
 }
