@@ -5,23 +5,23 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.gymshark.data.models.ItemDays
+import com.gymshark.data.models.CalendarDayInfo
 import com.gymshark.databinding.ItemCalendarBinding
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
-class CalendarAdapter() : ListAdapter<ItemDays, CalendarAdapter.VH>(object:DiffUtil.ItemCallback<ItemDays>(){
+class CalendarAdapter() : ListAdapter<CalendarDayInfo, CalendarAdapter.VH>(object:DiffUtil.ItemCallback<CalendarDayInfo>(){
     override fun areItemsTheSame(
-        oldItem: ItemDays,
-        newItem: ItemDays
+        oldItem: CalendarDayInfo,
+        newItem: CalendarDayInfo
     ): Boolean {
         return oldItem.data == newItem.data && oldItem.type == newItem.type
     }
 
     override fun areContentsTheSame(
-        oldItem: ItemDays,
-        newItem: ItemDays
+        oldItem: CalendarDayInfo,
+        newItem: CalendarDayInfo
     ): Boolean {
         return oldItem == newItem
     }
@@ -42,7 +42,7 @@ class CalendarAdapter() : ListAdapter<ItemDays, CalendarAdapter.VH>(object:DiffU
     }
 
     inner class VH(private val binding: ItemCalendarBinding): RecyclerView.ViewHolder(binding.root){
-        fun bind(item: ItemDays){
+        fun bind(item: CalendarDayInfo){
             val calendar = Calendar.getInstance().apply {
                 timeInMillis = item.data
             }

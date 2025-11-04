@@ -1,6 +1,6 @@
 package com.gymshark.data.models
 
-data class DayItem(
+data class TrainingCalendarDay(
     val date: Long,
     val train: Train?
 )

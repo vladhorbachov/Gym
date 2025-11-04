@@ -1,6 +1,6 @@
 package com.gymshark.data.models
 
-data class ItemDays(
+data class CalendarDayInfo(
     val data: Long,
     val type: String
 )

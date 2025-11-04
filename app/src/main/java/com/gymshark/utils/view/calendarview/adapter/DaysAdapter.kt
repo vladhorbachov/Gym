@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.gymshark.data.models.DayItem
+import com.gymshark.data.models.TrainingCalendarDay
 import com.gymshark.data.models.Train
 import com.gymshark.databinding.ItemDayBinding
 import java.text.SimpleDateFormat
@@ -16,7 +16,7 @@ import java.util.Locale
 
 class DaysAdapter(
     private val onClick: (Train?) -> Unit
-) : ListAdapter<DayItem, DaysAdapter.DayVH>(DiffCallback()) {
+) : ListAdapter<TrainingCalendarDay, DaysAdapter.DayVH>(DiffCallback()) {
 
     private val today = Calendar.getInstance()
     var trainingDays: Set<Int> = emptySet()
@@ -37,7 +37,7 @@ class DaysAdapter(
     inner class DayVH(private val binding: ItemDayBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(item: DayItem) {
+        fun bind(item: TrainingCalendarDay) {
             val dateFormat = SimpleDateFormat("d", Locale.getDefault())
             val dayFormat = SimpleDateFormat("EEE", Locale.getDefault())
 
@@ -93,10 +93,10 @@ class DaysAdapter(
         }
     }
 
-    class DiffCallback : DiffUtil.ItemCallback<DayItem>() {
-        override fun areItemsTheSame(oldItem: DayItem, newItem: DayItem) =
+    class DiffCallback : DiffUtil.ItemCallback<TrainingCalendarDay>() {
+        override fun areItemsTheSame(oldItem: TrainingCalendarDay, newItem: TrainingCalendarDay) =
             oldItem.date == newItem.date
 
-        override fun areContentsTheSame(oldItem: DayItem, newItem: DayItem) = oldItem == newItem
+        override fun areContentsTheSame(oldItem: TrainingCalendarDay, newItem: TrainingCalendarDay) = oldItem == newItem
     }
 }

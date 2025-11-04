@@ -5,7 +5,7 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.gymshark.data.models.DayItem
+import com.gymshark.data.models.TrainingCalendarDay
 import com.gymshark.data.models.Train
 import com.gymshark.databinding.ViewCalendarBinding
 import com.gymshark.utils.view.calendarview.adapter.DaysAdapter
@@ -60,7 +60,7 @@ class CalendarView @JvmOverloads constructor(
         binding.monthText.text = dateFormat.format(currentCalendar.time)
             .replaceFirstChar { it.uppercase() }
 
-        val days = ArrayList<DayItem>()
+        val days = ArrayList<TrainingCalendarDay>()
         val cal = currentCalendar.clone() as Calendar
         cal.set(Calendar.DAY_OF_MONTH, 1)
         val month = cal.get(Calendar.MONTH)
@@ -73,7 +73,7 @@ class CalendarView @JvmOverloads constructor(
                         tCal.get(Calendar.MONTH) == cal.get(Calendar.MONTH) &&
                         tCal.get(Calendar.DAY_OF_MONTH) == cal.get(Calendar.DAY_OF_MONTH)
             }
-            days.add(DayItem(date = time, train = train))
+            days.add(TrainingCalendarDay(date = time, train = train))
             cal.add(Calendar.DAY_OF_MONTH, 1)
         }
 
