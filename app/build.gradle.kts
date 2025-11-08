@@ -1,15 +1,15 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    id("kotlin-kapt")
     id("androidx.navigation.safeargs.kotlin")
     id("kotlin-parcelize")
     id("com.google.gms.google-services")
+    id("com.google.devtools.ksp")
 }
 
 android {
     namespace = "com.gymshark"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.gymshark"
@@ -65,16 +65,16 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
     // Room
-    implementation("androidx.room:room-runtime:2.6.1")
-    implementation("androidx.room:room-ktx:2.6.1")
-    kapt("androidx.room:room-compiler:2.6.1")
+    implementation("androidx.room:room-runtime:2.8.3")
+    implementation("androidx.room:room-ktx:2.8.3")
+    ksp("androidx.room:room-compiler:2.8.3")
 
     // LiveData & ViewModel
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.1")
 
     // Navigation
-    implementation("androidx.navigation:navigation-fragment-ktx:2.8.2")
-    implementation("androidx.navigation:navigation-ui-ktx:2.8.2")
+    implementation("androidx.navigation:navigation-fragment-ktx:2.9.5")
+    implementation("androidx.navigation:navigation-ui-ktx:2.9.5")
 
     // OkHttp3
     implementation("com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.11")
@@ -99,4 +99,8 @@ dependencies {
     implementation ("com.google.android.material:material:1.13.0")
 
     implementation ("androidx.datastore:datastore-preferences:1.1.1")
+
+    // Moshi (Square)
+    implementation("com.squareup.moshi:moshi-kotlin:1.15.1")
+    ksp("com.squareup.moshi:moshi-kotlin-codegen:1.15.1")
 }

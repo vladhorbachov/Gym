@@ -3,6 +3,7 @@ package com.gymshark.data.db.entity
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.gymshark.data.models.DaySlot
 import com.gymshark.data.models.Pentagon
 import com.gymshark.data.models.Series
 import com.gymshark.data.models.TrainingDay
@@ -22,5 +23,7 @@ data class UserEntity(
     var pentagon: Pentagon,
     var trainingDay: TrainingDay,
     @Embedded(prefix = "series_")
-    var series: Series
+    var series: Series,
+    var trainingDayTypes: Map<Int, Set<String>> = emptyMap(),
+    var trainingSlots: List<DaySlot> = emptyList()
 )

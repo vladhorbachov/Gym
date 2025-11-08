@@ -3,6 +3,8 @@ package com.gymshark.data.db
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.gymshark.data.db.converter.DaySlotsConverter
+import com.gymshark.data.db.converter.DayTypesConverter
 import com.gymshark.data.db.converter.PentagonConverter
 import com.gymshark.data.db.converter.TrainingDayConverter
 import com.gymshark.data.db.dao.ExercisesDao
@@ -24,12 +26,15 @@ import com.gymshark.data.db.entity.UserEntity
         TrainingsEntity::class,
         SetsEntity::class
     ],
-    version = 1,
+    version = 3,
     exportSchema = false
 )
 
 @TypeConverters(
-    PentagonConverter::class, TrainingDayConverter::class
+    PentagonConverter::class,
+    TrainingDayConverter::class,
+    DayTypesConverter::class,
+    DaySlotsConverter::class
 )
 abstract class DataBase : RoomDatabase() {
     abstract fun userDao(): UserDao

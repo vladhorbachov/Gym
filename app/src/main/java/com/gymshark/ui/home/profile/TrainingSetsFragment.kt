@@ -9,8 +9,10 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.gymshark.R
+import com.gymshark.data.models.DaySlot
 import com.gymshark.databinding.FragmentTrainingSetsBinding
 import com.gymshark.utils.view.SetsDayView
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.time.DayOfWeek
@@ -30,60 +32,57 @@ class TrainingSetsFragment : Fragment(R.layout.fragment_training_sets) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentTrainingSetsBinding.bind(view)
 
+        // Стежимо за базовими днями і чистимо слоти, якщо база змінилась
         viewLifecycleOwner.lifecycleScope.launch {
-            vm.baseDays.collect { vm.syncWithBase() }
+            vm.baseDays.collectLatest { vm.syncWithBase() }
         }
 
+        // Рендеримо СЛОТИ
         viewLifecycleOwner.lifecycleScope.launch {
-            vm.displayedDays.collect { list ->
-                renderDays(list)
-            }
+            vm.displayedSlots.collectLatest { renderSlots(it) }
         }
 
-        binding.ivAdd.setOnClickListener { vm.addNext() }
-
+        // Кнопка додавання нового слота
+        binding.ivAdd.setOnClickListener {
+            vm.addNext()
+            Log.d("TSF", "add clicked; baseDays=${vm.baseDays.value} slots=${vm.displayedSlots.value}")
+        }
     }
 
-    private fun renderDays(days: List<Int>) {
+    private fun renderSlots(slots: List<DaySlot>) {
         binding.linearLayout.removeAllViews()
-        days.forEach { addDayView(it) }
+        slots.forEach { addSlotView(it) }
     }
 
-    fun showCheckboxAlertDialog(
-        items: List<String>,
-        onSelected: (selectedItems: List<String>) -> Unit
-    ) {
-        val selected = BooleanArray(items.size) { false }
-
-        AlertDialog.Builder(requireContext())
-            .setTitle("Виберіть опції")
-            .setMultiChoiceItems(items.toTypedArray(), selected) { _, which, isChecked ->
-                selected[which] = isChecked
-            }
-            .setPositiveButton("OK") { dialog, _ ->
-                val result = items.filterIndexed { index, _ -> selected[index] }
-                onSelected(result)
-                dialog.dismiss()
-            }
-            .setNegativeButton("Відміна") { dialog, _ ->
-                dialog.dismiss()
-            }
-            .show()
-    }
-
-    private val selectedItems =
-        mutableListOf<String>("Груди", "Плечі", "Ноги", "Спина", "Біцепс", "Тріцепс")
-
-    private fun addDayView(calendarValue: Int) {
-        val label = calendarToLabel(calendarValue)
+    private fun addSlotView(slot: DaySlot) {
+        val label = calendarToLabel(slot.day)
         val item = SetsDayView(requireContext()).apply {
-            binding.ivAddType.setOnClickListener {
-                showCheckboxAlertDialog(selectedItems){
-                    binding.tvDayType.text = it.joinToString(", ")
+            setDay(label)
+            setTypesText(
+                if (slot.types.isEmpty()) getString(R.string.choose_types_placeholder)
+                else slot.types.joinToString(", ")
+            )
+            setOnAddTypeClick {
+                val all = vm.categories.value
+                val pre = slot.types.toSet()
+                showCheckboxAlertDialog(all, pre) { chosen ->
+                    vm.setSlotTypes(slot.id, chosen)
+                    setTypesText(
+                        if (chosen.isEmpty()) getString(R.string.choose_types_placeholder)
+                        else chosen.joinToString(", ")
+                    )
+                }
+
+                showCheckboxAlertDialog(all, pre) { chosen ->
+                    vm.setSlotTypes(slot.id, chosen)
+                    setTypesText(
+                        if (chosen.isEmpty()) getString(R.string.choose_types_placeholder)
+                        else chosen.joinToString(", ")
+                    )
                 }
             }
-            setDay(label)
         }
+
         val lp = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
@@ -92,6 +91,26 @@ class TrainingSetsFragment : Fragment(R.layout.fragment_training_sets) {
             setMargins(m, m, m, m)
         }
         binding.linearLayout.addView(item, lp)
+    }
+
+    private fun showCheckboxAlertDialog(
+        items: List<String>,
+        preselected: Set<String>,
+        onSelected: (selectedItems: List<String>) -> Unit
+    ) {
+        val checked = BooleanArray(items.size) { i -> items[i] in preselected }
+        AlertDialog.Builder(requireContext())
+            .setTitle(getString(R.string.choose_types_title))
+            .setMultiChoiceItems(items.toTypedArray(), checked) { _, which, isChecked ->
+                checked[which] = isChecked
+            }
+            .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                val result = items.filterIndexed { index, _ -> checked[index] }
+                onSelected(result)
+                dialog.dismiss()
+            }
+            .setNegativeButton(android.R.string.cancel) { dialog, _ -> dialog.dismiss() }
+            .show()
     }
 
     private fun calendarToLabel(calendarValue: Int): String =

@@ -1,6 +1,7 @@
 package com.gymshark.di
 
 
+import androidx.lifecycle.SavedStateHandle
 import com.gymshark.ui.auth.AuthViewModel
 import com.gymshark.ui.home.HomeViewModel
 import com.gymshark.ui.home.profile.ProfileViewModel
@@ -16,5 +17,12 @@ val viewModelModule = module {
     viewModel { ProfileViewModel(get()) }
     viewModel { SplashViewModel(get(),get()) }
     viewModel { TrainingViewModel(get()) }
-    viewModel { TrainingSetsViewModel(get(),get()) }
+    viewModel { TrainingSetsViewModel(get(),get(),get()) }
+    viewModel { (handle: SavedStateHandle) ->
+        TrainingSetsViewModel(
+            userRepository = get(),
+            savedStateHandle = handle,
+            catalog = get()
+        )
+    }
 }

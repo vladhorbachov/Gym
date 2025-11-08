@@ -12,10 +12,16 @@ class SetsDayView @JvmOverloads constructor(
 ) : ConstraintLayout(context, attrs) {
 
     val binding = ViewSetsBinding.inflate(LayoutInflater.from(context), this)
-    fun setDay(s: String) {
-        binding.textView.text = s
 
+    fun setDay(label: String) {
+        binding.tvDay.text = label
     }
 
+    fun setTypesText(text: String) {
+        binding.tvDayType.text = text
+    }
 
+    fun setOnAddTypeClick(action: () -> Unit) {
+        binding.ivAddType.setOnClickListener { action() }
+    }
 }

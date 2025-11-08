@@ -5,4 +5,7 @@
     <string name="home">Home</string>
     <string name="stats">Stats</string>
 
+    <string name="choose_types_title">Виберіть типи тренування</string>
+    <string name="choose_types_placeholder">Натисніть, щоб обрати</string>
+
 </resources>
