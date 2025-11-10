@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.gymshark.data.auth.UserRepository
 import com.gymshark.data.exercises.ExercisesCatalog
 import com.gymshark.data.models.DaySlot
+import com.gymshark.data.models.getDefaultListDays
+import com.gymshark.data.models.getListDays
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -41,7 +43,7 @@ class TrainingSetsViewModel(
     /** Базові дні користувача (з БД профілю) */
     val baseDays: StateFlow<List<Int>> = userRepository.currentUserIdFlow
         .flatMapLatest { id -> if (id == null) flowOf(null) else userRepository.observeById(id) }
-        .map { entity -> entity?.trainingDay?.days ?: emptyList() }
+        .map { entity -> entity?.trainingSlots?.getListDays() ?: emptyList() }
         .map { it.normalizeToCalendarListDistinct() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
@@ -65,10 +67,8 @@ class TrainingSetsViewModel(
         viewModelScope.launch {
             val uid = userRepository.currentUserId() ?: return@launch
             val user = userRepository.getById(uid) ?: return@launch
-            if (user.trainingDay.days.isNullOrEmpty()) {
-                user.trainingDay.days.addAll(
-                    listOf(Calendar.MONDAY, Calendar.WEDNESDAY, Calendar.FRIDAY)
-                )
+            if (user.trainingSlots.getListDays().isEmpty()) {
+                user.trainingSlots.getDefaultListDays()
                 userRepository.upsert(user)
             }
 

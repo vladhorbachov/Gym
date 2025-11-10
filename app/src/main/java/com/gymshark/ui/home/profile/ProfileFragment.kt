@@ -12,6 +12,8 @@ import com.gymshark.data.db.entity.UserEntity
 import com.gymshark.data.models.Pentagon
 import com.gymshark.data.models.Series
 import com.gymshark.data.models.TrainingDay
+import com.gymshark.data.models.getListDays
+import com.gymshark.data.models.toDaysSlot
 import com.gymshark.databinding.FragmentProfileBinding
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -43,7 +45,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         viewLifecycleOwner.lifecycleScope.launch {
             val user = vm.loadUser(binding.etUserId.text.toString())
             selectedDays.clear()
-            user?.trainingDay?.days?.forEach { selectedDays.add(it) }
+            user?.trainingSlots?.getListDays()?.forEach { selectedDays.add(it) }
             renderSelectedDays()
         }
 
@@ -99,13 +101,14 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                 endurance = etEndurance.text.toString().toIntOrNull() ?: 0,
                 mobility = etMobility.text.toString().toIntOrNull() ?: 0,
             ),
-            trainingDay = TrainingDay(selectedDays.sorted().toMutableList()),
+            trainingSlots = selectedDays.sorted().toDaysSlot(),
             series = Series(
                 current = etCurrentSeries.text.toString().toIntOrNull() ?: 0,
                 maxSeries = etMaxSeries.text.toString().toIntOrNull() ?: 0,
                 isActive = swSeriesActive.isChecked
             )
         )
+
 
         viewLifecycleOwner.lifecycleScope.launch {
             vm.saveUser(user)

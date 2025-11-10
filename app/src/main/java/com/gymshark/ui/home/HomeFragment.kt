@@ -3,19 +3,9 @@ package com.gymshark.ui.home
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.fragment.findNavController
-import androidx.navigation.navOptions
 import com.gymshark.R
-import com.gymshark.data.db.entity.UserEntity
-import com.gymshark.data.models.Pentagon
-import com.gymshark.data.models.Series
-import com.gymshark.data.models.TrainingDay
 import com.gymshark.databinding.FragmentHomeBinding
 import com.gymshark.ui.auth.AuthViewModel
-import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class HomeFragment : Fragment(R.layout.fragment_home) {

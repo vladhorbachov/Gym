@@ -36,7 +36,12 @@ class DaysAdapter(
 
     inner class DayVH(private val binding: ItemDayBinding) :
         RecyclerView.ViewHolder(binding.root) {
-
+/**
+ * TODO:  передати айді останнььго тренування
+ * отримати список trainingSlot
+ * написати укстеншн для трейнінг слота де я передаю айді і поточний день а він мені передає наступне тренування
+ * написати екстеншн для розрахунку праивльного дня
+ * */
         fun bind(item: TrainingCalendarDay) {
             val dateFormat = SimpleDateFormat("d", Locale.getDefault())
             val dayFormat = SimpleDateFormat("EEE", Locale.getDefault())

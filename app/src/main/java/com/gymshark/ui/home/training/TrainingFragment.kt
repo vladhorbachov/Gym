@@ -55,7 +55,7 @@ class TrainingFragment : Fragment(R.layout.fragment_training),
             )
             adapter.submitList(testData)
 
-            cvCalendar.setTrains(
+            cvCalendar.setTrains(//TODO: передати всі тренування які були
                 listOf(
                     Train(
                         1,

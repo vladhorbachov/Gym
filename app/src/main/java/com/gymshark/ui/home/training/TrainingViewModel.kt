@@ -3,6 +3,7 @@ package com.gymshark.ui.home.training
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gymshark.data.auth.UserRepository
+import com.gymshark.data.models.getListDays
 import kotlinx.coroutines.flow.*
 import normalizeToCalendarListDistinct
 
@@ -15,7 +16,7 @@ class TrainingViewModel(
             .filterNotNull()
             .flatMapLatest { id -> userRepository.observeById(id) }
             .map { user ->
-                (user?.trainingDay?.days ?: emptyList())
+                (user?.trainingSlots?.getListDays() ?: emptyList())
                     .normalizeToCalendarListDistinct()
                     .toSet()
             }

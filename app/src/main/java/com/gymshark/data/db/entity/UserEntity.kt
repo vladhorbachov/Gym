@@ -21,7 +21,6 @@ data class UserEntity(
     var maxBPM: Int,
     var avgBPM: Int,
     var pentagon: Pentagon,
-    var trainingDay: TrainingDay,
     @Embedded(prefix = "series_")
     var series: Series,
     var trainingDayTypes: Map<Int, Set<String>> = emptyMap(),

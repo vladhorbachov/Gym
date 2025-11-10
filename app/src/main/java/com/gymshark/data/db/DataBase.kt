@@ -26,7 +26,7 @@ import com.gymshark.data.db.entity.UserEntity
         TrainingsEntity::class,
         SetsEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 
