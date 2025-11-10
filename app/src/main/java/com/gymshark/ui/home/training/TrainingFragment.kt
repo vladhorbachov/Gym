@@ -91,8 +91,15 @@ class TrainingFragment : Fragment(R.layout.fragment_training),
 
             viewLifecycleOwner.lifecycleScope.launch {
                 viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                    trainingVm.trainingDaysFlow.collect { calendarDays ->
-                        cvCalendar.setTrainingDays(calendarDays)
+                    launch {
+                        trainingVm.trainsFlow.collect { trains ->
+                            cvCalendar.setTrains(trains)
+                        }
+                    }
+                    launch {
+                        trainingVm.trainingDaysFlow.collect { calendarDays ->
+                            cvCalendar.setTrainingDays(calendarDays)
+                        }
                     }
                 }
             }

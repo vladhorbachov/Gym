@@ -6,18 +6,19 @@ import androidx.lifecycle.viewModelScope
 import com.gymshark.data.auth.UserRepository
 import com.gymshark.data.exercises.ExercisesCatalog
 import com.gymshark.data.models.DaySlot
-import com.gymshark.data.models.getDefaultListDays
-import com.gymshark.data.models.getListDays
+import com.gymshark.data.models.getDefaultListDays // має повертати List<DayOfWeek>
+import com.gymshark.data.models.getListDays       // має повертати List<DayOfWeek>
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import normalizeToCalendarListDistinct
-import java.util.Calendar
+import java.time.DayOfWeek
 
 class TrainingSetsViewModel(
     private val userRepository: UserRepository,
@@ -26,104 +27,116 @@ class TrainingSetsViewModel(
 ) : ViewModel() {
 
     companion object {
-        private const val KEY_SLOTS = "displayed_slots"           // List<DaySlot>
-        private const val KEY_CURSOR = "cursor_index"             // Int
-        private const val KEY_DAY_DEFAULTS =
-            "day_defaults"       // Map<Int, Set<String>>  (для пре-вибору)
+        private const val KEY_SLOTS = "displayed_slots"     // List<DaySlot>
+        private const val KEY_CURSOR = "cursor_index"       // Int
+        private const val KEY_DAY_DEFAULTS = "day_defaults" // Map<DayOfWeek, Set<String>>
     }
 
-    // Лічильник id для слотів (у поточній сесії)
+    // лічильник id для слотів (у поточній сесії)
     private var nextId = 1L
 
-    /** Категорії з JSON (assets/raw) */
+    /** категорії з JSON (assets/raw) */
     val categories: StateFlow<List<String>> = flow {
         emit(catalog.loadCategories())
     }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    /** Базові дні користувача (з БД профілю) */
-    val baseDays: StateFlow<List<Int>> = userRepository.currentUserIdFlow
-        .flatMapLatest { id -> if (id == null) flowOf(null) else userRepository.observeById(id) }
-        .map { entity -> entity?.trainingSlots?.getListDays() ?: emptyList() }
-        .map { it.normalizeToCalendarListDistinct() }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    /** базові дні користувача (з БД профілю) — ТЕПЕР List<DayOfWeek> */
+    val baseDays: StateFlow<List<DayOfWeek>> =
+        userRepository.currentUserIdFlow
+            .flatMapLatest { id -> if (id == null) flowOf(null) else userRepository.observeById(id) }
+            .map { entity ->
+                // очікуємо, що trainingSlots: List<DaySlot> з DayOfWeek усередині
+                val list = entity?.trainingSlots?.getListDays().orEmpty()
+                // унікальні + стабільне сортування по тижню
+                val weekOrder = weekOrder()
+                list.distinct().sortedBy { d -> weekOrder.indexOf(d) }
+            }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    /** Слоти, які відображаємо у UI */
+    /** слоти, які відображаємо у UI */
     val displayedSlots: StateFlow<List<DaySlot>> =
-        savedStateHandle.getStateFlow(KEY_SLOTS, emptyList())
+        savedStateHandle.getStateFlow(KEY_SLOTS, emptyList<DaySlot>())
 
-    /** Дефолти вибору типів по дню (для пре-філа у нових слотах) */
-    @Suppress("UNCHECKED_CAST")
-    val dayDefaults: StateFlow<Map<Int, Set<String>>> =
-        savedStateHandle.getStateFlow(KEY_DAY_DEFAULTS, emptyMap())
+    /** дефолти типів по дню (префіл для нових слотів) — ТЕПЕР Map<DayOfWeek, Set<String>> */
+    val dayDefaults: StateFlow<Map<DayOfWeek, Set<String>>> =
+        savedStateHandle.getStateFlow(KEY_DAY_DEFAULTS, emptyMap<DayOfWeek, Set<String>>())
 
     private var cursor: Int
         get() = savedStateHandle[KEY_CURSOR] ?: 0
-        set(value) {
-            savedStateHandle[KEY_CURSOR] = value
-        }
+        set(value) { savedStateHandle[KEY_CURSOR] = value }
 
     init {
-        // 1) Якщо у користувача в БД ще порожні базові дні — підкинемо мінімум
+        // 1) якщо в БД користувача ще порожньо — підкинемо дефолт (пн/ср/пт)
         viewModelScope.launch {
             val uid = userRepository.currentUserId() ?: return@launch
             val user = userRepository.getById(uid) ?: return@launch
             if (user.trainingSlots.getListDays().isEmpty()) {
-                user.trainingSlots.getDefaultListDays()
-                userRepository.upsert(user)
+                val defaults = getDefaultListDays() // List<DayOfWeek>
+                userRepository.setTrainingSlots(
+                    uid,
+                    defaults.map { d -> DaySlot(id = d.value.toLong(), day = d, types = emptyList()) }
+                )
             }
-
         }
+
+        // 2) підтягнемо існуючі слоти з БД у state
         viewModelScope.launch {
             val uid = userRepository.currentUserId() ?: return@launch
             val fromDb = userRepository.getTrainingSlots(uid)
-
-            // <-- ВАЖЛИВО: використовуємо поточне значення слотового стейту
             if (fromDb.isNotEmpty() && displayedSlots.value.isEmpty()) {
                 savedStateHandle[KEY_SLOTS] = fromDb
             }
-
-            // Виставляємо nextId після можливої ініціалізації з БД
-            nextId = ( (savedStateHandle[KEY_SLOTS] as? List<DaySlot>)
-                ?.maxOfOrNull { it.id } ?: 0L) + 1L
+            // nextId після ініціалізації
+            nextId = (displayedSlots.value.maxOfOrNull { it.id } ?: 0L) + 1L
         }
 
-
-        // 2) Підтягнемо дефолтні типи з БД (для пре-філа у нових слотах)
+        // 3) підтягнемо дефолтні типи з БД (якщо зберігаєш там як Map<Int, Set<String>>,
+        //    можеш локально перевести у Map<DayOfWeek, Set<String>> і зберігати вже так)
         viewModelScope.launch {
             val uid = userRepository.currentUserId() ?: return@launch
             val entity = userRepository.getById(uid) ?: return@launch
-            val defaultsFromDb = userRepository.getTrainingDayTypes(entity)
-            if (defaultsFromDb.isNotEmpty() && dayDefaults.value.isEmpty()) {
-                savedStateHandle[KEY_DAY_DEFAULTS] = defaultsFromDb
+            val raw = userRepository.getTrainingDayTypes(entity) // Map<Int, Set<String>> або вже Map<DayOfWeek, Set<String>>
+            if (raw.isNotEmpty() && dayDefaults.value.isEmpty()) {
+                // якщо в БД ще Int-ключі — тимчасово мапимо на DayOfWeek
+                val mapped: Map<DayOfWeek, Set<String>> = raw.mapKeys { (k, _) ->
+                    // Calendar -> DayOfWeek (разовий перехід у VM; краще перевести сховище теж)
+                    when (k) {
+                        java.util.Calendar.MONDAY -> DayOfWeek.MONDAY
+                        java.util.Calendar.TUESDAY -> DayOfWeek.TUESDAY
+                        java.util.Calendar.WEDNESDAY -> DayOfWeek.WEDNESDAY
+                        java.util.Calendar.THURSDAY -> DayOfWeek.THURSDAY
+                        java.util.Calendar.FRIDAY -> DayOfWeek.FRIDAY
+                        java.util.Calendar.SATURDAY -> DayOfWeek.SATURDAY
+                        java.util.Calendar.SUNDAY -> DayOfWeek.SUNDAY
+                        else -> DayOfWeek.MONDAY
+                    }
+                }
+                savedStateHandle[KEY_DAY_DEFAULTS] = mapped
             }
         }
     }
 
     /** Додає новий слот, циклиться по baseDays; якщо їх нема — по стандартному порядку тижня */
     fun addNext() {
-        val weekOrder = listOf(
-            Calendar.MONDAY, Calendar.TUESDAY, Calendar.WEDNESDAY,
-            Calendar.THURSDAY, Calendar.FRIDAY, Calendar.SATURDAY, Calendar.SUNDAY
-        )
+        val order = weekOrder()
         val src = baseDays.value
-            .sortedBy { weekOrder.indexOf(it) }
-            .ifEmpty { weekOrder }
+            .distinct()
+            .sortedBy { d -> order.indexOf(d) }
+            .ifEmpty { order }
 
-        val idx = (savedStateHandle[KEY_CURSOR] ?: 0) % src.size
+        val idx = cursor % src.size
         val day = src[idx]
-        savedStateHandle[KEY_CURSOR] = (idx + 1) % src.size
+        cursor = (idx + 1) % src.size
 
         val prefill = dayDefaults.value[day]?.toList().orEmpty()
         val newSlot = DaySlot(id = nextId++, day = day, types = prefill)
 
-
         val updated = displayedSlots.value + newSlot
         savedStateHandle[KEY_SLOTS] = updated
-        persistSlots(updated)        // ← ЗБЕРЕГТИ
+        persistSlots(updated)
     }
 
-
-    /** Змінити типи для конкретного слота */
+    /** змінити типи для конкретного слота */
     fun setSlotTypes(slotId: Long, types: List<String>) {
         val valid = categories.value.toSet()
         val normalized = types.filter { it in valid }
@@ -134,12 +147,11 @@ class TrainingSetsViewModel(
         persistSlots(updated)
     }
 
-
-    /** Видалити слот (якщо потрібно) */
+    /** видалити слот */
     fun removeSlot(slotId: Long) {
         val updated = displayedSlots.value.filterNot { it.id == slotId }
         savedStateHandle[KEY_SLOTS] = updated
-        persistSlots(updated)        // ← ЗБЕРЕГТИ
+        persistSlots(updated)
     }
 
     private fun persistSlots(slots: List<DaySlot>) {
@@ -149,39 +161,53 @@ class TrainingSetsViewModel(
         }
     }
 
-
-    /** Задати дефолтні типи для конкретного ДНЯ (впливатиме на нові слоти) + зберегти в БД */
-    fun setDayDefaults(dayCalendarValue: Int, types: List<String>) {
+    /** задати дефолтні типи для конкретного ДНЯ (впливатиме на нові слоти) + зберегти в БД */
+    fun setDayDefaults(day: DayOfWeek, types: List<String>) {
         val valid = categories.value.toSet()
         val normalized = types.filter { it in valid }.toSet()
-        val newMap = dayDefaults.value.toMutableMap().apply { put(dayCalendarValue, normalized) }
+        val newMap = dayDefaults.value.toMutableMap().apply { put(day, normalized) }
         savedStateHandle[KEY_DAY_DEFAULTS] = newMap
         persistDayDefaults()
     }
 
-    /** Повертає дефолт для дня (для префіла діалогу) */
-    fun defaultsFor(dayCalendarValue: Int): List<String> =
-        dayDefaults.value[dayCalendarValue]?.toList().orEmpty()
+    /** повертає дефолт для дня (для префіла діалогу) */
+    fun defaultsFor(day: DayOfWeek): List<String> =
+        dayDefaults.value[day]?.toList().orEmpty()
 
-    /** Синхронізувати з baseDays: прибрати слоти з днями, яких більше немає у профілі */
+    /** синхронізувати з baseDays: прибрати слоти з днями, яких більше немає у профілі */
     fun syncWithBase() {
         val allowed = baseDays.value.toSet()
         if (allowed.isEmpty()) return
         val filtered = displayedSlots.value.filter { it.day in allowed }
         if (filtered.size != displayedSlots.value.size) {
             savedStateHandle[KEY_SLOTS] = filtered
-            persistSlots(filtered)   // ← зберегти очищений список
+            persistSlots(filtered)
         }
-        val cur = savedStateHandle[KEY_CURSOR] ?: 0
-        savedStateHandle[KEY_CURSOR] =
-            if (baseDays.value.isNotEmpty()) cur % baseDays.value.size else 0
-
+        cursor = if (baseDays.value.isNotEmpty()) cursor % baseDays.value.size else 0
     }
 
     private fun persistDayDefaults() {
         viewModelScope.launch {
             val userId = userRepository.currentUserId() ?: return@launch
-            userRepository.setTrainingDayTypes(userId, dayDefaults.value)
+            // якщо сховище ще чекає Map<Int, Set<String>>, тимчасово конвертнемо:
+            val legacy: Map<Int, Set<String>> = dayDefaults.value.mapKeys { (k, _) ->
+                // DayOfWeek -> Calendar int (лише ДО МІГРАЦІЇ; далі збережеш Map<DayOfWeek, Set<String>>)
+                when (k) {
+                    DayOfWeek.MONDAY -> java.util.Calendar.MONDAY
+                    DayOfWeek.TUESDAY -> java.util.Calendar.TUESDAY
+                    DayOfWeek.WEDNESDAY -> java.util.Calendar.WEDNESDAY
+                    DayOfWeek.THURSDAY -> java.util.Calendar.THURSDAY
+                    DayOfWeek.FRIDAY -> java.util.Calendar.FRIDAY
+                    DayOfWeek.SATURDAY -> java.util.Calendar.SATURDAY
+                    DayOfWeek.SUNDAY -> java.util.Calendar.SUNDAY
+                }
+            }
+            userRepository.setTrainingDayTypes(userId, legacy)
         }
     }
+
+    private fun weekOrder(): List<DayOfWeek> = listOf(
+        DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY,
+        DayOfWeek.THURSDAY, DayOfWeek.FRIDAY, DayOfWeek.SATURDAY, DayOfWeek.SUNDAY
+    )
 }

@@ -17,7 +17,6 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.time.DayOfWeek
 import java.time.format.TextStyle
-import java.util.Calendar
 import java.util.Locale
 
 class TrainingSetsFragment : Fragment(R.layout.fragment_training_sets) {
@@ -32,17 +31,14 @@ class TrainingSetsFragment : Fragment(R.layout.fragment_training_sets) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentTrainingSetsBinding.bind(view)
 
-        // Стежимо за базовими днями і чистимо слоти, якщо база змінилась
         viewLifecycleOwner.lifecycleScope.launch {
             vm.baseDays.collectLatest { vm.syncWithBase() }
         }
 
-        // Рендеримо СЛОТИ
         viewLifecycleOwner.lifecycleScope.launch {
             vm.displayedSlots.collectLatest { renderSlots(it) }
         }
 
-        // Кнопка додавання нового слота
         binding.ivAdd.setOnClickListener {
             vm.addNext()
             Log.d("TSF", "add clicked; baseDays=${vm.baseDays.value} slots=${vm.displayedSlots.value}")
@@ -55,7 +51,7 @@ class TrainingSetsFragment : Fragment(R.layout.fragment_training_sets) {
     }
 
     private fun addSlotView(slot: DaySlot) {
-        val label = calendarToLabel(slot.day)
+        val label = dayOfWeekLabel(slot.day)
         val item = SetsDayView(requireContext()).apply {
             setDay(label)
             setTypesText(
@@ -65,14 +61,6 @@ class TrainingSetsFragment : Fragment(R.layout.fragment_training_sets) {
             setOnAddTypeClick {
                 val all = vm.categories.value
                 val pre = slot.types.toSet()
-                showCheckboxAlertDialog(all, pre) { chosen ->
-                    vm.setSlotTypes(slot.id, chosen)
-                    setTypesText(
-                        if (chosen.isEmpty()) getString(R.string.choose_types_placeholder)
-                        else chosen.joinToString(", ")
-                    )
-                }
-
                 showCheckboxAlertDialog(all, pre) { chosen ->
                     vm.setSlotTypes(slot.id, chosen)
                     setTypesText(
@@ -113,17 +101,8 @@ class TrainingSetsFragment : Fragment(R.layout.fragment_training_sets) {
             .show()
     }
 
-    private fun calendarToLabel(calendarValue: Int): String =
-        when (calendarValue) {
-            Calendar.MONDAY -> DayOfWeek.MONDAY
-            Calendar.TUESDAY -> DayOfWeek.TUESDAY
-            Calendar.WEDNESDAY -> DayOfWeek.WEDNESDAY
-            Calendar.THURSDAY -> DayOfWeek.THURSDAY
-            Calendar.FRIDAY -> DayOfWeek.FRIDAY
-            Calendar.SATURDAY -> DayOfWeek.SATURDAY
-            Calendar.SUNDAY -> DayOfWeek.SUNDAY
-            else -> null
-        }?.getDisplayName(TextStyle.SHORT, locale) ?: "?"
+    private fun dayOfWeekLabel(day: DayOfWeek): String =
+        day.getDisplayName(TextStyle.SHORT, locale)
 
     private fun Int.dp(context: Context) =
         (this * context.resources.displayMetrics.density).toInt()

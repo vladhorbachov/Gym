@@ -3,6 +3,7 @@ package com.gymshark.data.auth
 import com.gymshark.data.db.entity.UserEntity
 import com.gymshark.data.models.DaySlot
 import kotlinx.coroutines.flow.Flow
+import java.time.DayOfWeek
 
 interface UserRepository {
     suspend fun upsert(user: UserEntity)
@@ -18,5 +19,7 @@ interface UserRepository {
     fun getTrainingDayTypes(entity: UserEntity?): Map<Int, Set<String>>
     suspend fun getTrainingSlots(userId: String): List<DaySlot>
     suspend fun setTrainingSlots(userId: String, slots: List<DaySlot>)
+
+    fun observePlannedDays(): Flow<Set<DayOfWeek>>
 
 }

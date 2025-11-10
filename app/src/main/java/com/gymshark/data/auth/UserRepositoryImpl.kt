@@ -4,6 +4,11 @@ import com.gymshark.data.db.dao.UserDao
 import com.gymshark.data.db.entity.UserEntity
 import com.gymshark.data.models.DaySlot
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
+import java.time.DayOfWeek
 
 class UserRepositoryImpl(
     private val userDao: UserDao,
@@ -35,5 +40,15 @@ class UserRepositoryImpl(
         val u = userDao.getById(userId) ?: return
         userDao.upsert(u.copy(trainingSlots = slots))
     }
+
+    override fun observePlannedDays(): Flow<Set<DayOfWeek>> =
+        currentUserIdFlow
+            .filterNotNull()
+            .flatMapLatest { id -> observeById(id) }
+            .map { user ->
+                user?.trainingSlots?.map { it.day }?.toSet() ?: emptySet()
+
+            }
+            .distinctUntilChanged()
 
 }

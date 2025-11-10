@@ -11,7 +11,6 @@ import com.gymshark.R
 import com.gymshark.data.db.entity.UserEntity
 import com.gymshark.data.models.Pentagon
 import com.gymshark.data.models.Series
-import com.gymshark.data.models.TrainingDay
 import com.gymshark.data.models.getListDays
 import com.gymshark.data.models.toDaysSlot
 import com.gymshark.databinding.FragmentProfileBinding
@@ -19,7 +18,6 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.time.DayOfWeek
 import java.time.format.TextStyle
-import java.util.Calendar
 import java.util.Locale
 
 class ProfileFragment : Fragment(R.layout.fragment_profile) {
@@ -29,13 +27,12 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
     private val vm: ProfileViewModel by viewModel()
 
-    private val calendarDaysOrder = listOf(
-        Calendar.MONDAY, Calendar.TUESDAY, Calendar.WEDNESDAY,
-        Calendar.THURSDAY, Calendar.FRIDAY, Calendar.SATURDAY, Calendar.SUNDAY
+    private val dayOrder = listOf(
+        DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY,
+        DayOfWeek.THURSDAY, DayOfWeek.FRIDAY, DayOfWeek.SATURDAY, DayOfWeek.SUNDAY
     )
 
-    private val selectedDays =
-        mutableSetOf<Int>()
+    private val selectedDays = mutableSetOf<DayOfWeek>()
     private val locale: Locale get() = Locale.getDefault()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -45,9 +42,14 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         viewLifecycleOwner.lifecycleScope.launch {
             val user = vm.loadUser(binding.etUserId.text.toString())
             selectedDays.clear()
-            user?.trainingSlots?.getListDays()?.forEach { selectedDays.add(it) }
+            val days: List<DayOfWeek> = user?.trainingSlots
+                ?.getListDays()
+                ?.filterNotNull()
+                .orEmpty()
+            selectedDays.addAll(days)
             renderSelectedDays()
         }
+
 
         binding.btnPickDays.setOnClickListener { showDayPicker() }
         binding.btnSave.setOnClickListener { saveUser() }
@@ -55,24 +57,31 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
     }
 
     private fun renderSelectedDays() {
+        val weekOrder = listOf(
+            DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY,
+            DayOfWeek.THURSDAY, DayOfWeek.FRIDAY, DayOfWeek.SATURDAY, DayOfWeek.SUNDAY
+        )
+
+        val cleaned = selectedDays.filterNotNull().distinct()
+        val sorted = cleaned.sortedBy { d ->
+            weekOrder.indexOf(d).let { if (it >= 0) it else Int.MAX_VALUE }
+        }
+
         binding.tvSelectedDays.text =
-            if (selectedDays.isEmpty()) "Selected days: none"
-            else "Selected days: " + selectedDays
-                .sortedBy { calendarDaysOrder.indexOf(it).takeIf { i -> i >= 0 } ?: 99 }
-                .joinToString { calendarLabel(it) }
+            if (sorted.isEmpty()) "Selected days: none"
+            else "Selected days: " + sorted.joinToString { dayLabel(it) }
     }
 
+
     private fun showDayPicker() {
-        val labels = calendarDaysOrder.map { calendarLabel(it) }.toTypedArray()
-        val checked = BooleanArray(calendarDaysOrder.size) { idx ->
-            selectedDays.contains(calendarDaysOrder[idx])
-        }
+        val labels = dayOrder.map { it.getDisplayName(TextStyle.SHORT, locale) }.toTypedArray()
+        val checked = BooleanArray(dayOrder.size) { selectedDays.contains(dayOrder[it]) }
 
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Pick training days")
             .setMultiChoiceItems(labels, checked) { _, which, isChecked ->
-                val calValue = calendarDaysOrder[which]
-                if (isChecked) selectedDays.add(calValue) else selectedDays.remove(calValue)
+                val d = dayOrder[which]
+                if (isChecked) selectedDays.add(d) else selectedDays.remove(d)
             }
             .setPositiveButton("OK") { d, _ -> renderSelectedDays(); d.dismiss() }
             .setNegativeButton("Cancel", null)
@@ -101,6 +110,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                 endurance = etEndurance.text.toString().toIntOrNull() ?: 0,
                 mobility = etMobility.text.toString().toIntOrNull() ?: 0,
             ),
+            // важливо: toDaysSlot() має приймати List<DayOfWeek>
             trainingSlots = selectedDays.sorted().toDaysSlot(),
             series = Series(
                 current = etCurrentSeries.text.toString().toIntOrNull() ?: 0,
@@ -109,22 +119,12 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             )
         )
 
-
         viewLifecycleOwner.lifecycleScope.launch {
             vm.saveUser(user)
             Snackbar.make(requireView(), "User saved", Snackbar.LENGTH_SHORT).show()
         }
     }
 
-    private fun calendarLabel(calendarValue: Int): String =
-        when (calendarValue) {
-            Calendar.MONDAY -> DayOfWeek.MONDAY
-            Calendar.TUESDAY -> DayOfWeek.TUESDAY
-            Calendar.WEDNESDAY -> DayOfWeek.WEDNESDAY
-            Calendar.THURSDAY -> DayOfWeek.THURSDAY
-            Calendar.FRIDAY -> DayOfWeek.FRIDAY
-            Calendar.SATURDAY -> DayOfWeek.SATURDAY
-            Calendar.SUNDAY -> DayOfWeek.SUNDAY
-            else -> null
-        }?.getDisplayName(TextStyle.SHORT, locale) ?: "?"
+    private fun dayLabel(d: DayOfWeek): String =
+        d.getDisplayName(TextStyle.SHORT, locale)
 }
