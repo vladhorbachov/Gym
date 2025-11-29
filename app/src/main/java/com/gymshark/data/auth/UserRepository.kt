@@ -22,4 +22,7 @@ interface UserRepository {
 
     fun observePlannedDays(): Flow<Set<DayOfWeek>>
 
+    fun observeDaySlots(): Flow<List<DaySlot>>
+
+
 }

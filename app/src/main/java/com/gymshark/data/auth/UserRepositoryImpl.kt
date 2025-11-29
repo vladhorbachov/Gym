@@ -51,4 +51,14 @@ class UserRepositoryImpl(
             }
             .distinctUntilChanged()
 
+    override fun observeDaySlots(): Flow<List<DaySlot>> =
+        currentUserIdFlow
+            .filterNotNull()
+            .flatMapLatest { id -> observeById(id) }
+            .map { user ->
+                user?.trainingSlots ?: emptyList()
+            }
+            .distinctUntilChanged()
+
+
 }

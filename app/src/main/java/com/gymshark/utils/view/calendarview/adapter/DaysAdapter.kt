@@ -6,7 +6,6 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.gymshark.data.models.Train
 import com.gymshark.data.models.TrainingCalendarDay
 import com.gymshark.databinding.ItemDayBinding
 import java.time.DayOfWeek
@@ -15,7 +14,8 @@ import java.time.format.TextStyle
 import java.util.Locale
 
 class DaysAdapter(
-    private val onClick: (Train?) -> Unit
+    private val typesProvider: (LocalDate) -> List<String>,
+    private val onClick: (TrainingCalendarDay, List<String>) -> Unit
 ) : ListAdapter<TrainingCalendarDay, DaysAdapter.DayVH>(DiffCallback()) {
 
     var plannedDays: Set<DayOfWeek> = emptySet()
@@ -47,14 +47,23 @@ class DaysAdapter(
             val hasCompletedTrain = item.train != null
             val isPlanned = plannedDays.contains(item.date.dayOfWeek)
 
+            val typesForDay = typesProvider(item.date)
+
             when {
                 isToday -> setBgText("#2196F3", Color.WHITE, Color.WHITE)
                 hasCompletedTrain -> setBgText("#4CAF50", Color.WHITE, Color.WHITE)
-                isPlanned -> setBgText("#9C27B0", Color.WHITE, Color.WHITE)
+                isPlanned && typesForDay.isNotEmpty() -> setBgText(
+                    "#9C27B0",
+                    Color.WHITE,
+                    Color.WHITE
+                )
+
                 else -> setBgTextTransparent()
             }
 
-            binding.root.setOnClickListener { onClick(item.train) }
+            binding.root.setOnClickListener {
+                onClick(item, typesForDay)
+            }
         }
 
         private fun setBgText(bgColorHex: String, numColor: Int, nameColor: Int) {
@@ -73,7 +82,9 @@ class DaysAdapter(
     class DiffCallback : DiffUtil.ItemCallback<TrainingCalendarDay>() {
         override fun areItemsTheSame(o: TrainingCalendarDay, n: TrainingCalendarDay) =
             o.date == n.date
+
         override fun areContentsTheSame(o: TrainingCalendarDay, n: TrainingCalendarDay) =
             o == n
     }
 }
+

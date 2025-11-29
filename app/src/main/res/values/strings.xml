@@ -8,4 +8,15 @@
     <string name="choose_types_title">Виберіть типи тренування</string>
     <string name="choose_types_placeholder">Натисніть, щоб обрати</string>
 
+    <string name="no_train_selected">No workout</string>
+
+    <string name="no_muscles_planned">No muscle groups selected</string>
+
+    <string name="calendar_popup_title">Workout on %1$d.%2$d.%3$d</string>
+
+    <string name="calendar_popup_message">
+        Workout: %1$s\nMuscle groups: %2$s
+    </string>
+
+
 </resources>

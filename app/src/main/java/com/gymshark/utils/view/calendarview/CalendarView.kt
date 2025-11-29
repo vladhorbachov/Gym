@@ -5,6 +5,7 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.gymshark.data.models.DaySlot
 import com.gymshark.data.models.Train
 import com.gymshark.data.models.TrainingCalendarDay
 import com.gymshark.databinding.ViewCalendarBinding
@@ -12,6 +13,8 @@ import com.gymshark.utils.view.calendarview.adapter.DaysAdapter
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
+import java.time.temporal.ChronoUnit
+import java.time.temporal.TemporalAdjusters
 import java.util.Locale
 
 class CalendarView @JvmOverloads constructor(
@@ -19,13 +22,17 @@ class CalendarView @JvmOverloads constructor(
 ) : LinearLayout(context, attrs) {
 
     private val binding = ViewCalendarBinding.inflate(LayoutInflater.from(context), this)
-    private val adapter = DaysAdapter { onTrainSelected?.invoke(it) }
-
+    private var trainingSlots: List<DaySlot> = emptyList()
+    private val adapter = DaysAdapter(
+        typesProvider = { date -> typesForDate(date) }
+    ) { day, types ->
+        onDayClick?.invoke(day.date, day.train, types)
+    }
     private var currentMonth: YearMonth = YearMonth.now()
     private var trains: List<Train> = emptyList()
     private var plannedDays: Set<java.time.DayOfWeek> = emptySet()
 
-    var onTrainSelected: ((Train?) -> Unit)? = null
+    var onDayClick: ((LocalDate, Train?, List<String>) -> Unit)? = null
 
     init {
         orientation = VERTICAL
@@ -55,10 +62,16 @@ class CalendarView @JvmOverloads constructor(
         updateMonth()
     }
 
+    fun setTrainingSlots(slots: List<DaySlot>) {
+        trainingSlots = slots
+        updateMonth()
+    }
+
     private fun updateMonth() {
         val locale = Locale.getDefault()
         val monthName = currentMonth.month.getDisplayName(TextStyle.FULL_STANDALONE, locale)
-        binding.monthText.text = monthName.replaceFirstChar { it.titlecase(locale) } + " ${currentMonth.year}"
+        binding.monthText.text =
+            monthName.replaceFirstChar { it.titlecase(locale) } + " ${currentMonth.year}"
 
         val days = buildList {
             val length = currentMonth.lengthOfMonth()
@@ -75,5 +88,26 @@ class CalendarView @JvmOverloads constructor(
                 binding.daysRecycler.post { binding.daysRecycler.scrollToPosition(pos) }
             }
         }
+    }
+
+    private fun typesForDate(date: LocalDate): List<String> {
+        val dayOfWeek = date.dayOfWeek
+
+        val slotsForDay = trainingSlots
+            .filter { it.day == dayOfWeek }
+            .sortedBy { it.id }
+
+        if (slotsForDay.isEmpty()) return emptyList()
+
+        val today = LocalDate.now()
+
+        val firstPlannedDate = today.with(TemporalAdjusters.nextOrSame(dayOfWeek))
+
+        if (date.isBefore(firstPlannedDate)) return emptyList()
+
+        val weeksBetween = ChronoUnit.WEEKS.between(firstPlannedDate, date)
+        val index = (weeksBetween % slotsForDay.size).toInt()
+
+        return slotsForDay[index].types
     }
 }

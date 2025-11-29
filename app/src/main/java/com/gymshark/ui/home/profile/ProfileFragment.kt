@@ -110,7 +110,6 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                 endurance = etEndurance.text.toString().toIntOrNull() ?: 0,
                 mobility = etMobility.text.toString().toIntOrNull() ?: 0,
             ),
-            // важливо: toDaysSlot() має приймати List<DayOfWeek>
             trainingSlots = selectedDays.sorted().toDaysSlot(),
             series = Series(
                 current = etCurrentSeries.text.toString().toIntOrNull() ?: 0,
