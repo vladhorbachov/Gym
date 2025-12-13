@@ -5,20 +5,23 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.gymshark.R
+import com.gymshark.data.db.entity.toExercise
 import com.gymshark.data.models.Exercise
 import com.gymshark.databinding.FragmentTrainingBinding
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import kotlinx.coroutines.launch
+import org.koin.androidx.viewmodel.ext.android.activityViewModel
 
 class TrainingFragment : Fragment(R.layout.fragment_training),
     ExerciseActionsBottomSheet.Callbacks {
 
     private var _binding: FragmentTrainingBinding? = null
     private val binding get() = _binding!!
-    private val trainingVm: TrainingViewModel by viewModel()
+    private val trainingVm: TrainingViewModel by activityViewModel()
 
     private val adapter = ExerciseAdapter { item ->
         ExerciseActionsBottomSheet.newInstance(item)
@@ -42,14 +45,14 @@ class TrainingFragment : Fragment(R.layout.fragment_training),
                 DividerItemDecoration(requireContext(), RecyclerView.VERTICAL)
             )
 
-            val testData = listOf(
-                Exercise(1, "Bench Press", "—", "—"),
-                Exercise(2, "Squat", "—", "—"),
-                Exercise(3, "Deadlift", "—", "—")
-            )
-            adapter.submitList(testData)
 
 
+
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            trainingVm.suggestedExercisesFlow.collect {
+                adapter.submitList(it.toExercise())
+            }
         }
     }
 

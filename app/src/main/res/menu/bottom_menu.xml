@@ -10,7 +10,7 @@
         android:icon="@drawable/ic_stats"
         android:title="@string/stats" />
     <item
-        android:id="@+id/navTraining"
+        android:id="@+id/navPrepare"
         android:icon="@drawable/ic_sports"
         android:title="@string/stats" />
     <item

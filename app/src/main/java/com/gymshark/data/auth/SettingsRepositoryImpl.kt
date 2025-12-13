@@ -14,7 +14,6 @@ class SettingsRepositoryImpl(
     override fun setVersion(version: Int) {
         editor.putInt(VERSION,version).apply()
     }
-//TODO:: реализовать сохранение последнего тренировки
     override fun getLastTrainingId(): Int {
         return 0
     }

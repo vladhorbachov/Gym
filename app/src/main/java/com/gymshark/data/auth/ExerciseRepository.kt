@@ -15,7 +15,7 @@ interface ExerciseRepository {
 
     suspend fun getAll(): List<ExercisesEntity>
 
-    suspend fun getByCategory(category: String): List<ExercisesEntity>
+    suspend fun getByCategory(category: List<String>): List<ExercisesEntity>
 
     suspend fun delete()
 

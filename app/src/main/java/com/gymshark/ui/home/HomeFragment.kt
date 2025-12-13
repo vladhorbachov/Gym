@@ -6,18 +6,23 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.gymshark.R
 import com.gymshark.databinding.FragmentHomeBinding
+import com.gymshark.ui.home.adapter.ExerciseListItem
+import com.gymshark.ui.home.adapter.RecommendedExercisesAdapter
 import com.gymshark.ui.home.training.TrainingViewModel
 import kotlinx.coroutines.launch
-import org.koin.androidx.viewmodel.ext.android.viewModel
-import java.time.LocalDate
+import org.koin.androidx.viewmodel.ext.android.activityViewModel
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
 
-    private val trainingVm: TrainingViewModel by viewModel()
+    private val trainingVm: TrainingViewModel by activityViewModel()
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
+    private val recommendedAdapter by lazy {
+        RecommendedExercisesAdapter { }
+    }
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -25,44 +30,14 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         _binding = FragmentHomeBinding.bind(view)
 
         with(binding) {
+            rvExercises.layoutManager =
+                LinearLayoutManager(requireContext())
+
+            rvExercises.adapter = recommendedAdapter
 
             cvCalendar.onDayClick = { date, train, types ->
+                trainingVm.loadSuggestedExercises(types)
 
-                val effectiveTrain = train ?: run {
-                    val today = LocalDate.now()
-                    if (date == today) {
-                        trainingVm.todayRecommendedTrainFlow.value
-                    } else {
-                        null
-                    }
-                }
-
-                val title = effectiveTrain?.title ?: getString(R.string.no_train_selected)
-
-                val muscles = if (types.isEmpty()) {
-                    getString(R.string.no_muscles_planned)
-                } else {
-                    types.joinToString(", ")
-                }
-
-                androidx.appcompat.app.AlertDialog.Builder(requireContext())
-                    .setTitle(
-                        getString(
-                            R.string.calendar_popup_title,
-                            date.dayOfMonth,
-                            date.monthValue,
-                            date.year
-                        )
-                    )
-                    .setMessage(
-                        getString(
-                            R.string.calendar_popup_message,
-                            title,
-                            if (muscles.isBlank()) getString(R.string.no_muscles_planned) else muscles
-                        )
-                    )
-                    .setPositiveButton(android.R.string.ok, null)
-                    .show()
             }
         }
 
@@ -83,6 +58,21 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                         binding.cvCalendar.setTrainingSlots(slots)
                     }
                 }
+                launch {
+                    trainingVm.suggestedExercisesFlow.collect { exercises ->
+                        val sectionedItems: List<ExerciseListItem> =
+                            exercises
+                                .groupBy { it.baseCategory }
+                                .flatMap { (category, list) ->
+                                    listOf(ExerciseListItem.Header(category)) +
+                                            list.map { ExerciseListItem.ExerciseRow(it) }
+                                }
+
+                        recommendedAdapter.submitList(sectionedItems)
+                    }
+                }
+
+
             }
         }
     }

@@ -28,8 +28,8 @@ interface ExercisesDao {
     @Query("SELECT * FROM Exercises")
     suspend fun getAll(): List<ExercisesEntity>
 
-    @Query("SELECT * FROM Exercises WHERE baseCategory = :category")
-    suspend fun getByCategory(category: String): List<ExercisesEntity>
+    @Query("SELECT * FROM Exercises WHERE baseCategory IN (:category) GROUP BY name")
+    suspend fun getByCategory(category: List<String>): List<ExercisesEntity>
 
     @Query("DELETE FROM Exercises")
     suspend fun delete()

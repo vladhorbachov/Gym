@@ -9,6 +9,7 @@ import com.gymshark.data.auth.SettingsRepositoryImpl
 import com.gymshark.data.auth.TrainingRepository
 import com.gymshark.data.auth.UserRepository
 import com.gymshark.data.auth.UserRepositoryImpl
+import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
 val repositoryModule = module {
@@ -16,5 +17,5 @@ val repositoryModule = module {
     single<UserRepository> { UserRepositoryImpl(get(),get()) }
     single<ExerciseRepository> { ExerciseRepositoryImpl(get()) }
     single<SettingsRepository> { SettingsRepositoryImpl(get()) }
-    single { TrainingRepository(get(),get()) }
+    single { TrainingRepository(get(),get(),androidContext()) }
 }

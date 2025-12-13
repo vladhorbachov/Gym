@@ -32,4 +32,12 @@
         android:id="@+id/trainingSetsFragment"
         android:name="com.gymshark.ui.home.profile.TrainingSetsFragment"
         android:label="TrainingSetsFragment" />
+    <fragment
+        android:id="@+id/navPrepare"
+        android:name="com.gymshark.ui.home.training.PrepareFragment"
+        android:label="PrepareFragment" >
+        <action
+            android:id="@+id/action_prepareFragment_to_navTraining"
+            app:destination="@id/navTraining" />
+    </fragment>
 </navigation>

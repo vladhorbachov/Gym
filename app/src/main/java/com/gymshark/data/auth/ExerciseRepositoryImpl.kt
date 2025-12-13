@@ -28,7 +28,7 @@ class ExerciseRepositoryImpl(val dao: ExercisesDao) : ExerciseRepository {
         return dao.getAll()
     }
 
-    override suspend fun getByCategory(category: String): List<ExercisesEntity> {
+    override suspend fun getByCategory(category: List<String>): List<ExercisesEntity> {
         return dao.getByCategory(category)
     }
 
