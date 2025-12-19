@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/train_graph"
+    app:startDestination="@id/prepareFragment">
+
+    <fragment
+        android:id="@+id/prepareFragment"
+        android:name="com.gymshark.ui.home.training.PrepareFragment"
+        android:label="PrepareFragment" >
+        <action
+            android:id="@+id/action_prepareFragment_to_trainingFragment"
+            app:destination="@id/trainingFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/trainingFragment"
+        android:name="com.gymshark.ui.home.training.TrainingFragment"
+        android:label="TrainingFragment" />
+</navigation>

@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.gymshark.data.db.entity.TrainingsEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TrainingsDao {
@@ -24,4 +25,7 @@ interface TrainingsDao {
 
     @Query("SELECT * FROM Trainings")
     suspend fun getAll(): List<TrainingsEntity>
+
+    @Query("SELECT * FROM Trainings ORDER BY time DESC")
+    fun observeAll(): Flow<List<TrainingsEntity>>
 }

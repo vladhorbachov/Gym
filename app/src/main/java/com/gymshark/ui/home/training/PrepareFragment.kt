@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.navGraphViewModels
 import com.gymshark.R
 import com.gymshark.databinding.FragmentPrepareTrainBinding
 
@@ -13,6 +14,7 @@ class PrepareFragment : Fragment(R.layout.fragment_prepare_train) {
     private var _binding: FragmentPrepareTrainBinding? = null
     private val binding get() = _binding!!
 
+    private val statVm: TrainingStatViewModel by navGraphViewModels(R.id.home_graph)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, s: Bundle?
@@ -23,15 +25,11 @@ class PrepareFragment : Fragment(R.layout.fragment_prepare_train) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        _binding = FragmentPrepareTrainBinding.bind(view)
 
-        with(binding) {
-            btnStartTrain.setOnClickListener {
-                findNavController().navigate(R.id.action_prepareFragment_to_navTraining)
-            }
+        binding.btnStartTrain.setOnClickListener {
+            statVm.start()
+            findNavController().navigate(R.id.action_prepareFragment_to_trainingFragment)
         }
-    }
-    fun startTimer(){
 
     }
 

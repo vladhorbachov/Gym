@@ -4,8 +4,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -22,6 +24,7 @@ class TrainingFragment : Fragment(R.layout.fragment_training),
     private var _binding: FragmentTrainingBinding? = null
     private val binding get() = _binding!!
     private val trainingVm: TrainingViewModel by activityViewModel()
+    private val statVm: TrainingStatViewModel by activityViewModel()
 
     private val adapter = ExerciseAdapter { item ->
         ExerciseActionsBottomSheet.newInstance(item)
@@ -45,10 +48,37 @@ class TrainingFragment : Fragment(R.layout.fragment_training),
                 DividerItemDecoration(requireContext(), RecyclerView.VERTICAL)
             )
 
+            btnFinish.setOnClickListener {
+                val finishTime = System.currentTimeMillis()
+                val elapsedSec = statVm.elapsedSeconds.value
+                val startTime = statVm.startTime.value ?: (finishTime - elapsedSec * 1000L)
 
+                statVm.stopAndReset()
+
+                trainingVm.finishTraining(
+                    title = "Workout",
+                    startTime = startTime,
+                    finishTime = finishTime,
+                    durationSec = elapsedSec,
+                    exerciseId = adapter.currentList.firstOrNull()?.id?.toInt() ?: 0,
+                    setsCount = 0
+                )
+                Toast.makeText(
+                    requireContext(),
+                    "Training duration: $elapsedSec seconds",
+                    Toast.LENGTH_LONG
+                ).show()
+                findNavController().navigate(R.id.navStats, null,
+                    androidx.navigation.navOptions {
+                        popUpTo(R.id.prepareFragment) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                )
+            }
 
 
         }
+
         viewLifecycleOwner.lifecycleScope.launch {
             trainingVm.suggestedExercisesFlow.collect {
                 adapter.submitList(it.toExercise())
@@ -68,7 +98,7 @@ class TrainingFragment : Fragment(R.layout.fragment_training),
         }
         return "— x $sets"
     }
-
+    private val exerciseList = mutableListOf<Exercise>()
     override fun onExerciseParamsChanged(
         exerciseId: Long,
         maxWeight: Float?,
@@ -83,6 +113,7 @@ class TrainingFragment : Fragment(R.layout.fragment_training),
                 )
             } else ex
         }
+
         adapter.submitList(newList)
     }
 

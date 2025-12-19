@@ -17,10 +17,6 @@
         android:name="com.gymshark.ui.home.MealFragment"
         android:label="MealFragment" />
     <fragment
-        android:id="@+id/navTraining"
-        android:name="com.gymshark.ui.home.training.TrainingFragment"
-        android:label="TrainingFragment" />
-    <fragment
         android:id="@+id/navProfile"
         android:name="com.gymshark.ui.home.profile.ProfileFragment"
         android:label="ProfileFragment" >
@@ -32,12 +28,5 @@
         android:id="@+id/trainingSetsFragment"
         android:name="com.gymshark.ui.home.profile.TrainingSetsFragment"
         android:label="TrainingSetsFragment" />
-    <fragment
-        android:id="@+id/navPrepare"
-        android:name="com.gymshark.ui.home.training.PrepareFragment"
-        android:label="PrepareFragment" >
-        <action
-            android:id="@+id/action_prepareFragment_to_navTraining"
-            app:destination="@id/navTraining" />
-    </fragment>
+    <include app:graph="@navigation/train_graph" />
 </navigation>

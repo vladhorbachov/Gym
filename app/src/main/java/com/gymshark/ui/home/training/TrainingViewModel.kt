@@ -4,8 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gymshark.data.auth.TrainingRepository
 import com.gymshark.data.db.entity.ExercisesEntity
+import com.gymshark.data.db.entity.TrainingsEntity
 import com.gymshark.data.models.DaySlot
 import com.gymshark.data.models.Train
+import com.gymshark.data.models.toTrainingsEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -97,4 +99,35 @@ class TrainingViewModel(
             }
         }
     }
+    fun finishTraining(
+        title: String,
+        startTime: Long,
+        finishTime: Long,
+        durationSec: Long,
+        exerciseId: Int,
+        setsCount: Int
+    ) = viewModelScope.launch {
+
+        val entity = TrainingsEntity(
+            name = title,
+            exerciseId = exerciseId,
+            time = finishTime,
+            setsCount = setsCount,
+            startTime = startTime,
+            finishTime = finishTime,
+
+            fullDuration = durationSec,
+            activeDuration = durationSec,
+
+            minBPM = 70,
+            maxBPM = 140,
+            avgBPM = 105,
+            calories = 0,
+            mood = "neutral"
+        )
+
+        trainingRepository.saveTraining(entity)
+    }
+
+
 }
