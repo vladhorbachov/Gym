@@ -5,9 +5,12 @@ import com.gymshark.R
 import com.gymshark.data.db.dao.ExercisesDao
 import com.gymshark.data.db.dao.TrainingsDao
 import com.gymshark.data.db.entity.ExercisesEntity
+import com.gymshark.data.db.entity.TrainingExerciseEntity
+import com.gymshark.data.db.entity.TrainingSetEntity
 import com.gymshark.data.db.entity.TrainingsEntity
 import com.gymshark.data.models.DaySlot
 import com.gymshark.data.models.Train
+import com.gymshark.ui.home.training.drafts.TrainingDraft
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import org.json.JSONObject
@@ -66,9 +69,31 @@ class TrainingRepository(
     suspend fun getExercisesByCategory(category: List<String>): List<ExercisesEntity> {
         return exercisesDao.getByCategory(category)
     }
-    suspend fun saveTraining(entity: TrainingsEntity) {
-        trainingsDao.insert(entity)
+    suspend fun saveTrainingDraft(training: TrainingsEntity, draft: TrainingDraft): Long {
+        val details: List<Pair<TrainingExerciseEntity, List<TrainingSetEntity>>> =
+            draft.exercises.mapIndexed { index, ex ->
+                val exEntity = TrainingExerciseEntity(
+                    trainingId = 0,
+                    exerciseId = ex.exerciseId.toInt(),
+                    orderIndex = index
+                )
+
+                val sets = ex.sets
+                    .filter { it.reps != null || it.weight != null }
+                    .map { s ->
+                        TrainingSetEntity(
+                            trainingExerciseId = 0,
+                            reps = s.reps,
+                            weight = s.weight
+                        )
+                    }
+
+                exEntity to sets
+            }
+
+        return trainingsDao.insertTrainingWithDetails(training, details)
     }
+
 
     private fun parseExercisesFromJson(): List<ExercisesEntity> {
         val inputStream = context.resources.openRawResource(R.raw.exercises)

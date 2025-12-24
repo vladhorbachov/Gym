@@ -7,16 +7,25 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.core.view.isEmpty
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.android.material.textfield.TextInputEditText
 import com.gymshark.R
-import com.gymshark.data.models.Exercise
 import com.gymshark.databinding.BsExerciseActionsBinding
+import com.gymshark.ui.home.training.drafts.SetEntry
+import org.koin.androidx.viewmodel.ext.android.activityViewModel
 
 class ExerciseActionsBottomSheet : BottomSheetDialogFragment() {
 
     private var _binding: BsExerciseActionsBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var exercise: Exercise
+    private val trainingVm: TrainingViewModel by activityViewModel()
+
+    private var exerciseId: Long = 0L
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        exerciseId = requireArguments().getLong(ARG_EXERCISE_ID)
+    }
 
     override fun onCreateView(i: LayoutInflater, c: ViewGroup?, s: Bundle?): View {
         _binding = BsExerciseActionsBinding.inflate(i, c, false)
@@ -24,15 +33,23 @@ class ExerciseActionsBottomSheet : BottomSheetDialogFragment() {
     }
 
     override fun onViewCreated(view: View, s: Bundle?) {
-        @Suppress("DEPRECATION")
-        exercise = requireArguments().getParcelable(ARG_EXERCISE)!!
-        binding.tvTitle.text = exercise.title
+        val ex = trainingVm.getExerciseDraft(exerciseId)
 
-        if (binding.rowsContainer.isEmpty()) addRow()
+        binding.tvTitle.text = ex?.title ?: "Exercise"
+
+        val sets = ex?.sets.orEmpty()
+        if (binding.rowsContainer.isEmpty()) {
+            if (sets.isEmpty()) {
+                addRow()
+            } else {
+                sets.forEach { addRowWithValues(it) }
+            }
+        }
 
         binding.btnPlus.setOnClickListener { addRow() }
         binding.btnMinus.setOnClickListener { removeRow() }
-        binding.btnInfo.setOnClickListener { callbacks()?.onInfoClicked(exercise) }
+
+        binding.btnInfo.setOnClickListener {}
 
         updateMinusEnabled()
     }
@@ -40,49 +57,37 @@ class ExerciseActionsBottomSheet : BottomSheetDialogFragment() {
     override fun onDismiss(dialog: android.content.DialogInterface) {
         super.onDismiss(dialog)
 
-        val weights = collectWeights()
-        val reps = collectReps()
-
-        val maxWeight: Float? = weights.maxOrNull()
-        val avgReps: Float? = if (reps.isNotEmpty()) reps.average().toFloat() else null
-        val setsCount = binding.rowsContainer.childCount
-
-        callbacks()?.onExerciseParamsChanged(
-            exerciseId = exercise.id,
-            maxWeight = maxWeight,
-            avgReps = avgReps,
-            sets = setsCount
-        )
+        val newSets = collectSets()
+        trainingVm.updateExerciseSets(exerciseId, newSets)
     }
 
-    private fun collectWeights(): List<Float> {
-        val res = mutableListOf<Float>()
+    private fun collectSets(): List<SetEntry> = buildList {
         repeat(binding.rowsContainer.childCount) { i ->
             val row = binding.rowsContainer.getChildAt(i)
-            val raw =
-                row.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etRight)
-                    ?.text?.toString().orEmpty()
-            val normalized = raw.replace(',', '.').filter { it.isDigit() || it == '.' }
-            normalized.toFloatOrNull()?.let(res::add)
-        }
-        return res
-    }
 
-    private fun collectReps(): List<Int> {
-        val res = mutableListOf<Int>()
-        repeat(binding.rowsContainer.childCount) { i ->
-            val row = binding.rowsContainer.getChildAt(i)
-            val raw =
-                row.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etLeft)
-                    ?.text?.toString().orEmpty()
-            val onlyDigits = raw.filter { it.isDigit() }
-            onlyDigits.toIntOrNull()?.let(res::add)
+            val repsRaw = row.findViewById<TextInputEditText>(R.id.etLeft)
+                ?.text?.toString().orEmpty()
+            val weightRaw = row.findViewById<TextInputEditText>(R.id.etRight)
+                ?.text?.toString().orEmpty()
+
+            val reps = repsRaw.filter { it.isDigit() }.toIntOrNull()
+            val normalizedW = weightRaw.replace(',', '.').filter { it.isDigit() || it == '.' }
+            val weight = normalizedW.toFloatOrNull()
+
+            add(SetEntry(reps = reps, weight = weight))
         }
-        return res
     }
 
     private fun addRow() {
         val row = layoutInflater.inflate(R.layout.item_ex_params_row, binding.rowsContainer, false)
+        binding.rowsContainer.addView(row)
+        updateMinusEnabled()
+    }
+
+    private fun addRowWithValues(set: SetEntry) {
+        val row = layoutInflater.inflate(R.layout.item_ex_params_row, binding.rowsContainer, false)
+        row.findViewById<TextInputEditText>(R.id.etLeft)?.setText(set.reps?.toString().orEmpty())
+        row.findViewById<TextInputEditText>(R.id.etRight)?.setText(set.weight?.toString().orEmpty())
         binding.rowsContainer.addView(row)
         updateMinusEnabled()
     }
@@ -98,25 +103,16 @@ class ExerciseActionsBottomSheet : BottomSheetDialogFragment() {
         binding.btnMinus.isEnabled = binding.rowsContainer.childCount > 1
     }
 
-    private fun callbacks(): Callbacks? = parentFragment as? Callbacks ?: activity as? Callbacks
-
-    interface Callbacks {
-        fun onInfoClicked(exercise: Exercise)
-
-        fun onExerciseParamsChanged(
-            exerciseId: Long,
-            maxWeight: Float?,
-            avgReps: Float?,
-            sets: Int
-        )
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     companion object {
-        private const val ARG_EXERCISE = "arg_exercise"
+        private const val ARG_EXERCISE_ID = "arg_exercise_id"
 
-        @JvmStatic
-        fun newInstance(exercise: Exercise) = ExerciseActionsBottomSheet().apply {
-            arguments = bundleOf(ARG_EXERCISE to exercise)
+        fun newInstance(exerciseId: Long) = ExerciseActionsBottomSheet().apply {
+            arguments = bundleOf(ARG_EXERCISE_ID to exerciseId)
         }
     }
 }

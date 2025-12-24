@@ -15,6 +15,8 @@ import com.gymshark.data.db.dao.UserDao
 import com.gymshark.data.db.entity.ExercisesEntity
 import com.gymshark.data.db.entity.FoodEntity
 import com.gymshark.data.db.entity.SetsEntity
+import com.gymshark.data.db.entity.TrainingExerciseEntity
+import com.gymshark.data.db.entity.TrainingSetEntity
 import com.gymshark.data.db.entity.TrainingsEntity
 import com.gymshark.data.db.entity.UserEntity
 
@@ -24,9 +26,11 @@ import com.gymshark.data.db.entity.UserEntity
         ExercisesEntity::class,
         FoodEntity::class,
         TrainingsEntity::class,
+        TrainingExerciseEntity::class,
+        TrainingSetEntity::class,
         SetsEntity::class
     ],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 

@@ -12,22 +12,27 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.gymshark.R
-import com.gymshark.data.db.entity.toExercise
-import com.gymshark.data.models.Exercise
 import com.gymshark.databinding.FragmentTrainingBinding
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
-
-class TrainingFragment : Fragment(R.layout.fragment_training),
-    ExerciseActionsBottomSheet.Callbacks {
+/*
+* Розширити табличку щоб сетсрепс збергіав і вагу і кількість повторів
+* Створити табличку з максимальною вагою, айді вправи, назва вправи, загальна кількість підходів за все життя на кожну вправу, також зберігати айдішку тренування в якому було досягнуто максимальну вагу
+* для показу в статс фрагмент
+* фінальний фрагмент після тренування в якому я можу вибрати настрій,та перехід до вимірювання пусльсу по ікноці підчас тренування та в кінці
+* додати кнопку для переходу в вимір пульсу по іконці анімованій
+*
+* */
+class TrainingFragment : Fragment(R.layout.fragment_training) {
 
     private var _binding: FragmentTrainingBinding? = null
     private val binding get() = _binding!!
+
     private val trainingVm: TrainingViewModel by activityViewModel()
     private val statVm: TrainingStatViewModel by activityViewModel()
 
     private val adapter = ExerciseAdapter { item ->
-        ExerciseActionsBottomSheet.newInstance(item)
+        ExerciseActionsBottomSheet.newInstance(item.exerciseId)
             .show(childFragmentManager, "exercise_actions")
     }
 
@@ -51,75 +56,43 @@ class TrainingFragment : Fragment(R.layout.fragment_training),
             btnFinish.setOnClickListener {
                 val finishTime = System.currentTimeMillis()
                 val elapsedSec = statVm.elapsedSeconds.value
-                val startTime = statVm.startTime.value ?: (finishTime - elapsedSec * 1000L)
 
                 statVm.stopAndReset()
 
                 trainingVm.finishTraining(
                     title = "Workout",
-                    startTime = startTime,
                     finishTime = finishTime,
-                    durationSec = elapsedSec,
-                    exerciseId = adapter.currentList.firstOrNull()?.id?.toInt() ?: 0,
-                    setsCount = 0
+                    durationSec = elapsedSec
                 )
+
                 Toast.makeText(
                     requireContext(),
                     "Training duration: $elapsedSec seconds",
                     Toast.LENGTH_LONG
                 ).show()
-                findNavController().navigate(R.id.navStats, null,
+
+                findNavController().navigate(
+                    R.id.navStats,
+                    null,
                     androidx.navigation.navOptions {
                         popUpTo(R.id.prepareFragment) { inclusive = true }
                         launchSingleTop = true
                     }
                 )
             }
-
-
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
-            trainingVm.suggestedExercisesFlow.collect {
-                adapter.submitList(it.toExercise())
+            trainingVm.suggestedExercisesFlow.collect { list ->
+                trainingVm.setExercisesFromSuggested(list)
             }
         }
-    }
 
-    override fun onInfoClicked(exercise: Exercise) {
-        // TODO: реалізація
-    }
-
-    private fun formatSetsReps(avgReps: Float?, sets: Int): String? {
-        avgReps?.let {
-            val whole = it.toInt()
-            val repsStr = if (it == whole.toFloat()) whole.toString() else "%.1f".format(it)
-            return "$repsStr x $sets"
+        viewLifecycleOwner.lifecycleScope.launch {
+            trainingVm.draft.collect { draft ->
+                adapter.submitList(draft.exercises)
+            }
         }
-        return "— x $sets"
-    }
-    private val exerciseList = mutableListOf<Exercise>()
-    override fun onExerciseParamsChanged(
-        exerciseId: Long,
-        maxWeight: Float?,
-        avgReps: Float?,
-        sets: Int
-    ) {
-        val newList = adapter.currentList.map { ex ->
-            if (ex.id == exerciseId) {
-                ex.copy(
-                    weight = maxWeight?.let { formatWeight(it) } ?: ex.weight,
-                    setsReps = formatSetsReps(avgReps, sets) ?: ex.setsReps
-                )
-            } else ex
-        }
-
-        adapter.submitList(newList)
-    }
-
-    private fun formatWeight(value: Float): String {
-        val asInt = value.toInt()
-        return if (value == asInt.toFloat()) "$asInt kg" else "%.1f kg".format(value)
     }
 
     override fun onDestroyView() {
