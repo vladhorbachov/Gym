@@ -7,9 +7,11 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
+import com.gymshark.data.models.DailyStatsRow
 import com.gymshark.data.db.entity.TrainingExerciseEntity
 import com.gymshark.data.db.entity.TrainingSetEntity
 import com.gymshark.data.db.entity.TrainingsEntity
+import com.gymshark.data.models.MoodRow
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -61,5 +63,27 @@ interface TrainingsDao {
         return trainingId.toLong()
     }
 
+    @Query(
+        """
+    SELECT 
+        date(time / 1000, 'unixepoch') as day,
+        SUM(activeDuration) as totalDuration,
+        AVG(avgBPM) as avgBpm,
+        SUM(calories) as totalCalories
+    FROM Trainings
+    GROUP BY day
+    ORDER BY day DESC
+"""
+    )
+    fun observeDailyStats(): Flow<List<DailyStatsRow>>
+
+    @Query("""
+    SELECT 
+        date(time / 1000, 'unixepoch') as day,
+        mood
+    FROM Trainings
+    ORDER BY time DESC
+""")
+    fun observeMoodTimeline(): Flow<List<MoodRow>>
 
 }

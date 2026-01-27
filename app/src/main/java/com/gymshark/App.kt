@@ -5,6 +5,7 @@ import com.gymshark.di.appModule
 import com.gymshark.di.databaseModule
 import com.gymshark.di.exercisesModule
 import com.gymshark.di.firebaseModule
+import com.gymshark.di.networkModule
 import com.gymshark.di.preferencesModule
 import com.gymshark.di.repositoryModule
 import com.gymshark.di.viewModelModule
@@ -19,7 +20,7 @@ class App : Application() {
             androidContext(this@App)
             modules(
                 firebaseModule, repositoryModule, viewModelModule, databaseModule, appModule,
-                preferencesModule,exercisesModule
+                preferencesModule,exercisesModule, networkModule
             )
         }
     }

@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -15,6 +14,7 @@ import com.gymshark.R
 import com.gymshark.databinding.FragmentTrainingBinding
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
+
 /*
 * Розширити табличку щоб сетсрепс збергіав і вагу і кількість повторів
 * Створити табличку з максимальною вагою, айді вправи, назва вправи, загальна кількість підходів за все життя на кожну вправу, також зберігати айдішку тренування в якому було досягнуто максимальну вагу
@@ -54,31 +54,11 @@ class TrainingFragment : Fragment(R.layout.fragment_training) {
             )
 
             btnFinish.setOnClickListener {
-                val finishTime = System.currentTimeMillis()
-                val elapsedSec = statVm.elapsedSeconds.value
-
                 statVm.stopAndReset()
-
-                trainingVm.finishTraining(
-                    title = "Workout",
-                    finishTime = finishTime,
-                    durationSec = elapsedSec
-                )
-
-                Toast.makeText(
-                    requireContext(),
-                    "Training duration: $elapsedSec seconds",
-                    Toast.LENGTH_LONG
-                ).show()
-
                 findNavController().navigate(
-                    R.id.navStats,
-                    null,
-                    androidx.navigation.navOptions {
-                        popUpTo(R.id.prepareFragment) { inclusive = true }
-                        launchSingleTop = true
-                    }
+                    R.id.action_trainingFragment_to_finishFragment
                 )
+
             }
         }
 

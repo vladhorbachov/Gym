@@ -11,6 +11,7 @@ import com.gymshark.data.models.toTrainingsEntity
 import com.gymshark.ui.home.training.drafts.ExerciseDraft
 import com.gymshark.ui.home.training.drafts.SetEntry
 import com.gymshark.ui.home.training.drafts.TrainingDraft
+import com.gymshark.ui.home.training.drafts.isPerformed
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -93,7 +94,11 @@ class TrainingViewModel(
     fun finishTraining(
         title: String,
         finishTime: Long,
-        durationSec: Long
+        durationSec: Long,
+        mood: String,
+        minBpm: Int?,
+        maxBpm: Int?,
+        avgBpm: Int?
     ) = viewModelScope.launch {
 
         val cur = _draft.value
@@ -101,10 +106,8 @@ class TrainingViewModel(
 
         val firstExerciseId = cur.exercises.firstOrNull()?.exerciseId?.toInt() ?: 0
         val performedSets = cur.exercises.sumOf { ex ->
-            ex.sets.count { s -> s.reps != null || s.weight != null }
+            ex.sets.count { it.isPerformed() }
         }
-
-
 
         val entity = TrainingsEntity(
             name = title,
@@ -115,18 +118,18 @@ class TrainingViewModel(
             finishTime = finishTime,
             fullDuration = durationSec,
             activeDuration = durationSec,
-            minBPM = 70,
-            maxBPM = 140,
-            avgBPM = 105,
+            minBPM = minBpm,
+            maxBPM = maxBpm,
+            avgBPM = avgBpm,
             calories = 0,
-            mood = "neutral"
+            mood = mood
         )
 
         trainingRepository.saveTrainingDraft(entity, cur)
 
-
         _draft.value = TrainingDraft()
     }
+
 
 
 

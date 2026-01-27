@@ -7,11 +7,15 @@ import com.gymshark.data.db.converter.DaySlotsConverter
 import com.gymshark.data.db.converter.DayTypesConverter
 import com.gymshark.data.db.converter.PentagonConverter
 import com.gymshark.data.db.converter.TrainingDayConverter
+import com.gymshark.data.db.dao.BodyWeightDao
+import com.gymshark.data.db.dao.ExercisePrDao
 import com.gymshark.data.db.dao.ExercisesDao
 import com.gymshark.data.db.dao.FoodDao
 import com.gymshark.data.db.dao.SetsDao
 import com.gymshark.data.db.dao.TrainingsDao
 import com.gymshark.data.db.dao.UserDao
+import com.gymshark.data.db.entity.BodyWeightEntity
+import com.gymshark.data.db.entity.ExercisePrEntity
 import com.gymshark.data.db.entity.ExercisesEntity
 import com.gymshark.data.db.entity.FoodEntity
 import com.gymshark.data.db.entity.SetsEntity
@@ -28,9 +32,11 @@ import com.gymshark.data.db.entity.UserEntity
         TrainingsEntity::class,
         TrainingExerciseEntity::class,
         TrainingSetEntity::class,
-        SetsEntity::class
+        SetsEntity::class,
+        ExercisePrEntity::class,
+        BodyWeightEntity::class
     ],
-    version = 5,
+    version = 7,
     exportSchema = false
 )
 
@@ -46,4 +52,7 @@ abstract class DataBase : RoomDatabase() {
     abstract fun foodDao(): FoodDao
     abstract fun trainingsDao(): TrainingsDao
     abstract fun setsDao(): SetsDao
+    abstract fun exercisePrDao(): ExercisePrDao
+    abstract fun bodyWeightDao(): BodyWeightDao
+
 }

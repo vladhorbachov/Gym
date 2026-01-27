@@ -14,6 +14,7 @@ import com.gymshark.data.models.Series
 import com.gymshark.data.models.getListDays
 import com.gymshark.data.models.toDaysSlot
 import com.gymshark.databinding.FragmentProfileBinding
+import com.gymshark.ui.home.profile.weight.FragmentAddBodyWeight
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.time.DayOfWeek
@@ -48,12 +49,16 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                 .orEmpty()
             selectedDays.addAll(days)
             renderSelectedDays()
+
         }
 
 
         binding.btnPickDays.setOnClickListener { showDayPicker() }
         binding.btnSave.setOnClickListener { saveUser() }
         binding.btnPickTrainingSet.setOnClickListener { showSetPicker() }
+        FragmentAddBodyWeight()
+            .show(parentFragmentManager, "FragmentAddBodyWeight")
+
     }
 
     private fun renderSelectedDays() {
@@ -126,4 +131,6 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
     private fun dayLabel(d: DayOfWeek): String =
         d.getDisplayName(TextStyle.SHORT, locale)
+
+
 }

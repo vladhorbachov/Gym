@@ -106,4 +106,8 @@ dependencies {
 
     //graphs
     implementation ("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
+    //barcode
+    implementation ("com.google.android.gms:play-services-mlkit-barcode-scanning:18.3.1")
+
 }

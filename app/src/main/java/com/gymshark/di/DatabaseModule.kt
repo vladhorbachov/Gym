@@ -23,4 +23,11 @@ val databaseModule = module {
     single {
         get<DataBase>().trainingsDao()
     }
+    single {
+        get<DataBase>().exercisePrDao()
+
+    }
+    single {
+        get<DataBase>().bodyWeightDao()
+    }
 }

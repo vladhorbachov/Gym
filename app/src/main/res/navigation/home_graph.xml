@@ -10,7 +10,7 @@
         android:label="HomeFragment" />
     <fragment
         android:id="@+id/navStats"
-        android:name="com.gymshark.ui.home.StatsFragment"
+        android:name="com.gymshark.ui.home.stats.StatsFragment"
         android:label="StatsFragment" />
     <fragment
         android:id="@+id/navMeal"

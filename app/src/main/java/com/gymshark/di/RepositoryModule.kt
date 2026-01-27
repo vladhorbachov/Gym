@@ -17,5 +17,5 @@ val repositoryModule = module {
     single<UserRepository> { UserRepositoryImpl(get(),get()) }
     single<ExerciseRepository> { ExerciseRepositoryImpl(get()) }
     single<SettingsRepository> { SettingsRepositoryImpl(get()) }
-    single { TrainingRepository(get(),get(),get(),androidContext()) }
+    single { TrainingRepository(get(),get(),get(),get(),get(),get(),androidContext()) }
 }
