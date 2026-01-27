@@ -1,4 +1,4 @@
-package com.gymshark.data.auth
+package com.gymshark.data.user
 
 import com.gymshark.data.db.entity.UserEntity
 import com.gymshark.data.models.DaySlot

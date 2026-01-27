@@ -2,8 +2,8 @@ package com.gymshark.ui.home.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gymshark.data.auth.TrainingRepository
-import com.gymshark.data.auth.UserRepository
+import com.gymshark.data.training.TrainingRepository
+import com.gymshark.data.user.UserRepository
 import com.gymshark.data.db.entity.UserEntity
 import kotlinx.coroutines.launch
 

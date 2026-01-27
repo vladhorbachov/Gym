@@ -5,8 +5,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gymshark.data.auth.ExerciseRepository
-import com.gymshark.data.auth.SettingsRepository
+import com.gymshark.data.exercises.ExerciseRepository
+import com.gymshark.data.settings.SettingsRepository
 import com.gymshark.data.models.ExerciseJson
 import kotlinx.coroutines.launch
 

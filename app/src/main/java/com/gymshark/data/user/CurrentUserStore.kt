@@ -1,4 +1,4 @@
-package com.gymshark.data.auth
+package com.gymshark.data.user
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences

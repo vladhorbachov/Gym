@@ -2,7 +2,7 @@ package com.gymshark.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gymshark.data.auth.UserRepository
+import com.gymshark.data.user.UserRepository
 import com.gymshark.data.db.entity.UserEntity
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow

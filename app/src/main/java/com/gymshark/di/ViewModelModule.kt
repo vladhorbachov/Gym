@@ -1,6 +1,5 @@
 package com.gymshark.di
 
-
 import androidx.lifecycle.SavedStateHandle
 import com.gymshark.ui.auth.AuthViewModel
 import com.gymshark.ui.home.HomeViewModel
@@ -16,12 +15,31 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 val viewModelModule = module {
+
     viewModel { AuthViewModel(get()) }
+
     viewModel { HomeViewModel(get()) }
-    viewModel { ProfileViewModel(get(),get()) }
+
+    viewModel { ProfileViewModel(get(), get()) }
+
     viewModel { SplashViewModel(get(), get()) }
-    viewModel { TrainingViewModel(get()) }
-    viewModel { TrainingSetsViewModel(get(), get(), get()) }
+
+    viewModel {
+        TrainingViewModel(
+            trainingRepository = get(),
+            userRepository = get(),
+            exerciseRepository = get()
+        )
+    }
+
+    viewModel {
+        TrainingSetsViewModel(
+            get(),
+            get(),
+            get()
+        )
+    }
+
     viewModel { (handle: SavedStateHandle) ->
         TrainingSetsViewModel(
             userRepository = get(),
@@ -29,9 +47,12 @@ val viewModelModule = module {
             catalog = get()
         )
     }
-    viewModel { TrainingStatViewModel(get()) }
-    viewModel { FinishViewModel() }
-    viewModel { PulseViewModel() }
-    viewModel { StatsViewModel(get()) }
 
+    viewModel { TrainingStatViewModel(get()) }
+
+    viewModel { FinishViewModel() }
+
+    viewModel { PulseViewModel() }
+
+    viewModel { StatsViewModel(get()) }
 }

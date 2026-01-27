@@ -1,5 +1,6 @@
-package com.gymshark.data.auth
+package com.gymshark.data.user
 
+import com.gymshark.data.user.CurrentUserStore
 import com.gymshark.data.db.dao.UserDao
 import com.gymshark.data.db.entity.UserEntity
 import com.gymshark.data.models.DaySlot

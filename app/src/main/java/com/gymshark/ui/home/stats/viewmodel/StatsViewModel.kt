@@ -2,7 +2,7 @@ package com.gymshark.ui.home.stats.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gymshark.data.auth.TrainingRepository
+import com.gymshark.data.training.TrainingRepository
 import com.gymshark.data.models.DailyStatsUi
 import com.gymshark.data.models.MoodDayUi
 import com.gymshark.data.models.toMoodUi

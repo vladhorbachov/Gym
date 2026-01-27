@@ -1,4 +1,4 @@
-package com.gymshark.data.auth
+package com.gymshark.data.exercises
 
 import com.gymshark.data.db.entity.ExercisesEntity
 

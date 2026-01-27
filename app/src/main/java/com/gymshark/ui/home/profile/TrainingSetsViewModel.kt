@@ -3,7 +3,7 @@ package com.gymshark.ui.home.profile
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gymshark.data.auth.UserRepository
+import com.gymshark.data.user.UserRepository
 import com.gymshark.data.exercises.ExercisesCatalog
 import com.gymshark.data.models.DaySlot
 import com.gymshark.data.models.getDefaultListDays

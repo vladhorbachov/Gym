@@ -1,4 +1,4 @@
-package com.gymshark.data.auth
+package com.gymshark.data.settings
 
 interface SettingsRepository {
     fun getVersion(): Int

@@ -2,16 +2,18 @@ package com.gymshark.ui.home.training
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gymshark.data.auth.TrainingRepository
 import com.gymshark.data.db.entity.ExercisesEntity
 import com.gymshark.data.db.entity.TrainingsEntity
+import com.gymshark.data.exercises.ExerciseRepository
 import com.gymshark.data.models.DaySlot
 import com.gymshark.data.models.Train
-import com.gymshark.data.models.toTrainingsEntity
+import com.gymshark.data.training.TrainingRepository
+import com.gymshark.data.user.UserRepository
 import com.gymshark.ui.home.training.drafts.ExerciseDraft
 import com.gymshark.ui.home.training.drafts.SetEntry
 import com.gymshark.ui.home.training.drafts.TrainingDraft
 import com.gymshark.ui.home.training.drafts.isPerformed
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -26,7 +28,9 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 
 class TrainingViewModel(
-    private val trainingRepository: TrainingRepository
+    private val trainingRepository: TrainingRepository,
+    private val userRepository: UserRepository,
+    private val exerciseRepository: ExerciseRepository
 ) : ViewModel() {
 
     init {
@@ -34,6 +38,7 @@ class TrainingViewModel(
             trainingRepository.seedExercisesIfEmpty()
         }
     }
+
     private val _draft = MutableStateFlow(TrainingDraft())
     val draft: StateFlow<TrainingDraft> = _draft.asStateFlow()
 
@@ -47,11 +52,11 @@ class TrainingViewModel(
             .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     val trainingDaysFlow: StateFlow<Set<DayOfWeek>> =
-        trainingRepository.observePlannedDays()
+        userRepository.observePlannedDays()
             .stateIn(viewModelScope, SharingStarted.Lazily, emptySet())
 
     val trainingSlotsFlow: StateFlow<List<DaySlot>> =
-        trainingRepository.observeDaySlots()
+        userRepository.observeDaySlots()
             .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     private val selectionDataFlow = combine(
@@ -80,6 +85,7 @@ class TrainingViewModel(
             cur.copy(exercises = newExercises)
         }
     }
+
     fun updateExerciseSets(exerciseId: Long, sets: List<SetEntry>) {
         _draft.update { cur ->
             cur.copy(
@@ -89,8 +95,10 @@ class TrainingViewModel(
             )
         }
     }
+
     fun getExerciseDraft(exerciseId: Long): ExerciseDraft? =
         _draft.value.exercises.firstOrNull { it.exerciseId == exerciseId }
+
     fun finishTraining(
         title: String,
         finishTime: Long,
@@ -126,13 +134,10 @@ class TrainingViewModel(
         )
 
         trainingRepository.saveTrainingDraft(entity, cur)
-
         _draft.value = TrainingDraft()
     }
 
-
-
-
+    @OptIn(ExperimentalCoroutinesApi::class)
     val todayRecommendedTrainFlow: StateFlow<Train?> =
         selectionDataFlow
             .flatMapLatest { (completedTrains, daySlots, plannedDays) ->
@@ -144,7 +149,7 @@ class TrainingViewModel(
                         return@flow
                     }
 
-                    val todaySlots: List<DaySlot> = daySlots
+                    val todaySlots = daySlots
                         .filter { it.day == today }
                         .sortedBy { it.id }
 
@@ -153,15 +158,14 @@ class TrainingViewModel(
                         return@flow
                     }
 
-                    val lastTrainingId: Long = completedTrains
-                        .maxOfOrNull { it.id.toLong() } ?: 0L
+                    val lastTrainingId =
+                        completedTrains.maxOfOrNull { it.id.toLong() } ?: 0L
 
-                    val nextSlot: DaySlot =
+                    val nextSlot =
                         todaySlots.firstOrNull { it.id > lastTrainingId }
                             ?: todaySlots.first()
 
-                    val train = trainingRepository.getTrainByTypes(nextSlot.types)
-                    emit(train)
+                    emit(trainingRepository.getTrainByTypes(nextSlot.types))
                 }
             }
             .stateIn(viewModelScope, SharingStarted.Lazily, null)
@@ -169,13 +173,12 @@ class TrainingViewModel(
     fun loadSuggestedExercises(category: List<String>) {
         viewModelScope.launch {
             runCatching {
-                trainingRepository.getExercisesByCategory(category)
-            }.onSuccess { list ->
-                _suggestedExercisesFlow.value = list
+                exerciseRepository.getByCategory(category)
+            }.onSuccess {
+                _suggestedExercisesFlow.value = it
             }.onFailure {
                 _suggestedExercisesFlow.value = emptyList()
             }
         }
     }
-
 }
