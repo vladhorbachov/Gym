@@ -1,9 +1,8 @@
 package com.gymshark.data.user
 
-import com.gymshark.data.user.CurrentUserStore
 import com.gymshark.data.db.dao.UserDao
 import com.gymshark.data.db.entity.UserEntity
-import com.gymshark.data.models.DaySlot
+import com.gymshark.domain.models.DaySlot
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull

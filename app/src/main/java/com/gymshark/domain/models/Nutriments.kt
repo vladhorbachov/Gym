@@ -1,4 +1,4 @@
-package com.gymshark.data.models
+package com.gymshark.domain.models
 
 import com.google.gson.annotations.SerializedName
 

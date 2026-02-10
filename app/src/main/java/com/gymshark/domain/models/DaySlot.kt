@@ -1,9 +1,8 @@
-package com.gymshark.data.models
+package com.gymshark.domain.models
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 import java.time.DayOfWeek
-import java.util.Calendar
 
 @Parcelize
 data class DaySlot(

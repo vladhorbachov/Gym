@@ -14,7 +14,7 @@
         android:label="StatsFragment" />
     <fragment
         android:id="@+id/navMeal"
-        android:name="com.gymshark.ui.home.MealFragment"
+        android:name="com.gymshark.ui.home.meal.MealFragment"
         android:label="MealFragment" />
     <fragment
         android:id="@+id/navProfile"

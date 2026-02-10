@@ -5,9 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gymshark.data.user.UserRepository
 import com.gymshark.data.exercises.ExercisesCatalog
-import com.gymshark.data.models.DaySlot
-import com.gymshark.data.models.getDefaultListDays
-import com.gymshark.data.models.getListDays
+import com.gymshark.domain.models.DaySlot
+import com.gymshark.domain.models.getDefaultListDays
+import com.gymshark.domain.models.getListDays
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest

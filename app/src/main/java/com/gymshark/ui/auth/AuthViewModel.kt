@@ -3,7 +3,7 @@ package com.gymshark.ui.auth
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gymshark.data.auth.AuthRepository
+import com.gymshark.domain.repository.AuthRepository
 import kotlinx.coroutines.launch
 
 class AuthViewModel(private val repo: AuthRepository) : ViewModel() {

@@ -2,7 +2,6 @@ package com.gymshark.data.db.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.gymshark.data.models.Exercise
 
 @Entity(tableName = "Exercises")
 data class ExercisesEntity(

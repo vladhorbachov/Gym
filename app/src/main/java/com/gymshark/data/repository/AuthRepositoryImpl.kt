@@ -1,6 +1,7 @@
-package com.gymshark.data.auth
+package com.gymshark.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
+import com.gymshark.domain.repository.AuthRepository
 import kotlinx.coroutines.tasks.await
 
 class AuthRepositoryImpl(

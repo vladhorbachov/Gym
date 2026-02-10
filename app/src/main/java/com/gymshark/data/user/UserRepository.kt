@@ -1,7 +1,7 @@
 package com.gymshark.data.user
 
 import com.gymshark.data.db.entity.UserEntity
-import com.gymshark.data.models.DaySlot
+import com.gymshark.domain.models.DaySlot
 import kotlinx.coroutines.flow.Flow
 import java.time.DayOfWeek
 

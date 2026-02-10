@@ -5,8 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.gymshark.data.db.entity.ExercisesEntity
 import com.gymshark.data.db.entity.TrainingsEntity
 import com.gymshark.data.exercises.ExerciseRepository
-import com.gymshark.data.models.DaySlot
-import com.gymshark.data.models.Train
+import com.gymshark.domain.models.DaySlot
+import com.gymshark.domain.models.Train
 import com.gymshark.data.training.TrainingRepository
 import com.gymshark.data.user.UserRepository
 import com.gymshark.ui.home.training.drafts.ExerciseDraft

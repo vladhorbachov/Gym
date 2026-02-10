@@ -9,7 +9,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.gymshark.R
-import com.gymshark.data.models.DaySlot
+import com.gymshark.domain.models.DaySlot
 import com.gymshark.databinding.FragmentTrainingSetsBinding
 import com.gymshark.utils.view.SetsDayView
 import kotlinx.coroutines.flow.collectLatest

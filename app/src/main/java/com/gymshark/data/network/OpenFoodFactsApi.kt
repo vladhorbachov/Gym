@@ -1,6 +1,6 @@
 package com.gymshark.data.network
 
-import com.gymshark.data.models.ProductResponse
+import com.gymshark.domain.models.ProductResponse
 import retrofit2.http.GET
 import retrofit2.http.Path
 

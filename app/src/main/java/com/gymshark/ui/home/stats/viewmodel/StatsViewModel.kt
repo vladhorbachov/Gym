@@ -3,9 +3,9 @@ package com.gymshark.ui.home.stats.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gymshark.data.training.TrainingRepository
-import com.gymshark.data.models.DailyStatsUi
-import com.gymshark.data.models.MoodDayUi
-import com.gymshark.data.models.toMoodUi
+import com.gymshark.domain.models.DailyStatsUi
+import com.gymshark.domain.models.MoodDayUi
+import com.gymshark.domain.models.toMoodUi
 import com.gymshark.ui.home.stats.ChartPoint
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

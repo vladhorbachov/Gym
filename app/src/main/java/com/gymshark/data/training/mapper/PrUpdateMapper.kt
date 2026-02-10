@@ -1,6 +1,6 @@
 package com.gymshark.data.training.mapper
 
-import com.gymshark.data.models.PrUpdate
+import com.gymshark.domain.models.PrUpdate
 import com.gymshark.ui.home.training.drafts.TrainingDraft
 import com.gymshark.ui.home.training.drafts.isPerformed
 import com.gymshark.ui.home.training.drafts.normalizedWeightOrNull

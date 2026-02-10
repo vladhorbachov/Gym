@@ -3,10 +3,9 @@ package com.gymshark.data.db.entity
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.gymshark.data.models.DaySlot
-import com.gymshark.data.models.Pentagon
-import com.gymshark.data.models.Series
-import com.gymshark.data.models.TrainingDay
+import com.gymshark.domain.models.DaySlot
+import com.gymshark.domain.models.Pentagon
+import com.gymshark.domain.models.Series
 
 @Entity(tableName = "User")
 data class UserEntity(

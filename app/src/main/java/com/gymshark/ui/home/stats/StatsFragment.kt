@@ -11,7 +11,7 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.gymshark.R
-import com.gymshark.data.models.MoodUi
+import com.gymshark.domain.models.MoodUi
 import com.gymshark.databinding.FragmentStatsBinding
 import com.gymshark.ui.home.stats.viewmodel.StatsViewModel
 import kotlinx.coroutines.launch

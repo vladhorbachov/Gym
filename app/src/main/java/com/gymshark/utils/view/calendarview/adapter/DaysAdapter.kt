@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.gymshark.data.models.TrainingCalendarDay
+import com.gymshark.domain.models.TrainingCalendarDay
 import com.gymshark.databinding.ItemDayBinding
 import java.time.DayOfWeek
 import java.time.LocalDate

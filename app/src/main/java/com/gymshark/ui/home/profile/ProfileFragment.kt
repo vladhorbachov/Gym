@@ -9,10 +9,10 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.gymshark.R
 import com.gymshark.data.db.entity.UserEntity
-import com.gymshark.data.models.Pentagon
-import com.gymshark.data.models.Series
-import com.gymshark.data.models.getListDays
-import com.gymshark.data.models.toDaysSlot
+import com.gymshark.domain.models.Pentagon
+import com.gymshark.domain.models.Series
+import com.gymshark.domain.models.getListDays
+import com.gymshark.domain.models.toDaysSlot
 import com.gymshark.databinding.FragmentProfileBinding
 import com.gymshark.ui.home.profile.weight.FragmentAddBodyWeight
 import kotlinx.coroutines.launch

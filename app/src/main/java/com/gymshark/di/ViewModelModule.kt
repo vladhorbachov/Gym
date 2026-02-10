@@ -3,6 +3,7 @@ package com.gymshark.di
 import androidx.lifecycle.SavedStateHandle
 import com.gymshark.ui.auth.AuthViewModel
 import com.gymshark.ui.home.HomeViewModel
+import com.gymshark.ui.home.meal.MealViewModel
 import com.gymshark.ui.home.profile.ProfileViewModel
 import com.gymshark.ui.home.profile.TrainingSetsViewModel
 import com.gymshark.ui.home.pulse.PulseViewModel
@@ -55,4 +56,6 @@ val viewModelModule = module {
     viewModel { PulseViewModel() }
 
     viewModel { StatsViewModel(get()) }
+
+    viewModel { MealViewModel(get(), get()) }
 }

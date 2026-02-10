@@ -5,9 +5,9 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.gymshark.data.models.DaySlot
-import com.gymshark.data.models.Train
-import com.gymshark.data.models.TrainingCalendarDay
+import com.gymshark.domain.models.DaySlot
+import com.gymshark.domain.models.Train
+import com.gymshark.domain.models.TrainingCalendarDay
 import com.gymshark.databinding.ViewCalendarBinding
 import com.gymshark.utils.view.calendarview.adapter.DaysAdapter
 import java.time.LocalDate

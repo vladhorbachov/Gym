@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gymshark.data.exercises.ExerciseRepository
 import com.gymshark.data.settings.SettingsRepository
-import com.gymshark.data.models.ExerciseJson
+import com.gymshark.domain.models.ExerciseJson
 import kotlinx.coroutines.launch
 
 class SplashViewModel(

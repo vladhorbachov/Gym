@@ -1,9 +1,11 @@
 package com.gymshark.di
 
-import com.gymshark.data.auth.AuthRepository
-import com.gymshark.data.auth.AuthRepositoryImpl
+import com.gymshark.domain.repository.AuthRepository
+import com.gymshark.data.repository.AuthRepositoryImpl
 import com.gymshark.data.exercises.ExerciseRepository
 import com.gymshark.data.exercises.ExerciseRepositoryImpl
+import com.gymshark.data.repository.FoodRepositoryImpl
+import com.gymshark.data.repository.MealInfoRepositoryImpl
 import com.gymshark.data.settings.SettingsRepository
 import com.gymshark.data.settings.SettingsRepositoryImpl
 import com.gymshark.data.training.TrainingRepository
@@ -14,6 +16,8 @@ import com.gymshark.data.training.seed.ExercisesSeedDataSource
 import com.gymshark.data.training.seed.ExercisesSeedDataSourceImpl
 import com.gymshark.data.user.UserRepository
 import com.gymshark.data.user.UserRepositoryImpl
+import com.gymshark.domain.repository.FoodRepository
+import com.gymshark.domain.repository.MealInfoRepository
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
@@ -46,4 +50,6 @@ val repositoryModule = module {
             get()
         )
     }
+    single<FoodRepository> { FoodRepositoryImpl(get()) }
+    single<MealInfoRepository> { MealInfoRepositoryImpl(get()) }
 }

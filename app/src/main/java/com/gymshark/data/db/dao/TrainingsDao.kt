@@ -7,11 +7,11 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
-import com.gymshark.data.models.DailyStatsRow
+import com.gymshark.domain.models.DailyStatsRow
 import com.gymshark.data.db.entity.TrainingExerciseEntity
 import com.gymshark.data.db.entity.TrainingSetEntity
 import com.gymshark.data.db.entity.TrainingsEntity
-import com.gymshark.data.models.MoodRow
+import com.gymshark.domain.models.MoodRow
 import kotlinx.coroutines.flow.Flow
 
 @Dao

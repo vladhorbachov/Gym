@@ -1,4 +1,4 @@
-package com.gymshark.data.models
+package com.gymshark.domain.models
 
 import com.gymshark.data.db.entity.TrainingsEntity
 import java.time.Instant

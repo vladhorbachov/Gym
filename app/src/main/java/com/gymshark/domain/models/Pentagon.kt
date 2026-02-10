@@ -1,4 +1,4 @@
-package com.gymshark.data.models
+package com.gymshark.domain.models
 
 data class Pentagon(
     var strength: Int = 0,

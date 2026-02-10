@@ -1,4 +1,4 @@
-package com.gymshark.data.models
+package com.gymshark.domain.models
 
 enum class MoodUi { BAD, NEUTRAL, GOOD, AMAZING }
 

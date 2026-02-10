@@ -30,4 +30,7 @@ val databaseModule = module {
     single {
         get<DataBase>().bodyWeightDao()
     }
+    single {
+        get<DataBase>().mealInfoDao()
+    }
 }

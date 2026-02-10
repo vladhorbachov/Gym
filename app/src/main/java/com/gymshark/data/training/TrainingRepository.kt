@@ -2,9 +2,9 @@ package com.gymshark.data.training
 
 import com.gymshark.data.db.entity.BodyWeightEntity
 import com.gymshark.data.db.entity.TrainingsEntity
-import com.gymshark.data.models.DailyStatsRow
-import com.gymshark.data.models.MoodRow
-import com.gymshark.data.models.Train
+import com.gymshark.domain.models.DailyStatsRow
+import com.gymshark.domain.models.MoodRow
+import com.gymshark.domain.models.Train
 import com.gymshark.ui.home.training.drafts.TrainingDraft
 import kotlinx.coroutines.flow.Flow
 

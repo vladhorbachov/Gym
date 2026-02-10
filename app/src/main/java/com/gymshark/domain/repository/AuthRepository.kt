@@ -1,4 +1,4 @@
-package com.gymshark.data.auth
+package com.gymshark.domain.repository
 
 interface AuthRepository {
     suspend fun register(email: String, password: String)

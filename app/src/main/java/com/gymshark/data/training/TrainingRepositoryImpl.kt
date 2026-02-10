@@ -9,9 +9,9 @@ import com.gymshark.data.db.dao.ExercisesDao
 import com.gymshark.data.db.dao.TrainingsDao
 import com.gymshark.data.db.entity.BodyWeightEntity
 import com.gymshark.data.db.entity.TrainingsEntity
-import com.gymshark.data.models.DailyStatsRow
-import com.gymshark.data.models.MoodRow
-import com.gymshark.data.models.Train
+import com.gymshark.domain.models.DailyStatsRow
+import com.gymshark.domain.models.MoodRow
+import com.gymshark.domain.models.Train
 import com.gymshark.data.training.mapper.PrUpdateMapper
 import com.gymshark.data.training.mapper.TrainingDraftMapper
 import com.gymshark.data.training.seed.ExercisesSeedDataSource

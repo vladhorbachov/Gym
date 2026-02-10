@@ -7,7 +7,7 @@ import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.gson.Gson
 import com.gymshark.R
-import com.gymshark.data.models.ExerciseJson
+import com.gymshark.domain.models.ExerciseJson
 import com.gymshark.ui.auth.AuthActivity
 import com.gymshark.ui.home.HomeActivity
 import com.gymshark.utils.Constants
