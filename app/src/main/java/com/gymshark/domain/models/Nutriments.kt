@@ -11,7 +11,6 @@ data class ProductResponse(
 data class Product(
     @SerializedName("product_name")
     val productName: String?,
-    val brands: String?,
     val nutriments: Nutriments?
 )
 

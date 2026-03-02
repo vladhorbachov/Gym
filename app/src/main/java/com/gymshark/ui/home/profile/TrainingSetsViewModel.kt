@@ -8,6 +8,7 @@ import com.gymshark.data.exercises.ExercisesCatalog
 import com.gymshark.domain.models.DaySlot
 import com.gymshark.domain.models.getDefaultListDays
 import com.gymshark.domain.models.getListDays
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -32,6 +33,8 @@ class TrainingSetsViewModel(
     }
 
     private var nextId = 1L
+    private val _committedSlots = MutableStateFlow<List<DaySlot>>(emptyList())
+    val committedSlots: StateFlow<List<DaySlot>> = _committedSlots
 
     val categories: StateFlow<List<String>> = flow {
         emit(catalog.loadCategories())
@@ -47,8 +50,8 @@ class TrainingSetsViewModel(
             }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    val displayedSlots: StateFlow<List<DaySlot>> =
-        savedStateHandle.getStateFlow(KEY_SLOTS, emptyList())
+    private val _displayedSlots = MutableStateFlow<List<DaySlot>>(emptyList())
+    val displayedSlots: StateFlow<List<DaySlot>> = _displayedSlots
 
     val dayDefaults: StateFlow<Map<DayOfWeek, Set<String>>> =
         savedStateHandle.getStateFlow(KEY_DAY_DEFAULTS, emptyMap())
@@ -61,7 +64,7 @@ class TrainingSetsViewModel(
         viewModelScope.launch {
             val uid = userRepository.currentUserId() ?: return@launch
             val user = userRepository.getById(uid) ?: return@launch
-            if (user.trainingSlots.getListDays().isEmpty()) {
+            if (user.trainingSlots.isEmpty()) {
                 val defaults = getDefaultListDays()
                 userRepository.setTrainingSlots(
                     uid,
@@ -73,11 +76,8 @@ class TrainingSetsViewModel(
         viewModelScope.launch {
             val uid = userRepository.currentUserId() ?: return@launch
             val fromDb = userRepository.getTrainingSlots(uid)
-            if (fromDb.isNotEmpty() && displayedSlots.value.isEmpty()) {
-                savedStateHandle[KEY_SLOTS] = fromDb
-            }
-            nextId = (displayedSlots.value.maxOfOrNull { it.id } ?: 0L) + 1L
-            restoreCursor()
+            _displayedSlots.value = fromDb
+            nextId = (fromDb.maxOfOrNull { it.id } ?: 0L) + 1L
         }
 
         viewModelScope.launch {
@@ -122,8 +122,7 @@ class TrainingSetsViewModel(
         val newSlot = DaySlot(id = nextId++, day = day, types = prefill)
 
         val updated = displayedSlots.value + newSlot
-        savedStateHandle[KEY_SLOTS] = updated
-        persistSlots(updated)
+        _displayedSlots.value = updated
     }
 
     fun setSlotTypes(slotId: Long, types: List<String>) {
@@ -132,15 +131,44 @@ class TrainingSetsViewModel(
         val updated = displayedSlots.value.map { s ->
             if (s.id == slotId) s.copy(types = normalized) else s
         }
-        savedStateHandle[KEY_SLOTS] = updated
-        persistSlots(updated)
+        _displayedSlots.value = updated
     }
 
     fun removeSlot(slotId: Long) {
         val updated = displayedSlots.value.filterNot { it.id == slotId }
-        savedStateHandle[KEY_SLOTS] = updated
-        persistSlots(updated)
+        _displayedSlots.value = updated
     }
+    fun commitChanges() {
+        viewModelScope.launch {
+            val uid = userRepository.currentUserId() ?: return@launch
+            val slots = displayedSlots.value
+            userRepository.setTrainingSlots(uid, slots)
+            _committedSlots.value = slots
+        }
+    }
+
+
+    fun replaceBaseDays(newDays: Set<DayOfWeek>) {
+
+        val ordered = weekOrder().filter { it in newDays }
+
+        val newSlots = ordered.mapIndexed { index, day ->
+            DaySlot(
+                id = index + 1L,
+                day = day,
+                types = emptyList()
+            )
+        }
+
+        _displayedSlots.value = newSlots
+        cursor = 0
+        nextId = newSlots.size + 1L
+
+        persistSlots(newSlots)
+        _committedSlots.value = newSlots
+    }
+
+
 
     private fun persistSlots(slots: List<DaySlot>) {
         viewModelScope.launch {
@@ -148,6 +176,8 @@ class TrainingSetsViewModel(
             userRepository.setTrainingSlots(uid, slots)
         }
     }
+
+
 
     fun setDayDefaults(day: DayOfWeek, types: List<String>) {
         val valid = categories.value.toSet()
@@ -165,7 +195,7 @@ class TrainingSetsViewModel(
         if (allowed.isEmpty()) return
         val filtered = displayedSlots.value.filter { it.day in allowed }
         if (filtered.size != displayedSlots.value.size) {
-            savedStateHandle[KEY_SLOTS] = filtered
+            _displayedSlots.value = filtered
             persistSlots(filtered)
         }
         cursor = if (baseDays.value.isNotEmpty()) cursor % baseDays.value.size else 0

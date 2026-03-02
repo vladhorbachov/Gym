@@ -2,10 +2,12 @@ package com.gymshark.ui.home
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.gymshark.R
@@ -22,8 +24,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
-    private var currentItems: MutableList<ExerciseListItem> = mutableListOf()
-
+    private var lastSelectedTypes: List<String> = emptyList()
     private val recommendedAdapter by lazy {
         RecommendedExercisesAdapter { exercise ->
         }
@@ -37,20 +38,30 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         binding.rvExercises.adapter = recommendedAdapter
 
         attachTouchHelper()
+        binding.todayCard.root.setOnClickListener {
 
-        binding.cvCalendar.onDayClick = { _, _, types ->
+            if (trainingVm.draft.value.exercises.isEmpty()) return@setOnClickListener
+
+            findNavController().navigate(R.id.action_navHome_to_train_graph)
+        }
+
+
+        binding.cvCalendar.onDayClick = label@{ _, _, types ->
+            if (types == lastSelectedTypes) return@label
+            lastSelectedTypes = types
             trainingVm.loadSuggestedExercises(types)
         }
+
+
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
 
                 launch {
-                    trainingVm.trainsFlow.collect { trains ->
-                        binding.cvCalendar.setTrains(trains)
+                    trainingVm.suggestedExercisesFlow.collect { list ->
+                        trainingVm.setExercisesFromSuggested(list)
                     }
                 }
-
                 launch {
                     trainingVm.trainingDaysFlow.collect { calendarDays ->
                         binding.cvCalendar.setTrainingDays(calendarDays)
@@ -64,23 +75,64 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 }
 
                 launch {
-                    trainingVm.suggestedExercisesFlow.collect { exercises ->
-                        val sectionedItems: List<ExerciseListItem> =
-                            exercises
+                    trainingVm.draft.collect { draft ->
+
+                        val sectionedItems =
+                            draft.exercises
                                 .groupBy { it.baseCategory }
                                 .flatMap { (category, list) ->
                                     listOf(ExerciseListItem.Header(category)) +
-                                            list.map { ExerciseListItem.ExerciseRow(it) }
+                                            list.map { draftExercise ->
+                                                ExerciseListItem.ExerciseRow(
+                                                    com.gymshark.data.db.entity.ExercisesEntity(
+                                                        id = draftExercise.exerciseId.toInt(),
+                                                        name = draftExercise.title,
+                                                        baseCategory = draftExercise.baseCategory,
+                                                        subCategory = "",
+                                                        difficulty = 1
+                                                    )
+                                                )
+                                            }
                                 }
+                        updateTodayCard(draft.exercises.size)
+                        binding.rvExercises.isVisible = draft.exercises.isNotEmpty()
 
-                        currentItems = sectionedItems.toMutableList()
-                        recommendedAdapter.submitList(currentItems.toList())
+                        recommendedAdapter.submitList(sectionedItems)
+                    }
+                }
+
+                launch {
+                    trainingVm.trainsFlow.collect { trains ->
+                        binding.cvCalendar.setTrains(trains)
+                    }
+                }
+                launch {
+                    trainingVm.completedExerciseIdsFlow.collect { ids ->
+                        recommendedAdapter.setCompletedIds(ids)
                     }
                 }
             }
         }
 
     }
+
+    private fun updateTodayCard(exCount: Int) {
+        binding.todayCard.root.alpha = if (exCount > 0) 1f else 0.5f
+        binding.todayCard.root.isClickable = exCount > 0
+
+        val title = if (lastSelectedTypes.isEmpty())
+            "Rest day"
+        else
+            lastSelectedTypes.joinToString(", ")
+                .replaceFirstChar { it.uppercase() }
+
+        binding.todayCard.tvTrainingName.text = title
+
+        binding.todayCard.tvMeta.text =
+            if (exCount == 0) "No exercises"
+            else "$exCount exercises"
+    }
+
 
     private fun attachTouchHelper() {
         val callback = object : androidx.recyclerview.widget.ItemTouchHelper.Callback() {
@@ -89,14 +141,14 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             override fun isItemViewSwipeEnabled() = true
 
             override fun getMovementFlags(
-                recyclerView: androidx.recyclerview.widget.RecyclerView,
-                viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder
             ): Int {
                 val pos = viewHolder.bindingAdapterPosition
                 if (pos == RecyclerView.NO_POSITION) return 0
 
                 return when (recommendedAdapter.getItemViewType(pos)) {
-                    0 -> makeMovementFlags(0, 0) // Header: нічого
+                    0 -> makeMovementFlags(0, 0)
                     else -> makeMovementFlags(
                         androidx.recyclerview.widget.ItemTouchHelper.UP or
                                 androidx.recyclerview.widget.ItemTouchHelper.DOWN,
@@ -110,62 +162,58 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 viewHolder: RecyclerView.ViewHolder,
                 target: RecyclerView.ViewHolder
             ): Boolean {
-                val from = viewHolder.bindingAdapterPosition
-                val to = target.bindingAdapterPosition
-                if (from == RecyclerView.NO_POSITION || to == RecyclerView.NO_POSITION) return false
 
-                if (recommendedAdapter.getItemViewType(to) == 0) return false
+                val fromPos = viewHolder.bindingAdapterPosition
+                val toPos = target.bindingAdapterPosition
 
-                val fromHeader = headerIndexAbove(from)
-                val toHeader = headerIndexAbove(to)
-                if (fromHeader != toHeader) return false
+                if (fromPos == RecyclerView.NO_POSITION ||
+                    toPos == RecyclerView.NO_POSITION) return false
 
-                java.util.Collections.swap(currentItems, from, to)
-                recommendedAdapter.submitList(currentItems.toList())
+                if (recommendedAdapter.getItemViewType(toPos) == 0) return false
+
+                val fromExerciseIndex = getExerciseIndex(fromPos)
+                val toExerciseIndex = getExerciseIndex(toPos)
+
+                if (fromExerciseIndex == -1 || toExerciseIndex == -1) return false
+
+                trainingVm.reorderExercises(fromExerciseIndex, toExerciseIndex)
+
                 return true
             }
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+
                 val pos = viewHolder.bindingAdapterPosition
                 if (pos == RecyclerView.NO_POSITION) return
 
-                if (recommendedAdapter.getItemViewType(pos) == 0) {
-                    recommendedAdapter.submitList(currentItems.toList())
-                    return
-                }
+                if (recommendedAdapter.getItemViewType(pos) == 0) return
 
-                currentItems.removeAt(pos)
+                val exerciseIndex = getExerciseIndex(pos)
+                if (exerciseIndex == -1) return
 
-                removeLonelyHeaders()
-
-                recommendedAdapter.submitList(currentItems.toList())
+                trainingVm.removeExerciseAt(exerciseIndex)
             }
 
-            private fun headerIndexAbove(position: Int): Int {
-                for (i in position downTo 0) {
-                    if (currentItems[i] is ExerciseListItem.Header) return i
+            private fun getExerciseIndex(adapterPosition: Int): Int {
+
+                val currentList = recommendedAdapter.currentList
+
+                var exerciseIndex = -1
+                var counter = -1
+
+                currentList.forEachIndexed { index, item ->
+                    if (item is ExerciseListItem.ExerciseRow) {
+                        counter++
+                    }
+                    if (index == adapterPosition) {
+                        exerciseIndex = counter
+                    }
                 }
-                return -1
+
+                return exerciseIndex
             }
 
-            private fun removeLonelyHeaders() {
-                val toRemove = mutableListOf<Int>()
-                var i = 0
-                while (i < currentItems.size) {
-                    if (currentItems[i] is ExerciseListItem.Header) {
-                        val headerIdx = i
-                        var hasRows = false
-                        var j = i + 1
-                        while (j < currentItems.size && currentItems[j] !is ExerciseListItem.Header) {
-                            if (currentItems[j] is ExerciseListItem.ExerciseRow) hasRows = true
-                            j++
-                        }
-                        if (!hasRows) toRemove.add(headerIdx)
-                        i = j
-                    } else i++
-                }
-                toRemove.asReversed().forEach { currentItems.removeAt(it) }
-            }
+
         }
 
         androidx.recyclerview.widget.ItemTouchHelper(callback).attachToRecyclerView(binding.rvExercises)

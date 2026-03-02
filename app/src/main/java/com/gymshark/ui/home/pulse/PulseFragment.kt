@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.gymshark.R
 import com.gymshark.databinding.FragmentPulseBinding
@@ -63,7 +64,12 @@ class PulseFragment : Fragment(R.layout.fragment_pulse) {
         )
 
         findNavController().navigate(
-            R.id.action_pulseFragment_to_navStats
+            R.id.navStats,
+            null,
+            NavOptions.Builder()
+                .setPopUpTo(R.id.train_graph, true)
+                .setLaunchSingleTop(true)
+                .build()
         )
     }
 

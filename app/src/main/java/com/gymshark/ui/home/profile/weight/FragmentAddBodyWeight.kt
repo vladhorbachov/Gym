@@ -69,7 +69,7 @@ class FragmentAddBodyWeight : BottomSheetDialogFragment() {
             ?.toFloatOrNull()
 
         if (weight != null && weight in 20f..300f) {
-            viewModel.saveBodyWeight(weight)
+            viewModel.updateWeight(weight)
             dismiss()
         } else {
             binding.etWeight.error = "Invalid weight"

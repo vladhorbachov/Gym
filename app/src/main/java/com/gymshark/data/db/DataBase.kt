@@ -39,7 +39,7 @@ import com.gymshark.data.db.entity.UserEntity
         BodyWeightEntity::class,
         MealInfoEntity::class
     ],
-    version = 8,
+    version = 9,
     exportSchema = false
 )
 

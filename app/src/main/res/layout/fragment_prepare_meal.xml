@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <!-- TOP FORM BLOCK -->
+
+    <!-- Meal type selector -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilMealType"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Meal type"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <AutoCompleteTextView
+            android:id="@+id/actMealType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="none"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Product name -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilProductName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Product name"
+        app:endIconMode="custom"
+        app:endIconDrawable="@drawable/ic_scan"
+        app:layout_constraintTop_toBottomOf="@id/tilMealType"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp">
+
+        <AutoCompleteTextView
+            android:id="@+id/actProductName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Calories -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilCalories"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Calories (kcal)"
+        app:layout_constraintTop_toBottomOf="@id/tilProductName"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etCalories"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- MACROS ROW -->
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilProtein"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Protein (g)"
+        app:layout_constraintTop_toBottomOf="@id/tilCalories"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/tilFat"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etProtein"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilFat"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Fat (g)"
+        app:layout_constraintTop_toBottomOf="@id/tilCalories"
+        app:layout_constraintStart_toEndOf="@id/tilProtein"
+        app:layout_constraintEnd_toStartOf="@id/tilCarbs"
+        android:layout_marginTop="16dp"
+        android:layout_marginHorizontal="8dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etFat"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilCarbs"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Carbs (g)"
+        app:layout_constraintTop_toBottomOf="@id/tilCalories"
+        app:layout_constraintStart_toEndOf="@id/tilFat"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="8dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etCarbs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- SAVE BUTTON -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnSaveMeal"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:text="Save meal"
+        android:enabled="false"
+        app:layout_constraintTop_toBottomOf="@id/tilCarbs"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp"/>
+
+    <!-- TODAY HISTORY TITLE -->
+    <TextView
+        android:id="@+id/tvTodayTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Today's meals"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        app:layout_constraintTop_toBottomOf="@id/btnSaveMeal"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="24dp"/>
+
+    <!-- HISTORY BUTTON -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnOpenHistory"
+        style="@style/Widget.Material3.Button.TextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="History"
+        app:layout_constraintBaseline_toBaselineOf="@id/tvTodayTitle"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- TODAY MEALS LIST -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvTodayMeals"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:paddingBottom="16dp"
+        app:layout_constraintTop_toBottomOf="@id/tvTodayTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

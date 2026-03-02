@@ -24,7 +24,7 @@ class HomeViewModel(
     fun saveUser(user: UserEntity) {
         viewModelScope.launch {
             repo.upsert(user)
-            repo.setCurrentUserId(user.userId)
+            repo.setCurrentUserId()
         }
     }
 }

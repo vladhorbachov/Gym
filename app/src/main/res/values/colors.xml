@@ -2,4 +2,47 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <color name="chip_bg">#F4F1FA</color>
+    <color name="chip_selected">#6E5ACD</color>
+    <color name="chip_text">#1C1B1F</color>
+
+
+    <color name="bgMain">#0F0E17</color>
+    <color name="surfaceCard">#1A1824</color>
+    <color name="surfaceElevated">#211F2D</color>
+
+    <color name="primaryPurple">#8B5CF6</color>
+    <color name="primaryPurpleGlow">#A78BFA</color>
+
+    <color name="textPrimary">#F4F4F5</color>
+    <color name="textSecondary">#B8B5C6</color>
+    <color name="textDisabled">#66FFFFFF</color>
+
+    <color name="strokeSubtle">#2A2738</color>
+    <color name="md_theme_background">#0F0F17</color>
+    <color name="md_theme_surface">#171726</color>
+    <color name="md_theme_surfaceContainer">#1E1E30</color>
+
+    <color name="md_theme_primary">#7C4DFF</color>
+    <color name="md_theme_onPrimary">#FFFFFF</color>
+
+    <color name="md_theme_onBackground">#F2F2F7</color>
+    <color name="md_theme_onSurface">#E6E6FA</color>
+
+    <color name="bg_primary">#0F0D17</color>
+    <color name="bg_surface">#161425</color>
+    <color name="bg_surface_2">#1D1A2E</color>
+
+    <color name="accent_700">#6A00F4</color>
+    <color name="accent_500">#9A3BFF</color>
+
+    <color name="emerald_700">#008F5A</color>
+    <color name="emerald_500">#00C878</color>
+
+    <color name="text_primary">#F1F0FF</color>
+    <color name="text_secondary">#A8A3C7</color>
+
+    <color name="danger">#FF5A6A</color>
 </resources>
+

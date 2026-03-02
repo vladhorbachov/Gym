@@ -3,11 +3,13 @@ package com.gymshark.utils.view.calendarview.adapter
 import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.gymshark.domain.models.TrainingCalendarDay
+import com.gymshark.R
 import com.gymshark.databinding.ItemDayBinding
+import com.gymshark.domain.models.TrainingCalendarDay
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.TextStyle
@@ -39,6 +41,7 @@ class DaysAdapter(
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: TrainingCalendarDay) {
+
             val locale = Locale.getDefault()
             binding.dayNumber.text = item.date.dayOfMonth.toString()
             binding.dayName.text = item.date.dayOfWeek.getDisplayName(TextStyle.SHORT, locale)
@@ -46,37 +49,62 @@ class DaysAdapter(
             val isToday = item.date == today
             val hasCompletedTrain = item.train != null
             val isPlanned = plannedDays.contains(item.date.dayOfWeek)
-
             val typesForDay = typesProvider(item.date)
 
             when {
-                isToday -> setBgText("#2196F3", Color.WHITE, Color.WHITE)
-                hasCompletedTrain -> setBgText("#4CAF50", Color.WHITE, Color.WHITE)
-                isPlanned && typesForDay.isNotEmpty() -> setBgText(
-                    "#9C27B0",
-                    Color.WHITE,
-                    Color.WHITE
-                )
-
-                else -> setBgTextTransparent()
+                isToday -> applyToday()
+                hasCompletedTrain -> applyCompleted()
+                isPlanned && typesForDay.isNotEmpty() -> applyPlanned()
+                else -> applyDefault()
             }
 
             binding.root.setOnClickListener {
-                onClick(item, typesForDay)
+
+                it.animate()
+                    .scaleX(0.95f)
+                    .scaleY(0.95f)
+                    .setDuration(70)
+                    .withEndAction {
+                        it.animate()
+                            .scaleX(1f)
+                            .scaleY(1f)
+                            .setDuration(180)
+                            .start()
+
+                        onClick(item, typesForDay)
+                    }
+                    .start()
             }
+
         }
 
-        private fun setBgText(bgColorHex: String, numColor: Int, nameColor: Int) {
-            binding.root.setBackgroundColor(Color.parseColor(bgColorHex))
-            binding.dayNumber.setTextColor(numColor)
-            binding.dayName.setTextColor(nameColor)
+        private fun applyToday() {
+            binding.root.setBackgroundResource(R.drawable.day_today)
+            binding.dayNumber.setTextColor(getColor(R.color.text_primary))
+            binding.dayName.setTextColor(getColor(R.color.text_primary))
         }
 
-        private fun setBgTextTransparent() {
-            binding.root.setBackgroundColor(Color.TRANSPARENT)
-            binding.dayNumber.setTextColor(Color.BLACK)
-            binding.dayName.setTextColor(Color.GRAY)
+        private fun applyCompleted() {
+            binding.root.setBackgroundResource(R.drawable.day_completed)
+            binding.dayNumber.setTextColor(getColor(R.color.text_primary))
+            binding.dayName.setTextColor(getColor(R.color.text_primary))
         }
+
+        private fun applyPlanned() {
+            binding.root.setBackgroundResource(R.drawable.day_planned)
+            binding.dayNumber.setTextColor(getColor(R.color.text_primary))
+            binding.dayName.setTextColor(getColor(R.color.text_secondary))
+        }
+
+        private fun applyDefault() {
+            binding.root.setBackgroundResource(R.drawable.day_default)
+            binding.dayNumber.setTextColor(getColor(R.color.text_secondary))
+            binding.dayName.setTextColor(getColor(R.color.text_secondary))
+        }
+
+        private fun getColor(id: Int) =
+            ContextCompat.getColor(binding.root.context, id)
+
     }
 
     class DiffCallback : DiffUtil.ItemCallback<TrainingCalendarDay>() {

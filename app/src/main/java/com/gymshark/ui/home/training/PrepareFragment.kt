@@ -14,7 +14,7 @@ class PrepareFragment : Fragment(R.layout.fragment_prepare_train) {
     private var _binding: FragmentPrepareTrainBinding? = null
     private val binding get() = _binding!!
 
-    private val statVm: TrainingStatViewModel by navGraphViewModels(R.id.home_graph)
+    private val statVm: TrainingStatViewModel by navGraphViewModels(R.id.train_graph)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, s: Bundle?

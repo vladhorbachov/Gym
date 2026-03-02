@@ -47,7 +47,9 @@
         <activity
             android:name=".ui.home.HomeActivity"
             android:exported="true"
-            android:launchMode="singleTop" />
+            android:launchMode="singleTop"
+            android:theme="@style/Theme.Gym.Profile" />
+
 
         <meta-data
             android:name="com.google.mlkit.vision.DEPENDENCIES"

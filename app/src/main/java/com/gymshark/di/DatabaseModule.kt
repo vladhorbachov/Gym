@@ -33,4 +33,7 @@ val databaseModule = module {
     single {
         get<DataBase>().mealInfoDao()
     }
+    single {
+        get<DataBase>().foodDao()
+    }
 }

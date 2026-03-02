@@ -50,6 +50,6 @@ val repositoryModule = module {
             get()
         )
     }
-    single<FoodRepository> { FoodRepositoryImpl(get()) }
+    single<FoodRepository> { FoodRepositoryImpl(get(),get()) }
     single<MealInfoRepository> { MealInfoRepositoryImpl(get()) }
 }

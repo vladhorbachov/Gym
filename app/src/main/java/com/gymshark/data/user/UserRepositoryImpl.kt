@@ -3,13 +3,14 @@ package com.gymshark.data.user
 import com.gymshark.data.db.dao.UserDao
 import com.gymshark.data.db.entity.UserEntity
 import com.gymshark.domain.models.DaySlot
+import com.gymshark.domain.models.toDaysSlot
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import java.time.DayOfWeek
-
+private const val KEY_USER_ID = "1"
 class UserRepositoryImpl(
     private val userDao: UserDao,
     private val currentUserStore: CurrentUserStore
@@ -60,5 +61,9 @@ class UserRepositoryImpl(
             }
             .distinctUntilChanged()
 
-
+    override suspend fun savePlannedDays(days: Set<DayOfWeek>) {
+        val userId = currentUserId() ?: return
+        val slots = days.toList().toDaysSlot()
+        setTrainingSlots(userId, slots)
+    }
 }

@@ -28,4 +28,5 @@ interface TrainingRepository {
     fun observeMoodTimeline(): Flow<List<MoodRow>>
 
     suspend fun seedExercisesIfEmpty()
+    fun observeCompletedExerciseIdsForToday(): Flow<Set<Int>>
 }

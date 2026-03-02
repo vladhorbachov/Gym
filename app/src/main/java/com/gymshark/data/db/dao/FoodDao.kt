@@ -24,4 +24,7 @@ interface FoodDao {
 
     @Query("SELECT * FROM Food")
     suspend fun getAll(): List<FoodEntity>
+
+    @Query("SELECT * FROM Food WHERE name = :name LIMIT 1")
+    suspend fun getByName(name: String): FoodEntity?
 }

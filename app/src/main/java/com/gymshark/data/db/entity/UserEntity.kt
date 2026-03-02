@@ -10,7 +10,7 @@ import com.gymshark.domain.models.Series
 @Entity(tableName = "User")
 data class UserEntity(
     @PrimaryKey(autoGenerate = false)
-    var userId: String,
+    var userId: String = "1",
     var name: String,
     var age: Int,
     var sex: Boolean,

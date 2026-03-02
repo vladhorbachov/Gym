@@ -85,5 +85,11 @@ interface TrainingsDao {
     ORDER BY time DESC
 """)
     fun observeMoodTimeline(): Flow<List<MoodRow>>
-
+    @Query("""
+    SELECT DISTINCT te.exerciseId
+    FROM TrainingExercises te
+    INNER JOIN Trainings t ON t.id = te.trainingId
+    WHERE date(t.time / 1000, 'unixepoch') = date(:todayMillis / 1000, 'unixepoch')
+""")
+    fun observeCompletedExerciseIdsForDay(todayMillis: Long): Flow<List<Int>>
 }

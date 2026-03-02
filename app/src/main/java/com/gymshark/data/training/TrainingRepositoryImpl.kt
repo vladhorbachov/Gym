@@ -19,6 +19,7 @@ import com.gymshark.ui.home.training.drafts.TrainingDraft
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import java.time.LocalDate
 import java.time.ZoneId
 
@@ -129,6 +130,10 @@ class TrainingRepositoryImpl(
             duration = 0L
         )
     }
-
+    override fun observeCompletedExerciseIdsForToday(): Flow<Set<Int>> {
+        val todayMillis = System.currentTimeMillis()
+        return trainingsDao.observeCompletedExerciseIdsForDay(todayMillis)
+            .map { it.toSet() }
+    }
 
 }

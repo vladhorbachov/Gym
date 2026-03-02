@@ -10,6 +10,7 @@ import com.gymshark.domain.models.Train
 import com.gymshark.domain.models.TrainingCalendarDay
 import com.gymshark.databinding.ViewCalendarBinding
 import com.gymshark.utils.view.calendarview.adapter.DaysAdapter
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
@@ -31,7 +32,9 @@ class CalendarView @JvmOverloads constructor(
     private var currentMonth: YearMonth = YearMonth.now()
     private var trains: List<Train> = emptyList()
     private var plannedDays: Set<java.time.DayOfWeek> = emptySet()
-
+    private var todayDispatched = false
+    private var isMonthAnimating = false
+    private var lastAutoSelectKey: String? = null
     var onDayClick: ((LocalDate, Train?, List<String>) -> Unit)? = null
 
     init {
@@ -41,30 +44,74 @@ class CalendarView @JvmOverloads constructor(
         binding.daysRecycler.adapter = adapter
 
         binding.arrowLeft.setOnClickListener {
+            if (isMonthAnimating) return@setOnClickListener
             currentMonth = currentMonth.minusMonths(1)
+            lastAutoSelectKey = null
             updateMonth()
         }
+
         binding.arrowRight.setOnClickListener {
+            if (isMonthAnimating) return@setOnClickListener
             currentMonth = currentMonth.plusMonths(1)
+            lastAutoSelectKey = null
             updateMonth()
         }
+
+
         updateMonth()
     }
 
     fun setTrains(list: List<Train>) {
         trains = list
         updateMonth()
+        tryAutoSelectIfReady()
     }
 
-    fun setTrainingDays(days: Set<java.time.DayOfWeek>) {
+    fun setTrainingDays(days: Set<DayOfWeek>) {
         plannedDays = days
         adapter.plannedDays = days
         updateMonth()
+        tryAutoSelectIfReady()
     }
 
     fun setTrainingSlots(slots: List<DaySlot>) {
         trainingSlots = slots
         updateMonth()
+        tryAutoSelectIfReady()
+    }
+    private fun tryAutoSelectIfReady() {
+        val today = LocalDate.now()
+
+        if (today.year != currentMonth.year || today.month != currentMonth.month) return
+
+        if (trainingSlots.isEmpty()) return
+        if (plannedDays.isEmpty()) return
+
+        val types = typesForDate(today)
+        if (types.isEmpty()) return
+
+        val key = "${today}|${types.joinToString(",")}|slots=${trainingSlots.size}|planned=${plannedDays.size}"
+        if (lastAutoSelectKey == key) return
+        lastAutoSelectKey = key
+
+        post {
+            onDayClick?.invoke(today, trains.find { it.localDate == today }, types)
+            animateTodayCell(today)
+        }
+    }
+
+    private fun animateTodayCell(today: LocalDate) {
+        binding.daysRecycler.postDelayed({
+            val pos = today.dayOfMonth - 1
+            val vh = binding.daysRecycler.findViewHolderForAdapterPosition(pos) ?: return@postDelayed
+            vh.itemView.animate()
+                .scaleX(1.06f).scaleY(1.06f)
+                .setDuration(300)
+                .withEndAction {
+                    vh.itemView.animate().scaleX(1f).scaleY(1f).setDuration(250).start()
+                }
+                .start()
+        }, 80)
     }
 
     private fun updateMonth() {
@@ -81,14 +128,77 @@ class CalendarView @JvmOverloads constructor(
                 add(TrainingCalendarDay(date = date, train = train))
             }
         }
-        adapter.submitList(days) {
-            val today = LocalDate.now()
-            if (today.year == currentMonth.year && today.month == currentMonth.month) {
-                val pos = today.dayOfMonth - 1
-                binding.daysRecycler.post { binding.daysRecycler.scrollToPosition(pos) }
+        isMonthAnimating = true
+
+        binding.daysRecycler.animate()
+            .alpha(0f)
+            .translationX(80f)
+            .setDuration(140)
+            .withEndAction {
+
+                adapter.submitList(days) {
+
+                    binding.daysRecycler.translationX = -80f
+
+                    binding.daysRecycler.animate()
+                        .alpha(1f)
+                        .translationX(0f)
+                        .setDuration(180)
+                        .withEndAction {
+                            isMonthAnimating = false
+                        }
+                        .start()
+
+                    val today = LocalDate.now()
+                    if (today.year == currentMonth.year && today.month == currentMonth.month) {
+                        val pos = today.dayOfMonth - 1
+                        binding.daysRecycler.post { binding.daysRecycler.scrollToPosition(pos) }
+                    }
+                }
+
+
             }
-        }
+            .start()
+
+
+
     }
+
+    private fun trySelectToday() {
+
+        if (todayDispatched) return
+        if (trainingSlots.isEmpty()) return
+        if (plannedDays.isEmpty()) return
+
+        val today = LocalDate.now()
+        val types = typesForDate(today)
+
+        if (types.isEmpty()) return
+
+        todayDispatched = true
+        post { onDayClick?.invoke(today, trains.find { it.localDate == today }, types) }
+        binding.daysRecycler.postDelayed({
+            val pos = today.dayOfMonth - 1
+            val vh = binding.daysRecycler.findViewHolderForAdapterPosition(pos)
+
+
+            vh?.itemView?.animate()
+                ?.scaleX(1.06f)
+                ?.scaleY(1.06f)
+                ?.setDuration(300)
+                ?.withEndAction {
+                    vh.itemView.animate()
+                        .scaleX(1f)
+                        .scaleY(1f)
+                        .setDuration(250)
+                        .start()
+                }
+                ?.start()
+        }, 80)
+
+
+    }
+
 
     private fun typesForDate(date: LocalDate): List<String> {
         val dayOfWeek = date.dayOfWeek

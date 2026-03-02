@@ -15,7 +15,6 @@ data class MealInfoEntity(
     val mealType: String,
 
     val productName: String?,
-    val brands: String?,
 
     val energyKcal100g: Float?,
     val proteins100g: Float?,
@@ -28,7 +27,6 @@ fun MealInfo.toEntity(): MealInfoEntity =
         date = date,
         mealType = mealType,
         productName = product.productName,
-        brands = product.brands,
         energyKcal100g = product.nutriments?.energyKcal100g,
         proteins100g = product.nutriments?.proteins100g,
         fat100g = product.nutriments?.fat100g,
@@ -44,7 +42,6 @@ fun MealInfoEntity.toDomain(): MealInfo =
         mealType = mealType,
         product = Product(
             productName = productName,
-            brands = brands,
             nutriments = Nutriments(
                 energyKcal100g = energyKcal100g,
                 proteins100g = proteins100g,

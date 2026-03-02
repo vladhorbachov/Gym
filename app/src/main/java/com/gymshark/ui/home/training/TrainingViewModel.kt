@@ -5,10 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.gymshark.data.db.entity.ExercisesEntity
 import com.gymshark.data.db.entity.TrainingsEntity
 import com.gymshark.data.exercises.ExerciseRepository
-import com.gymshark.domain.models.DaySlot
-import com.gymshark.domain.models.Train
 import com.gymshark.data.training.TrainingRepository
 import com.gymshark.data.user.UserRepository
+import com.gymshark.domain.models.DaySlot
+import com.gymshark.domain.models.Train
 import com.gymshark.ui.home.training.drafts.ExerciseDraft
 import com.gymshark.ui.home.training.drafts.SetEntry
 import com.gymshark.ui.home.training.drafts.TrainingDraft
@@ -42,6 +42,12 @@ class TrainingViewModel(
     private val _draft = MutableStateFlow(TrainingDraft())
     val draft: StateFlow<TrainingDraft> = _draft.asStateFlow()
 
+    val completedExerciseIdsFlow: StateFlow<Set<Int>> =
+        trainingRepository
+            .observeCompletedExerciseIdsForToday()
+            .stateIn(viewModelScope, SharingStarted.Lazily, emptySet())
+
+
     private val _suggestedExercisesFlow =
         MutableStateFlow<List<ExercisesEntity>>(emptyList())
     val suggestedExercisesFlow: StateFlow<List<ExercisesEntity>> =
@@ -67,6 +73,25 @@ class TrainingViewModel(
         Triple(completedTrains, daySlots, plannedDays)
     }
 
+    fun reorderExercises(from: Int, to: Int) {
+        _draft.update { cur ->
+            val list = cur.exercises.toMutableList()
+            if (from !in list.indices || to !in list.indices) return@update cur
+            val item = list.removeAt(from)
+            list.add(to, item)
+            cur.copy(exercises = list)
+        }
+    }
+
+    fun removeExerciseAt(index: Int) {
+        _draft.update { cur ->
+            if (index !in cur.exercises.indices) return@update cur
+            val list = cur.exercises.toMutableList()
+            list.removeAt(index)
+            cur.copy(exercises = list)
+        }
+    }
+
     fun setExercisesFromSuggested(list: List<ExercisesEntity>) {
         _draft.update { cur ->
             val oldById = cur.exercises.associateBy { it.exerciseId }
@@ -78,6 +103,7 @@ class TrainingViewModel(
                     ?: ExerciseDraft(
                         exerciseId = id,
                         title = e.name,
+                        baseCategory = e.baseCategory,
                         sets = listOf(SetEntry())
                     )
             }
