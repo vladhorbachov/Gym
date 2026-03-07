@@ -2,36 +2,70 @@
 <navigation
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/root_graph"
-    app:startDestination="@id/home_tab_graph">
+    android:id="@+id/home_graph"
+    app:startDestination="@id/navHome">
 
-    <include app:graph="@navigation/home_tab_graph"/>
+
+    <fragment
+        android:id="@+id/navHome"
+        android:name="com.gymshark.ui.home.HomeFragment">
+
+        <action
+            android:id="@+id/action_navHome_to_prepareFragment"
+            app:destination="@id/prepareFragment" />
+
+    </fragment>
 
     <fragment
         android:id="@+id/navStats"
         android:name="com.gymshark.ui.home.stats.StatsFragment"
-        android:label="Stats">
-        <action
-            android:id="@+id/action_navStats_to_home_tab_graph"
-            app:destination="@id/home_tab_graph" />
-    </fragment>
+        android:label="Stats" />
 
     <fragment
         android:id="@+id/navMeal"
         android:name="com.gymshark.ui.home.meal.MealFragment"
-        android:label="Meal"/>
+        android:label="Meal" />
 
     <fragment
         android:id="@+id/navProfile"
         android:name="com.gymshark.ui.home.profile.ProfileFragment"
-        android:label="Profile"/>
+        android:label="Profile" />
+
     <fragment
         android:id="@+id/prepareMealFragment"
-        android:name="com.gymshark.ui.home.meal.PrepareMealFragment"
-        android:label="PrepareMealFragment" >
+        android:name="com.gymshark.ui.home.meal.PrepareMealFragment" />
+
+
+    <fragment
+        android:id="@+id/prepareFragment"
+        android:name="com.gymshark.ui.home.training.PrepareFragment">
+
         <action
-            android:id="@+id/action_prepareMealFragment_to_navMeal"
-            app:destination="@id/navMeal" />
+            android:id="@+id/action_prepareFragment_to_trainingFragment"
+            app:destination="@id/trainingFragment" />
+
     </fragment>
+
+    <fragment
+        android:id="@+id/trainingFragment"
+        android:name="com.gymshark.ui.home.training.TrainingFragment">
+
+        <action
+            android:id="@+id/action_training_to_finish"
+            app:destination="@id/finishFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/finishFragment"
+        android:name="com.gymshark.ui.home.training.finish.FinishFragment">
+
+        <action
+            android:id="@+id/action_finish_to_pulse"
+            app:destination="@id/pulseFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/pulseFragment"
+        android:name="com.gymshark.ui.home.pulse.PulseFragment" />
 
 </navigation>

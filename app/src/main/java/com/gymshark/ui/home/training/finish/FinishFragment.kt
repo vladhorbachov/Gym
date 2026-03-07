@@ -27,9 +27,7 @@ class FinishFragment : Fragment(R.layout.fragment_finish) {
             .setOnClickListener { finishVm.selectMood(Mood.AMAZING) }
 
         view.findViewById<View>(R.id.btnContinue).setOnClickListener {
-            findNavController().navigate(
-                R.id.action_finishFragment_to_pulseFragment
-            )
+            findNavController().navigate(R.id.pulseFragment)
         }
     }
 }

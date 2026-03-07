@@ -6,15 +6,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.navGraphViewModels
 import com.gymshark.R
 import com.gymshark.databinding.FragmentPrepareTrainBinding
+import org.koin.androidx.viewmodel.ext.android.activityViewModel
 
 class PrepareFragment : Fragment(R.layout.fragment_prepare_train) {
     private var _binding: FragmentPrepareTrainBinding? = null
     private val binding get() = _binding!!
 
-    private val statVm: TrainingStatViewModel by navGraphViewModels(R.id.train_graph)
+    private val statVm: TrainingStatViewModel by activityViewModel()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, s: Bundle?
@@ -28,9 +28,8 @@ class PrepareFragment : Fragment(R.layout.fragment_prepare_train) {
 
         binding.btnStartTrain.setOnClickListener {
             statVm.start()
-            findNavController().navigate(R.id.action_prepareFragment_to_trainingFragment)
+            findNavController().navigate(R.id.trainingFragment)
         }
-
     }
 
     override fun onDestroyView() {

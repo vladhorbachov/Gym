@@ -55,9 +55,7 @@ class TrainingFragment : Fragment(R.layout.fragment_training) {
 
             btnFinish.setOnClickListener {
                 statVm.stopAndReset()
-                findNavController().navigate(
-                    R.id.action_trainingFragment_to_finishFragment
-                )
+                findNavController().navigate(R.id.finishFragment)
 
             }
         }

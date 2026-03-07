@@ -57,9 +57,7 @@ class PrepareMealFragment : Fragment() {
 
     private fun setupScanButton() {
         binding.tilProductName.setEndIconOnClickListener {
-            findNavController().navigate(
-                R.id.action_prepareMealFragment_to_navMeal
-            )
+            findNavController().navigate(R.id.navMeal)
         }
     }
 

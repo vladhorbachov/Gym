@@ -49,26 +49,23 @@ class PulseFragment : Fragment(R.layout.fragment_pulse) {
     }
 
     private fun saveAndExit() {
-        val finishTime = System.currentTimeMillis()
-        val duration = statVm.elapsedSeconds.value
-        val mood = finishVm.mood.value.name.lowercase()
+        val navController = findNavController()
 
         trainingVm.finishTraining(
             title = "Workout",
-            finishTime = finishTime,
-            durationSec = duration,
-            mood = mood,
+            finishTime = System.currentTimeMillis(),
+            durationSec = statVm.elapsedSeconds.value,
+            mood = finishVm.mood.value.name.lowercase(),
             minBpm = pulseVm.minBpm.value,
             maxBpm = pulseVm.maxBpm.value,
             avgBpm = pulseVm.avgBpm.value
         )
 
-        findNavController().navigate(
+        navController.navigate(
             R.id.navStats,
             null,
             NavOptions.Builder()
-                .setPopUpTo(R.id.train_graph, true)
-                .setLaunchSingleTop(true)
+                .setPopUpTo(R.id.home_graph, true)
                 .build()
         )
     }

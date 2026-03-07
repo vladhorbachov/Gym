@@ -42,7 +42,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
             if (trainingVm.draft.value.exercises.isEmpty()) return@setOnClickListener
 
-            findNavController().navigate(R.id.action_navHome_to_train_graph)
+            findNavController().navigate(
+                R.id.action_navHome_to_prepareFragment
+            )
         }
 
 
