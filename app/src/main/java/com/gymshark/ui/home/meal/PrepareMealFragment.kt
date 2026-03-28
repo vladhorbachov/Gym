@@ -12,7 +12,6 @@ import com.gymshark.R
 import com.gymshark.data.db.entity.FoodEntity
 import com.gymshark.databinding.FragmentPrepareMealBinding
 import com.gymshark.domain.models.MealType
-import com.gymshark.domain.models.Nutriments
 import com.gymshark.domain.models.Product
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -43,12 +42,12 @@ class PrepareMealFragment : Fragment() {
 
                 binding.actProductName.setText(product.productName ?: "")
 
-                val n = product.nutriments
+                val nutriments = product.nutriments
 
-                binding.etCalories.setText(n?.energyKcal100g?.toString() ?: "")
-                binding.etProtein.setText(n?.proteins100g?.toString() ?: "")
-                binding.etFat.setText(n?.fat100g?.toString() ?: "")
-                binding.etCarbs.setText(n?.carbohydrates100g?.toString() ?: "")
+                binding.etCalories.setText(nutriments?.energyKcal100g?.toString() ?: "")
+                binding.etProtein.setText(nutriments?.proteins100g?.toString() ?: "")
+                binding.etFat.setText(nutriments?.fat100g?.toString() ?: "")
+                binding.etCarbs.setText(nutriments?.carbohydrates100g?.toString() ?: "")
             }
 
 
