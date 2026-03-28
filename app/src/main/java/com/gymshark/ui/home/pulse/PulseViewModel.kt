@@ -1,11 +1,17 @@
 package com.gymshark.ui.home.pulse
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.gymshark.domain.repository.pulse.PulseRepository
+import com.gymshark.data.db.entity.PulseEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import kotlin.random.Random
 
-class PulseViewModel : ViewModel() {
+class PulseViewModel(
+    private val pulse: PulseRepository
+) : ViewModel() {
 
     private val _isMeasuring = MutableStateFlow(false)
     val isMeasuring = _isMeasuring.asStateFlow()
@@ -35,5 +41,13 @@ class PulseViewModel : ViewModel() {
         _avgBpm.value = _samples.average().toInt()
 
         _isMeasuring.value = false
+    }
+
+    fun setPulse(pulseEntity: PulseEntity){
+        viewModelScope.launch {
+            runCatching {
+                pulse.insert(pulseEntity)
+            }
+        }
     }
 }

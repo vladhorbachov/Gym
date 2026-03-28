@@ -12,6 +12,8 @@ import com.gymshark.R
 import com.gymshark.data.db.entity.FoodEntity
 import com.gymshark.databinding.FragmentPrepareMealBinding
 import com.gymshark.domain.models.MealType
+import com.gymshark.domain.models.Nutriments
+import com.gymshark.domain.models.Product
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -33,6 +35,22 @@ class PrepareMealFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        findNavController().currentBackStackEntry
+            ?.savedStateHandle
+            ?.getLiveData<Product>("scanned_food")
+            ?.observe(viewLifecycleOwner) { product ->
+
+                binding.actProductName.setText(product.productName ?: "")
+
+                val n = product.nutriments
+
+                binding.etCalories.setText(n?.energyKcal100g?.toString() ?: "")
+                binding.etProtein.setText(n?.proteins100g?.toString() ?: "")
+                binding.etFat.setText(n?.fat100g?.toString() ?: "")
+                binding.etCarbs.setText(n?.carbohydrates100g?.toString() ?: "")
+            }
+
 
         setupMealTypeDropdown()
         setupScanButton()

@@ -44,5 +44,27 @@
     <color name="text_secondary">#A8A3C7</color>
 
     <color name="danger">#FF5A6A</color>
+
+
+    <color name="Purple_Plum">#585CE5</color>
+    <color name="Titan_White">#FAFAFF</color>
+    <color name="White_Lilac">#F0F1F9</color>
+    <color name="Deep_Blue">#0F2851</color>
+    <color name="Light_Grey">#E5E6EE</color>
+    <color name="Violet">#A1A3F6</color>
+    <color name="Water_Light">#C9EBED</color>
+    <color name="Violet_Light">#D0D1FF</color>
+    <color name="Cold_grey">#415371</color>
+    <color name="Dust_Grey">#B0B2C3</color>
+    <color name="Lilac_Petals_Dark">#F0F1F9</color>
+    <color name="Dark_Grey">#898D9E</color>
+    <color name="Turquoise">#58C6CD</color>
+    <color name="Alert">#EF8B8B</color>
+    <color name="Peach_Light">#F5DEDE</color>
+    <color name="Sunny_Yellow">#F2D382</color>
+    <color name="transparent">#00000000</color>
+    <color name="Gray_Blue">#9E9E9E</color>
+    <color name="Deep_Blue_Light">#534bae</color>
+
 </resources>
 

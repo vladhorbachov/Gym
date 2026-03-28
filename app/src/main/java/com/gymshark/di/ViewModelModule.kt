@@ -53,7 +53,7 @@ val viewModelModule = module {
 
     viewModel { FinishViewModel() }
 
-    viewModel { PulseViewModel() }
+    viewModel { PulseViewModel(get()) }
 
     viewModel { StatsViewModel(get()) }
 

@@ -12,6 +12,7 @@ import com.gymshark.data.db.dao.ExercisePrDao
 import com.gymshark.data.db.dao.ExercisesDao
 import com.gymshark.data.db.dao.FoodDao
 import com.gymshark.data.db.dao.MealInfoDao
+import com.gymshark.data.db.dao.PulseDao
 import com.gymshark.data.db.dao.SetsDao
 import com.gymshark.data.db.dao.TrainingsDao
 import com.gymshark.data.db.dao.UserDao
@@ -20,6 +21,7 @@ import com.gymshark.data.db.entity.ExercisePrEntity
 import com.gymshark.data.db.entity.ExercisesEntity
 import com.gymshark.data.db.entity.FoodEntity
 import com.gymshark.data.db.entity.MealInfoEntity
+import com.gymshark.data.db.entity.PulseEntity
 import com.gymshark.data.db.entity.SetsEntity
 import com.gymshark.data.db.entity.TrainingExerciseEntity
 import com.gymshark.data.db.entity.TrainingSetEntity
@@ -37,9 +39,10 @@ import com.gymshark.data.db.entity.UserEntity
         SetsEntity::class,
         ExercisePrEntity::class,
         BodyWeightEntity::class,
+        PulseEntity::class,
         MealInfoEntity::class
     ],
-    version = 9,
+    version = 10,
     exportSchema = false
 )
 
@@ -57,5 +60,6 @@ abstract class DataBase : RoomDatabase() {
     abstract fun setsDao(): SetsDao
     abstract fun exercisePrDao(): ExercisePrDao
     abstract fun bodyWeightDao(): BodyWeightDao
+    abstract fun pulseDao(): PulseDao
     abstract fun mealInfoDao(): MealInfoDao
 }

@@ -16,9 +16,12 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.gymshark.R
 import com.gymshark.databinding.FragmentMealBinding
 import com.gymshark.ui.home.meal.barcode.BarcodeAnalyzer
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.concurrent.Executors
@@ -30,8 +33,8 @@ class MealFragment : Fragment(R.layout.fragment_meal) {
     private val binding get() = _binding!!
     private val cameraExecutor = Executors.newSingleThreadExecutor()
     private var isScanned = false
-
-
+    private var lastBarcode: String? = null
+    private var lastScanTime = 0L
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, s: Bundle?
     ): View {
@@ -44,7 +47,6 @@ class MealFragment : Fragment(R.layout.fragment_meal) {
 
         checkCameraPermission()
 
-        observeFood()
     }
 
     private fun checkCameraPermission() {
@@ -63,18 +65,6 @@ class MealFragment : Fragment(R.layout.fragment_meal) {
     }
 
 
-
-    private fun observeFood() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            mealViewModel.nutrimentsState.collect {
-                binding.tvResult.text = it.toString()
-//                    "energyKcal100g = ${it?.energyKcal100g.toString()}, " +
-//                            "\n proteins100g = ${it?.proteins100g.toString()}, " +
-//                            "\n fat100g = ${it?.fat100g.toString()}," +
-//                            "\n carbohydrates100g = ${it?.carbohydrates100g.toString()}"
-            }
-        }
-    }
 
 
     private val cameraPermissionLauncher =
@@ -110,12 +100,38 @@ class MealFragment : Fragment(R.layout.fragment_meal) {
             val imageAnalyzer = ImageAnalysis.Builder()
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
-                .also {
-                    it.setAnalyzer(cameraExecutor, BarcodeAnalyzer { barcode ->
-                        if (!isScanned) {
-                            isScanned = true
-                            binding.tvResult.text = "Scanned: $barcode"
-                            mealViewModel.getFood(barcode)
+                .also { analyzer ->
+
+                    analyzer.setAnalyzer(cameraExecutor, BarcodeAnalyzer { barcode ->
+
+                        if (isScanned) return@BarcodeAnalyzer
+
+                        val now = System.currentTimeMillis()
+                        if (now - lastScanTime < 1500) return@BarcodeAnalyzer
+
+                        lastScanTime = now
+                        isScanned = true
+                        lastBarcode = barcode
+
+                        binding.tvResult.text = "Scanning..."
+
+                        mealViewModel.clearProduct()
+                        mealViewModel.getFood(barcode)
+
+                        viewLifecycleOwner.lifecycleScope.launch {
+                            mealViewModel.productState
+                                .filterNotNull()
+                                .first()
+                                .let { product ->
+
+                                    binding.tvResult.text = "Found!"
+
+                                    findNavController().previousBackStackEntry
+                                        ?.savedStateHandle
+                                        ?.set("scanned_food", product)
+
+                                    findNavController().popBackStack()
+                                }
                         }
                     })
                 }
@@ -131,6 +147,15 @@ class MealFragment : Fragment(R.layout.fragment_meal) {
             )
         }, ContextCompat.getMainExecutor(requireContext()))
     }
+    override fun onResume() {
+        super.onResume()
+        isScanned = false
+    }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        cameraExecutor.shutdown()
+        _binding = null
+    }
 
 }

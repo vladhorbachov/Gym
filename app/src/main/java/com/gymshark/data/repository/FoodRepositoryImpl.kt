@@ -4,6 +4,7 @@ import com.gymshark.data.db.dao.FoodDao
 import com.gymshark.data.db.entity.FoodEntity
 import com.gymshark.data.network.OpenFoodFactsApi
 import com.gymshark.domain.models.Nutriments
+import com.gymshark.domain.models.Product
 import com.gymshark.domain.repository.FoodRepository
 
 class FoodRepositoryImpl(
@@ -11,8 +12,9 @@ class FoodRepositoryImpl(
     private val foodDao: FoodDao
 ) : FoodRepository {
 
-    override suspend fun getFood(barcode: String): Nutriments? {
-        return api.getProduct(barcode).product?.nutriments
+    override suspend fun getFood(barcode: String): Product? {
+        val response = api.getProduct(barcode)
+        return if (response.status == 1) response.product else null
     }
 
     override suspend fun insertIfNew(

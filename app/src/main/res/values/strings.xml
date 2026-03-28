@@ -17,6 +17,15 @@
     <string name="calendar_popup_message">
         Workout: %1$s\nMuscle groups: %2$s
     </string>
-
+    <plurals name="measurement_output_template" translatable="false">
+        <item quantity="zero">Pulse: %2.1f</item>
+        <item quantity="one">Pulse: %2.1f</item>
+        <item quantity="other">Pulse: %2.1f</item>
+    </plurals>
+    <string name="raw_values">Measurements (Timestamp, Value)</string>
+    <string name="row_separator">\n</string>
+    <string name="dateFormatGranular">yyyy-MM-dd\'T\'HH:mm:ss.SSSZZZZZ</string>
+    <string name="separator">,</string>
+    <string name="output_detected_peaks_header">Detected Peaks:</string>
 
 </resources>
