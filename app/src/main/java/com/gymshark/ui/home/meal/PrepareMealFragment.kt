@@ -1,6 +1,8 @@
 package com.gymshark.ui.home.meal
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,6 +15,7 @@ import com.gymshark.data.db.entity.FoodEntity
 import com.gymshark.databinding.FragmentPrepareMealBinding
 import com.gymshark.domain.models.MealType
 import com.gymshark.domain.models.Product
+import com.gymshark.ui.home.meal.adapter.TodayMealsAdapter
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -23,6 +26,10 @@ class PrepareMealFragment : Fragment() {
 
     private val viewModel: MealViewModel by viewModel()
     private var foodList: List<FoodEntity> = emptyList()
+
+    private lateinit var mealsAdapter: TodayMealsAdapter
+    private var isHistoryMode = false
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -43,21 +50,27 @@ class PrepareMealFragment : Fragment() {
                 binding.actProductName.setText(product.productName ?: "")
 
                 val nutriments = product.nutriments
-
                 binding.etCalories.setText(nutriments?.energyKcal100g?.toString() ?: "")
                 binding.etProtein.setText(nutriments?.proteins100g?.toString() ?: "")
                 binding.etFat.setText(nutriments?.fat100g?.toString() ?: "")
                 binding.etCarbs.setText(nutriments?.carbohydrates100g?.toString() ?: "")
-            }
 
+                findNavController().currentBackStackEntry
+                    ?.savedStateHandle
+                    ?.remove<Product>("scanned_food")
+            }
 
         setupMealTypeDropdown()
         setupScanButton()
         setupTextWatchers()
         setupSaveButton()
+        setupTodayMealsList()
+        setupHistoryButton()
+        observeMeals()
         loadProductsFromDb()
-    }
 
+        viewModel.loadTodayMeals()
+    }
 
     private fun setupMealTypeDropdown() {
         val mealTypes = MealType.entries.map { it.mealType }
@@ -71,10 +84,55 @@ class PrepareMealFragment : Fragment() {
         binding.actMealType.setAdapter(adapter)
     }
 
-
     private fun setupScanButton() {
         binding.tilProductName.setEndIconOnClickListener {
             findNavController().navigate(R.id.navMeal)
+        }
+    }
+
+    private fun setupTodayMealsList() {
+        mealsAdapter = TodayMealsAdapter { meal ->
+            viewModel.deleteMeal(meal)
+        }
+
+        binding.rvTodayMeals.layoutManager =
+            androidx.recyclerview.widget.LinearLayoutManager(requireContext())
+
+        binding.rvTodayMeals.adapter = mealsAdapter
+    }
+
+    private fun setupHistoryButton() {
+        binding.btnOpenHistory.setOnClickListener {
+            isHistoryMode = !isHistoryMode
+
+            if (isHistoryMode) {
+                binding.tvTodayTitle.text = "Meal history"
+                binding.btnOpenHistory.text = "Today"
+                viewModel.loadAllHistoryMeals()
+                mealsAdapter.submitList(viewModel.historyMealsState.value)
+            } else {
+                binding.tvTodayTitle.text = "Today's meals"
+                binding.btnOpenHistory.text = "History"
+                viewModel.loadTodayMeals()
+                mealsAdapter.submitList(viewModel.todayMealsState.value)
+            }
+        }
+    }
+    private fun observeMeals() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.todayMealsState.collect { meals ->
+                if (!isHistoryMode) {
+                    mealsAdapter.submitList(meals)
+                }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.historyMealsState.collect { meals ->
+                if (isHistoryMode) {
+                    mealsAdapter.submitList(meals)
+                }
+            }
         }
     }
 
@@ -94,7 +152,6 @@ class PrepareMealFragment : Fragment() {
             binding.actProductName.setAdapter(adapter)
 
             binding.actProductName.setOnItemClickListener { _, _, position, _ ->
-
                 val selectedFood = foodList[position]
 
                 binding.etCalories.setText(selectedFood.calories.toString())
@@ -105,10 +162,8 @@ class PrepareMealFragment : Fragment() {
         }
     }
 
-
     private fun setupSaveButton() {
         binding.btnSaveMeal.setOnClickListener {
-
             val mealType = binding.actMealType.text.toString().trim()
             val productName = binding.actProductName.text.toString().trim()
 
@@ -128,22 +183,30 @@ class PrepareMealFragment : Fragment() {
                 carbs = carbs
             )
 
-            findNavController().popBackStack()
+            clearForm()
+            validateForm()
         }
     }
 
+    private fun clearForm() {
+        binding.actMealType.setText("")
+        binding.actProductName.setText("")
+        binding.etCalories.setText("")
+        binding.etProtein.setText("")
+        binding.etFat.setText("")
+        binding.etCarbs.setText("")
+    }
 
     private fun setupTextWatchers() {
-
-        val watcher = object : android.text.TextWatcher {
-
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+        val watcher = object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) =
+                Unit
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 validateForm()
             }
 
-            override fun afterTextChanged(s: android.text.Editable?) {}
+            override fun afterTextChanged(s: Editable?) = Unit
         }
 
         binding.actMealType.addTextChangedListener(watcher)
@@ -155,7 +218,6 @@ class PrepareMealFragment : Fragment() {
     }
 
     private fun validateForm() {
-
         val isValid =
             binding.actMealType.text?.isNotBlank() == true &&
                     binding.actProductName.text?.isNotBlank() == true &&

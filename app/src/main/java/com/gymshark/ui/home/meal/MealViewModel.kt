@@ -19,6 +19,12 @@ class MealViewModel(
     private val _productState = MutableStateFlow<Product?>(null)
     val productState: StateFlow<Product?> = _productState
 
+    private val _todayMealsState = MutableStateFlow<List<MealInfoEntity>>(emptyList())
+    val todayMealsState: StateFlow<List<MealInfoEntity>> = _todayMealsState
+
+    private val _historyMealsState = MutableStateFlow<List<MealInfoEntity>>(emptyList())
+    val historyMealsState: StateFlow<List<MealInfoEntity>> = _historyMealsState
+
     fun getFood(barcode: String) {
         viewModelScope.launch {
             try {
@@ -38,7 +44,6 @@ class MealViewModel(
         carbs: Float?
     ) {
         viewModelScope.launch {
-
             foodRepository.insertIfNew(
                 name = productName,
                 calories = calories,
@@ -58,12 +63,36 @@ class MealViewModel(
                     carbohydrates100g = carbs
                 )
             )
+
+            loadTodayMeals()
+            loadAllHistoryMeals()
+        }
+    }
+
+    fun loadTodayMeals() {
+        viewModelScope.launch {
+            _todayMealsState.value = mealInfoRepository.getTodayMeals()
+        }
+    }
+
+    fun loadAllHistoryMeals() {
+        viewModelScope.launch {
+            _historyMealsState.value = mealInfoRepository.getHistoryMeals()
+        }
+    }
+
+    fun deleteMeal(meal: MealInfoEntity) {
+        viewModelScope.launch {
+            mealInfoRepository.delete(meal)
+            loadTodayMeals()
+            loadAllHistoryMeals()
         }
     }
 
     fun clearProduct() {
         _productState.value = null
     }
+
     suspend fun getAllLocalFoods(): List<FoodEntity> {
         return foodRepository.getAllLocal()
     }

@@ -8,12 +8,27 @@ interface MealInfoRepository {
 
     suspend fun insertAll(meals: List<MealInfoEntity>)
 
-    suspend fun getAllByDate(date: Long): List<MealInfoEntity>
+    suspend fun getMealsByDay(
+        startOfDay: Long,
+        endOfDay: Long
+    ): List<MealInfoEntity>
 
-    suspend fun getByDateAndType(
-        date: Long,
+    suspend fun getMealsByDayAndType(
+        startOfDay: Long,
+        endOfDay: Long,
         mealType: String
     ): List<MealInfoEntity>
 
-    suspend fun deleteByDate(date: Long)
+    suspend fun deleteMealsByDay(
+        startOfDay: Long,
+        endOfDay: Long
+    )
+
+    suspend fun getTodayMeals(): List<MealInfoEntity>
+
+    suspend fun getAllMeals(): List<MealInfoEntity>
+
+    suspend fun getHistoryMeals(): List<MealInfoEntity>
+
+    suspend fun delete(meal: MealInfoEntity)
 }
