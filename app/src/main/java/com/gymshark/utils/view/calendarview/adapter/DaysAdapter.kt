@@ -1,6 +1,5 @@
 package com.gymshark.utils.view.calendarview.adapter
 
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
@@ -21,35 +20,99 @@ class DaysAdapter(
 ) : ListAdapter<TrainingCalendarDay, DaysAdapter.DayVH>(DiffCallback()) {
 
     var plannedDays: Set<DayOfWeek> = emptySet()
-        set(value) {
-            field = value
-            notifyDataSetChanged()
-        }
+        private set
 
-    private val today: LocalDate = LocalDate.now()
+    private val today: LocalDate
+        get() = LocalDate.now()
+
+    fun updatePlannedDays(days: Set<DayOfWeek>) {
+        if (plannedDays == days) return
+
+        val oldDays = plannedDays
+        plannedDays = days
+
+        currentList.forEachIndexed { index, item ->
+            val wasPlanned = oldDays.contains(item.date.dayOfWeek)
+            val isPlannedNow = plannedDays.contains(item.date.dayOfWeek)
+
+            if (wasPlanned != isPlannedNow) {
+                notifyItemChanged(index, PAYLOAD_STYLE_ONLY)
+            }
+        }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DayVH {
-        val binding = ItemDayBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding = ItemDayBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        )
         return DayVH(binding)
     }
 
     override fun onBindViewHolder(holder: DayVH, position: Int) {
-        holder.bind(getItem(position))
+        holder.bind(getItem(position), fullBind = true)
     }
 
-    inner class DayVH(private val binding: ItemDayBinding) :
-        RecyclerView.ViewHolder(binding.root) {
+    override fun onBindViewHolder(holder: DayVH, position: Int, payloads: MutableList<Any>) {
+        if (payloads.contains(PAYLOAD_STYLE_ONLY)) {
+            holder.bind(getItem(position), fullBind = false)
+        } else {
+            onBindViewHolder(holder, position)
+        }
+    }
 
-        fun bind(item: TrainingCalendarDay) {
+    inner class DayVH(
+        private val binding: ItemDayBinding
+    ) : RecyclerView.ViewHolder(binding.root) {
 
+        fun bind(item: TrainingCalendarDay, fullBind: Boolean) {
             val locale = Locale.getDefault()
-            binding.dayNumber.text = item.date.dayOfMonth.toString()
-            binding.dayName.text = item.date.dayOfWeek.getDisplayName(TextStyle.SHORT, locale)
+            val date = item.date
+            val typesForDay = typesProvider(date)
 
-            val isToday = item.date == today
+            if (fullBind) {
+                binding.dayNumber.text = date.dayOfMonth.toString()
+                binding.dayName.text = date.dayOfWeek.getDisplayName(TextStyle.SHORT, locale)
+
+                binding.root.alpha = 1f
+                binding.root.translationX = 0f
+                binding.root.translationY = 0f
+                binding.root.isEnabled = true
+
+                binding.root.setOnClickListener { view ->
+                    view.animate().cancel()
+                    view.scaleX = 1f
+                    view.scaleY = 1f
+                    view.isEnabled = false
+
+                    view.animate()
+                        .scaleX(0.95f)
+                        .scaleY(0.95f)
+                        .setDuration(110L)
+                        .withEndAction {
+                            view.animate()
+                                .scaleX(1f)
+                                .scaleY(1f)
+                                .setDuration(110L)
+                                .withEndAction {
+                                    view.isEnabled = true
+                                    onClick(item, typesForDay)
+                                }
+                                .start()
+                        }
+                        .start()
+                }
+            }
+
+            applyVisualState(item, typesForDay)
+        }
+
+        private fun applyVisualState(item: TrainingCalendarDay, typesForDay: List<String>) {
+            val date = item.date
+            val isToday = date == today
             val hasCompletedTrain = item.train != null
-            val isPlanned = plannedDays.contains(item.date.dayOfWeek)
-            val typesForDay = typesProvider(item.date)
+            val isPlanned = plannedDays.contains(date.dayOfWeek)
 
             when {
                 isToday -> applyToday()
@@ -57,25 +120,6 @@ class DaysAdapter(
                 isPlanned && typesForDay.isNotEmpty() -> applyPlanned()
                 else -> applyDefault()
             }
-
-            binding.root.setOnClickListener {
-
-                it.animate()
-                    .scaleX(0.95f)
-                    .scaleY(0.95f)
-                    .setDuration(70)
-                    .withEndAction {
-                        it.animate()
-                            .scaleX(1f)
-                            .scaleY(1f)
-                            .setDuration(180)
-                            .start()
-
-                        onClick(item, typesForDay)
-                    }
-                    .start()
-            }
-
         }
 
         private fun applyToday() {
@@ -102,17 +146,24 @@ class DaysAdapter(
             binding.dayName.setTextColor(getColor(R.color.text_secondary))
         }
 
-        private fun getColor(id: Int) =
-            ContextCompat.getColor(binding.root.context, id)
-
+        private fun getColor(id: Int): Int {
+            return ContextCompat.getColor(binding.root.context, id)
+        }
     }
 
-    class DiffCallback : DiffUtil.ItemCallback<TrainingCalendarDay>() {
-        override fun areItemsTheSame(o: TrainingCalendarDay, n: TrainingCalendarDay) =
-            o.date == n.date
+    private class DiffCallback : DiffUtil.ItemCallback<TrainingCalendarDay>() {
+        override fun areItemsTheSame(
+            oldItem: TrainingCalendarDay,
+            newItem: TrainingCalendarDay
+        ): Boolean = oldItem.date == newItem.date
 
-        override fun areContentsTheSame(o: TrainingCalendarDay, n: TrainingCalendarDay) =
-            o == n
+        override fun areContentsTheSame(
+            oldItem: TrainingCalendarDay,
+            newItem: TrainingCalendarDay
+        ): Boolean = oldItem == newItem
+    }
+
+    private companion object {
+        const val PAYLOAD_STYLE_ONLY = "payload_style_only"
     }
 }
-

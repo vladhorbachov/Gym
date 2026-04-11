@@ -8,7 +8,8 @@
 
     <fragment
         android:id="@+id/navHome"
-        android:name="com.gymshark.ui.home.HomeFragment">
+        android:name="com.gymshark.ui.home.HomeFragment"
+        android:label="Home">
 
         <action
             android:id="@+id/action_navHome_to_prepareFragment"
@@ -33,7 +34,8 @@
 
     <fragment
         android:id="@+id/prepareMealFragment"
-        android:name="com.gymshark.ui.home.meal.PrepareMealFragment" />
+        android:name="com.gymshark.ui.home.meal.PrepareMealFragment"
+        android:label="Meal"/>
 
 
     <fragment
