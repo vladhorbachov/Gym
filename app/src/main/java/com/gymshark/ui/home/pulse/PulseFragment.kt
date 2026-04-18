@@ -112,6 +112,7 @@ class PulseFragment : Fragment(R.layout.fragment_pulse) {
         }
 
         binding.btnFinish.setOnClickListener {
+            finishVm.registerActivity(System.currentTimeMillis())
             saveAndExit()
         }
     }

@@ -28,5 +28,7 @@
     <string name="dateFormatGranular">yyyy-MM-dd\'T\'HH:mm:ss.SSSZZZZZ</string>
     <string name="separator">,</string>
     <string name="output_detected_peaks_header">Detected Peaks:</string>
+    <string name="current_series_5_visits">Current series: %s visits</string>
+    <string name="max_series_s_visits">Max series: %s visits</string>
 
 </resources>

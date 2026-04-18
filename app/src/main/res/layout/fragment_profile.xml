@@ -129,64 +129,22 @@
         </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/bg_card"
-        android:orientation="vertical"
-        android:padding="16dp"
-        android:layout_marginBottom="16dp">
-
         <TextView
-            android:layout_width="wrap_content"
+            android:id="@+id/tvVisitSeries"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Series"
+            android:text="@string/current_series_5_visits"
             android:textColor="@color/textPrimary"
-            android:textSize="18sp"
-            android:layout_marginBottom="8dp" />
-
-        <LinearLayout
+            android:textSize="16sp"
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/tvVisitMaxSeries"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="8dp"
-                android:hint="Max"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-
-            <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etCurrentSeries"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="number" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="Max"
-                android:layout_marginStart="8dp"
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etMaxSeries"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="number" />
-            </com.google.android.material.textfield.TextInputLayout>
-        </LinearLayout>
-
-        <com.google.android.material.materialswitch.MaterialSwitch
-            android:id="@+id/swSeriesActive"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Series Active" />
-    </LinearLayout>
+            android:text="@string/max_series_s_visits"
+            android:textColor="@color/textPrimary"
+            android:textSize="16sp"
+            android:textStyle="bold" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnSave"
@@ -205,6 +163,30 @@
         android:alpha="0.6"
         android:layout_marginTop="8dp"
         android:gravity="center" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDebugDay0"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="DEBUG: set today" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDebugDay1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="DEBUG: set yesterday" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDebugDay5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="DEBUG: set 5 days ago" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDebugRegister"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="DEBUG: register activity" />
 
 </LinearLayout>
 </ScrollView>

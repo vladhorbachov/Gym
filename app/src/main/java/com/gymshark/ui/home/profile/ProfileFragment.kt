@@ -45,9 +45,11 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
         initRows()
         loadUser()
+        vm.refreshSeriesState()
         observeTrainingSlotsFromDb()
-        binding.btnSave.setOnClickListener {
+        observeSeries()
 
+        binding.btnSave.setOnClickListener {
             it.animate().scaleX(0.96f).scaleY(0.96f).setDuration(90)
                 .withEndAction {
                     it.animate().scaleX(1f).scaleY(1f).duration = 90
@@ -56,34 +58,82 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             saveUser()
         }
 
+        val oneDay = 24 * 60 * 60 * 1000L
+
+        binding.btnDebugDay0.setOnClickListener {
+            vm.debugSetSeries(
+                Series(
+                    current = 3,
+                    maxSeries = 5,
+                    lastSession = System.currentTimeMillis()
+                )
+            )
+        }
+
+        binding.btnDebugDay1.setOnClickListener {
+            vm.debugSetSeries(
+                Series(
+                    current = 3,
+                    maxSeries = 5,
+                    lastSession = System.currentTimeMillis() - oneDay
+                )
+            )
+        }
+
+        binding.btnDebugDay5.setOnClickListener {
+            vm.debugSetSeries(
+                Series(
+                    current = 3,
+                    maxSeries = 5,
+                    lastSession = System.currentTimeMillis() - 5 * oneDay
+                )
+            )
+        }
+
+        binding.btnDebugRegister.setOnClickListener {
+            vm.registerActivity(System.currentTimeMillis())
+        }
+
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 vm.plannedDaysFlow.collect { days ->
-
                     binding.rowTrainingDays.setValue(
                         if (days.isEmpty())
                             "Not selected"
                         else
-                            days.joinToString(", ") { it.name.lowercase().replaceFirstChar { c -> c.uppercase() } }
+                            days.joinToString(", ") {
+                                it.name.lowercase().replaceFirstChar { c -> c.uppercase() }
+                            }
                     )
                 }
             }
         }
+    }
 
+    private fun observeSeries() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                vm.observeUser().collectLatest { user ->
+                    val current = user?.series?.current ?: 0
+                    val max = user?.series?.maxSeries ?: 0
+
+                    binding.tvVisitSeries.text = "Current series: $current"
+                    binding.tvVisitMaxSeries.text = "Max series: $max"
+                }
+            }
+        }
     }
 
     private fun initRows() {
         binding.rowTrainingDays.bind(ProfileRowModel("Training days", "Not selected"))
         binding.rowTrainingSet.bind(ProfileRowModel("Training set", "Not selected"))
         binding.rowTrainingSet.setOnClickListener {
-            vm.setCurrentUserId()
 
             TrainingSetsBottomSheet().show(parentFragmentManager, "training_sets")
         }
         binding.rowWeight.bind(ProfileRowModel("Weight", "Not set"))
 
         binding.rowTrainingDays.setOnClickListener {
-            vm.setCurrentUserId()
 
             viewLifecycleOwner.lifecycleScope.launch {
                 val currentDays = vm.plannedDaysFlow.value
@@ -104,9 +154,8 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                         this@ProfileFragment.weight = weight
                         binding.rowWeight.bind(ProfileRowModel("Weight", "${weight.toInt()} kg"))
 
-                        vm.setCurrentUserId()
                         vm.updateWeight(weight)
-
+                        vm.registerActivity(System.currentTimeMillis())
 
                         binding.rowWeight.flash()
                     }
@@ -129,8 +178,6 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
     private fun loadUser() {
         viewLifecycleOwner.lifecycleScope.launch {
-
-            vm.setCurrentUserId()
 
             val user = vm.loadUser()
 
@@ -172,7 +219,6 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         viewLifecycleOwner.lifecycleScope.launch {
 
 
-            vm.setCurrentUserId()
             val existing = vm.loadUser()
 
             val user = (existing ?: UserEntity(
@@ -186,18 +232,13 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                 avgBPM = 0,
                 pentagon = Pentagon(0,0,0,0,0),
                 trainingSlots = emptyList(),
-                series = Series(0,0,false)
+                series = Series(0, 0, 0L)
             )).copy(
                 name = etName.text.toString(),
                 age = etAge.text.toString().toIntOrNull() ?: 0,
                 sex = swSex.isChecked,
                 weight = weight,
                 height = etHeight.text.toString().toIntOrNull() ?: 0,
-                series = Series(
-                    current = etCurrentSeries.text.toString().toIntOrNull() ?: 0,
-                    maxSeries = etMaxSeries.text.toString().toIntOrNull() ?: 0,
-                    isActive = swSeriesActive.isChecked
-                )
             )
 
             vm.saveUser(user)

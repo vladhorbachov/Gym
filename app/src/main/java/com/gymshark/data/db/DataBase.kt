@@ -42,7 +42,7 @@ import com.gymshark.data.db.entity.UserEntity
         PulseEntity::class,
         MealInfoEntity::class
     ],
-    version = 10,
+    version = 11,
     exportSchema = false
 )
 

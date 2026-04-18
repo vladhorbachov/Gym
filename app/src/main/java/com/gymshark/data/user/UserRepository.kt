@@ -2,6 +2,7 @@ package com.gymshark.data.user
 
 import com.gymshark.data.db.entity.UserEntity
 import com.gymshark.domain.models.DaySlot
+import com.gymshark.domain.models.Series
 import kotlinx.coroutines.flow.Flow
 import java.time.DayOfWeek
 private const val KEY_USER_ID = "1"
@@ -25,6 +26,12 @@ interface UserRepository {
     fun observePlannedDays(): Flow<Set<DayOfWeek>>
     suspend fun savePlannedDays(days: Set<DayOfWeek>)
     fun observeDaySlots(): Flow<List<DaySlot>>
+
+    suspend fun registerActivity(currentTimeMillis: Long)
+
+    suspend fun debugSetSeries(series: Series)
+
+    suspend fun refreshSeriesState(currentTimeMillis: Long)
 
 
 }

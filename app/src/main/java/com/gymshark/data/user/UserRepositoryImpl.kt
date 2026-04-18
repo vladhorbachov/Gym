@@ -3,14 +3,17 @@ package com.gymshark.data.user
 import com.gymshark.data.db.dao.UserDao
 import com.gymshark.data.db.entity.UserEntity
 import com.gymshark.domain.models.DaySlot
+import com.gymshark.domain.models.Series
 import com.gymshark.domain.models.toDaysSlot
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import java.time.DayOfWeek
+import java.time.Instant
+import java.time.ZoneId
+
 private const val KEY_USER_ID = "1"
+
 class UserRepositoryImpl(
     private val userDao: UserDao,
     private val currentUserStore: CurrentUserStore
@@ -43,27 +46,132 @@ class UserRepositoryImpl(
     }
 
     override fun observePlannedDays(): Flow<Set<DayOfWeek>> =
-        currentUserIdFlow
-            .filterNotNull()
-            .flatMapLatest { id -> observeById(id) }
+        observeById(KEY_USER_ID)
             .map { user ->
                 user?.trainingSlots?.map { it.day }?.toSet() ?: emptySet()
-
             }
             .distinctUntilChanged()
 
     override fun observeDaySlots(): Flow<List<DaySlot>> =
-        currentUserIdFlow
-            .filterNotNull()
-            .flatMapLatest { id -> observeById(id) }
+        observeById(KEY_USER_ID)
             .map { user ->
                 user?.trainingSlots ?: emptyList()
             }
             .distinctUntilChanged()
 
+    override suspend fun registerActivity(currentTimeMillis: Long) {
+        val user = userDao.getById(KEY_USER_ID) ?: return
+
+        if (user.series.lastSession == 0L) {
+            userDao.upsert(
+                user.copy(
+                    series = user.series.copy(
+                        current = 1,
+                        maxSeries = maxOf(user.series.maxSeries, 1),
+                        lastSession = currentTimeMillis
+                    )
+                )
+            )
+            return
+        }
+
+        val zoneId = ZoneId.systemDefault()
+
+        val today = Instant.ofEpochMilli(currentTimeMillis)
+            .atZone(zoneId)
+            .toLocalDate()
+
+        val lastDay = Instant.ofEpochMilli(user.series.lastSession)
+            .atZone(zoneId)
+            .toLocalDate()
+
+        val diffDays = today.toEpochDay() - lastDay.toEpochDay()
+
+        when {
+            diffDays == 0L -> {
+                userDao.upsert(
+                    user.copy(
+                        series = user.series.copy(
+                            lastSession = currentTimeMillis
+                        )
+                    )
+                )
+            }
+
+            diffDays == 1L -> {
+                val newCurrent = user.series.current + 1
+                val newMax = maxOf(user.series.maxSeries, newCurrent)
+
+                userDao.upsert(
+                    user.copy(
+                        series = user.series.copy(
+                            current = newCurrent,
+                            maxSeries = newMax,
+                            lastSession = currentTimeMillis
+                        )
+                    )
+                )
+            }
+
+            else -> {
+                userDao.upsert(
+                    user.copy(
+                        series = user.series.copy(
+                            current = 1,
+                            maxSeries = user.series.maxSeries,
+                            lastSession = currentTimeMillis
+                        )
+                    )
+                )
+            }
+        }
+    }
+
+    override suspend fun refreshSeriesState(currentTimeMillis: Long) {
+        val userId = currentUserStore.currentUserIdOrNull() ?: return
+        val user = userDao.getById(userId) ?: return
+
+        val lastSession = user.series.lastSession
+        if (lastSession == 0L) return
+
+        val zoneId = ZoneId.systemDefault()
+
+        val today = Instant.ofEpochMilli(currentTimeMillis)
+            .atZone(zoneId)
+            .toLocalDate()
+
+        val lastDay = Instant.ofEpochMilli(lastSession)
+            .atZone(zoneId)
+            .toLocalDate()
+
+        val diffDays = today.toEpochDay() - lastDay.toEpochDay()
+
+        when {
+            diffDays <= 1L -> {
+                return
+            }
+
+            else -> {
+                if (user.series.current != 0) {
+                    userDao.upsert(
+                        user.copy(
+                            series = user.series.copy(
+                                current = 0
+                            )
+                        )
+                    )
+                }
+            }
+        }
+    }
+
     override suspend fun savePlannedDays(days: Set<DayOfWeek>) {
-        val userId = currentUserId() ?: return
         val slots = days.toList().toDaysSlot()
-        setTrainingSlots(userId, slots)
+        setTrainingSlots(KEY_USER_ID, slots)
+    }
+
+    override suspend fun debugSetSeries(series: Series) {
+        val user = userDao.getById(KEY_USER_ID) ?: return
+        userDao.upsert(user.copy(series = series))
     }
 }
