@@ -1,9 +1,8 @@
 package com.gymshark.di
 
-import com.gymshark.domain.repository.AuthRepository
-import com.gymshark.data.repository.AuthRepositoryImpl
 import com.gymshark.data.exercises.ExerciseRepository
 import com.gymshark.data.exercises.ExerciseRepositoryImpl
+import com.gymshark.data.repository.AuthRepositoryImpl
 import com.gymshark.data.repository.FoodRepositoryImpl
 import com.gymshark.data.repository.MealInfoRepositoryImpl
 import com.gymshark.data.settings.SettingsRepository
@@ -16,6 +15,7 @@ import com.gymshark.data.training.seed.ExercisesSeedDataSource
 import com.gymshark.data.training.seed.ExercisesSeedDataSourceImpl
 import com.gymshark.data.user.UserRepository
 import com.gymshark.data.user.UserRepositoryImpl
+import com.gymshark.domain.repository.AuthRepository
 import com.gymshark.domain.repository.FoodRepository
 import com.gymshark.domain.repository.MealInfoRepository
 import com.gymshark.domain.repository.pulse.PulseRepository
@@ -27,7 +27,7 @@ val repositoryModule = module {
 
     single<AuthRepository> { AuthRepositoryImpl(get()) }
 
-    single<UserRepository> { UserRepositoryImpl(get(), get()) }
+    single<UserRepository> { UserRepositoryImpl(get(), get(), get()) }
 
     single<ExerciseRepository> { ExerciseRepositoryImpl(get()) }
 
@@ -52,7 +52,7 @@ val repositoryModule = module {
             get()
         )
     }
-    single<FoodRepository> { FoodRepositoryImpl(get(),get()) }
+    single<FoodRepository> { FoodRepositoryImpl(get(), get()) }
     single<MealInfoRepository> { MealInfoRepositoryImpl(get()) }
     single<PulseRepository> { PulseRepositoryImpl(get()) }
 

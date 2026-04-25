@@ -2,6 +2,7 @@ package com.gymshark.data.user
 
 import com.gymshark.data.db.dao.UserDao
 import com.gymshark.data.db.entity.UserEntity
+import com.gymshark.data.prefs.UserPrefs
 import com.gymshark.domain.models.DaySlot
 import com.gymshark.domain.models.Series
 import com.gymshark.domain.models.toDaysSlot
@@ -12,13 +13,12 @@ import java.time.DayOfWeek
 import java.time.Instant
 import java.time.ZoneId
 
-private const val KEY_USER_ID = "1"
 
 class UserRepositoryImpl(
     private val userDao: UserDao,
-    private val currentUserStore: CurrentUserStore
+    private val currentUserStore: CurrentUserStore,
+    private val prefs: UserPrefs
 ) : UserRepository {
-
     override suspend fun upsert(user: UserEntity) = userDao.upsert(user)
     override suspend fun getById(id: String) = userDao.getById(id)
     override fun observeById(id: String): Flow<UserEntity?> = userDao.observeById(id)
@@ -46,21 +46,21 @@ class UserRepositoryImpl(
     }
 
     override fun observePlannedDays(): Flow<Set<DayOfWeek>> =
-        observeById(KEY_USER_ID)
+        observeById(prefs.getCurrentUserId())
             .map { user ->
                 user?.trainingSlots?.map { it.day }?.toSet() ?: emptySet()
             }
             .distinctUntilChanged()
 
     override fun observeDaySlots(): Flow<List<DaySlot>> =
-        observeById(KEY_USER_ID)
+        observeById(prefs.getCurrentUserId())
             .map { user ->
                 user?.trainingSlots ?: emptyList()
             }
             .distinctUntilChanged()
 
     override suspend fun registerActivity(currentTimeMillis: Long) {
-        val user = userDao.getById(KEY_USER_ID) ?: return
+        val user = userDao.getById(prefs.getCurrentUserId()) ?: return
 
         if (user.series.lastSession == 0L) {
             userDao.upsert(
@@ -167,11 +167,11 @@ class UserRepositoryImpl(
 
     override suspend fun savePlannedDays(days: Set<DayOfWeek>) {
         val slots = days.toList().toDaysSlot()
-        setTrainingSlots(KEY_USER_ID, slots)
+        setTrainingSlots(prefs.getCurrentUserId(), slots)
     }
 
     override suspend fun debugSetSeries(series: Series) {
-        val user = userDao.getById(KEY_USER_ID) ?: return
+        val user = userDao.getById(prefs.getCurrentUserId()) ?: return
         userDao.upsert(user.copy(series = series))
     }
 }

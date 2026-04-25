@@ -7,6 +7,7 @@ import com.gymshark.di.exercisesModule
 import com.gymshark.di.firebaseModule
 import com.gymshark.di.networkModule
 import com.gymshark.di.preferencesModule
+import com.gymshark.di.prefsModule
 import com.gymshark.di.repositoryModule
 import com.gymshark.di.viewModelModule
 import org.koin.android.ext.koin.androidContext
@@ -20,7 +21,7 @@ class App : Application() {
             androidContext(this@App)
             modules(
                 firebaseModule, repositoryModule, viewModelModule, databaseModule, appModule,
-                preferencesModule,exercisesModule, networkModule
+                preferencesModule, exercisesModule, networkModule, prefsModule
             )
         }
     }

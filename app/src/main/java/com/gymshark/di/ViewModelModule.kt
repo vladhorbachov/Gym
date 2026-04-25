@@ -13,12 +13,13 @@ import com.gymshark.ui.home.training.TrainingViewModel
 import com.gymshark.ui.home.training.finish.FinishViewModel
 import com.gymshark.ui.splash.SplashViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.androidx.viewmodel.dsl.viewModelOf
 import org.koin.dsl.module
 
 val viewModelModule = module {
 
-    viewModel { AuthViewModel(get()) }
-
+    //viewModel { AuthViewModel(get(), get()) }
+    viewModelOf(::AuthViewModel)
     viewModel { HomeViewModel(get()) }
 
     viewModel { ProfileViewModel(get()) }
