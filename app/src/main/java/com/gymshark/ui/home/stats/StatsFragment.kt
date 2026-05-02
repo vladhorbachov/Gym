@@ -1,15 +1,18 @@
 package com.gymshark.ui.home.stats
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.components.LimitLine
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.gymshark.R
 import com.gymshark.domain.models.MoodUi
 import com.gymshark.databinding.FragmentStatsBinding
@@ -17,63 +20,79 @@ import com.gymshark.ui.home.stats.viewmodel.StatsViewModel
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
 
-/*
-* графік прогрес ваги
-* середній пульс
-* кількість ккал на день
-* час тренувань
-* почуття після тренування
-*
-* */
 class StatsFragment : Fragment(R.layout.fragment_stats) {
 
     private var _binding: FragmentStatsBinding? = null
     private val binding get() = _binding!!
 
     private val vm: StatsViewModel by activityViewModel()
-    private var isFullMode = false
+
+    private var isWeightFull = false
+    private var isDurationFull = false
+    private var isCaloriesFull = false
+    private var isBpmFull = false
+    private var isCategoryWeightFull = false
+    private var isCategorySetsFull = false
+    private var isVolumeFull = false
+    private var isOneRmFull = false
+
+    // Palette for multi-line charts
+    private val lineColors = listOf(
+        Color.parseColor("#4FC3F7"),
+        Color.parseColor("#81C784"),
+        Color.parseColor("#FFB74D"),
+        Color.parseColor("#F06292"),
+        Color.parseColor("#CE93D8"),
+        Color.parseColor("#4DB6AC"),
+        Color.parseColor("#FFF176"),
+    )
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentStatsBinding.bind(view)
 
-        val chart = binding.lineChart
-
-        vm.loadWeightProgress()
-
+        // Single-line time-series charts
         viewLifecycleOwner.lifecycleScope.launch {
             vm.weightProgress.collect { points ->
-                if (points.isNotEmpty()) {
-                    render(chart, points, lastOnly = !isFullMode)
-                }
+                if (points.isNotEmpty()) renderLineChart(binding.lineChart, points, !isWeightFull)
+            }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            vm.durationProgress.collect { points ->
+                if (points.isNotEmpty()) renderLineChart(binding.lineChartDuration, points, !isDurationFull)
+            }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            vm.caloriesProgress.collect { points ->
+                if (points.isNotEmpty()) renderLineChart(binding.lineChartCalories, points, !isCaloriesFull)
+            }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            vm.bpmProgress.collect { points ->
+                if (points.isNotEmpty()) renderLineChart(binding.lineChartBpm, points, !isBpmFull)
             }
         }
 
+        // Today summary
         viewLifecycleOwner.lifecycleScope.launch {
             vm.dailyStats.collect { list ->
                 val today = list.firstOrNull() ?: return@collect
-
-                binding.tvTime.text =
-                    "Training time: ${today.totalMinutes} min"
-
-                binding.tvCalories.text =
-                    "Calories: ${today.calories}"
-
-                binding.tvBpm.text =
-                    today.avgBpm?.let { "Avg BPM: $it" }
-                        ?: "Avg BPM: not measured"
+                binding.tvTime.text = "Training time: ${today.totalMinutes} min"
+                binding.tvCalories.text = "Calories: ${today.calories}"
+                binding.tvBpm.text = today.avgBpm?.let { "Avg BPM: $it" } ?: "Avg BPM: not measured"
             }
         }
+
+        // Mood
         viewLifecycleOwner.lifecycleScope.launch {
             vm.moodTimeline.collect { list ->
                 binding.moodContainer.removeAllViews()
-
                 list.forEach { item ->
                     val tv = TextView(requireContext()).apply {
                         text = when (item.mood) {
-                            MoodUi.BAD -> "😣"
+                            MoodUi.BAD     -> "😣"
                             MoodUi.NEUTRAL -> "😐"
-                            MoodUi.GOOD -> "🙂"
+                            MoodUi.GOOD    -> "🙂"
                             MoodUi.AMAZING -> "🔥"
                         }
                         textSize = 24f
@@ -83,32 +102,119 @@ class StatsFragment : Fragment(R.layout.fragment_stats) {
                 }
             }
         }
-
         viewLifecycleOwner.lifecycleScope.launch {
             vm.weeklyMood.collect { mood ->
-                binding.tvWeeklyMood.text =
-                    mood?.let { "This week: $it" } ?: "This week: —"
+                binding.tvWeeklyMood.text = mood?.let { "This week: $it" } ?: "This week: —"
             }
         }
 
-        chart.setOnClickListener {
-            isFullMode = !isFullMode
-            render(chart, vm.weightProgress.value, lastOnly = !isFullMode)
+        // Multi-line: max weight per muscle group over time
+        viewLifecycleOwner.lifecycleScope.launch {
+            vm.categoryDailyStats.collect { rows ->
+                if (rows.isEmpty()) return@collect
+                val groups = rows.groupBy { it.category }
+                    .mapValues { (_, v) -> v.map { it.day to it.maxWeight } }
+                val dates = rows.map { it.day }.distinct().sorted()
+                renderMultiLineChart(binding.lineChartCategoryWeight, groups, dates, !isCategoryWeightFull)
+            }
+        }
+
+        // Multi-line: total sets per muscle group over time
+        viewLifecycleOwner.lifecycleScope.launch {
+            vm.categoryDailyStats.collect { rows ->
+                if (rows.isEmpty()) return@collect
+                val groups = rows.groupBy { it.category }
+                    .mapValues { (_, v) -> v.map { it.day to it.totalSets.toFloat() } }
+                val dates = rows.map { it.day }.distinct().sorted()
+                renderMultiLineChart(binding.lineChartCategorySets, groups, dates, !isCategorySetsFull)
+            }
+        }
+
+        // Weekly volume (tonnage)
+        viewLifecycleOwner.lifecycleScope.launch {
+            vm.weeklyVolume.collect { rows ->
+                if (rows.isEmpty()) return@collect
+                val points = rows.mapIndexed { i, r -> ChartPoint(i.toFloat(), r.totalVolume) }
+                val labels = rows.map { it.week.takeLast(3) } // "W12"
+                renderLineChart(binding.lineChartVolume, points, !isVolumeFull, xLabels = labels)
+            }
+        }
+
+        // Estimated 1RM — top exercises multi-line
+        viewLifecycleOwner.lifecycleScope.launch {
+            vm.topExerciseOneRM.collect { rows ->
+                if (rows.isEmpty()) return@collect
+                val groups = rows.groupBy { it.exerciseName }
+                    .mapValues { (_, v) -> v.map { it.day to it.estimated1RM } }
+                val dates = rows.map { it.day }.distinct().sorted()
+                renderMultiLineChart(binding.lineChartOneRM, groups, dates, !isOneRmFull)
+            }
+        }
+
+        // Click toggles — single-line charts
+        binding.lineChart.setOnClickListener {
+            isWeightFull = !isWeightFull
+            renderLineChart(binding.lineChart, vm.weightProgress.value, !isWeightFull)
+        }
+        binding.lineChartDuration.setOnClickListener {
+            isDurationFull = !isDurationFull
+            renderLineChart(binding.lineChartDuration, vm.durationProgress.value, !isDurationFull)
+        }
+        binding.lineChartCalories.setOnClickListener {
+            isCaloriesFull = !isCaloriesFull
+            renderLineChart(binding.lineChartCalories, vm.caloriesProgress.value, !isCaloriesFull)
+        }
+        binding.lineChartBpm.setOnClickListener {
+            isBpmFull = !isBpmFull
+            renderLineChart(binding.lineChartBpm, vm.bpmProgress.value, !isBpmFull)
+        }
+        binding.lineChartVolume.setOnClickListener {
+            isVolumeFull = !isVolumeFull
+            val rows = vm.weeklyVolume.value
+            val points = rows.mapIndexed { i, r -> ChartPoint(i.toFloat(), r.totalVolume) }
+            val labels = rows.map { it.week.takeLast(3) }
+            renderLineChart(binding.lineChartVolume, points, !isVolumeFull, xLabels = labels)
+        }
+
+        // Click toggles — multi-line charts
+        binding.lineChartCategoryWeight.setOnClickListener {
+            isCategoryWeightFull = !isCategoryWeightFull
+            val rows = vm.categoryDailyStats.value
+            val groups = rows.groupBy { it.category }
+                .mapValues { (_, v) -> v.map { it.day to it.maxWeight } }
+            val dates = rows.map { it.day }.distinct().sorted()
+            renderMultiLineChart(binding.lineChartCategoryWeight, groups, dates, !isCategoryWeightFull)
+        }
+        binding.lineChartCategorySets.setOnClickListener {
+            isCategorySetsFull = !isCategorySetsFull
+            val rows = vm.categoryDailyStats.value
+            val groups = rows.groupBy { it.category }
+                .mapValues { (_, v) -> v.map { it.day to it.totalSets.toFloat() } }
+            val dates = rows.map { it.day }.distinct().sorted()
+            renderMultiLineChart(binding.lineChartCategorySets, groups, dates, !isCategorySetsFull)
+        }
+        binding.lineChartOneRM.setOnClickListener {
+            isOneRmFull = !isOneRmFull
+            val rows = vm.topExerciseOneRM.value
+            val groups = rows.groupBy { it.exerciseName }
+                .mapValues { (_, v) -> v.map { it.day to it.estimated1RM } }
+            val dates = rows.map { it.day }.distinct().sorted()
+            renderMultiLineChart(binding.lineChartOneRM, groups, dates, !isOneRmFull)
         }
     }
 
-    private fun render(
+    // Single-line chart: one metric over time, with max highlight + avg line
+    private fun renderLineChart(
         chart: LineChart,
         points: List<ChartPoint>,
-        lastOnly: Boolean
+        compact: Boolean,
+        xLabels: List<String>? = null
     ) {
-        val visible = if (lastOnly) points.takeLast(5) else points
+        val visible = if (compact) points.takeLast(7) else points
+        val entries = visible.map { Entry(it.x, it.y) }
+        if (entries.isEmpty()) return
 
-        val entries = visible.map {
-            Entry(it.x, it.y)
-        }
-
-        val dataSet = LineDataSet(entries, "Weight").apply {
+        val mainDataSet = LineDataSet(entries, "").apply {
             setDrawValues(false)
             setDrawCircles(true)
             circleRadius = 4f
@@ -116,23 +222,112 @@ class StatsFragment : Fragment(R.layout.fragment_stats) {
             mode = LineDataSet.Mode.CUBIC_BEZIER
         }
 
-        chart.data = LineData(dataSet)
-        chart.description.isEnabled = false
-        chart.axisRight.isEnabled = false
+        val maxEntry = entries.maxByOrNull { it.y }
+        val maxDataSet = maxEntry?.let {
+            LineDataSet(listOf(it), "").apply {
+                lineWidth = 0f
+                setDrawCircles(true)
+                setDrawCircleHole(false)
+                circleRadius = 7f
+                setCircleColor(Color.RED)
+                setDrawValues(true)
+                valueTextSize = 10f
+                valueTextColor = Color.RED
+            }
+        }
 
+        val avg = entries.map { it.y }.average().toFloat()
+        chart.axisLeft.removeAllLimitLines()
+        chart.axisLeft.addLimitLine(
+            LimitLine(avg, "avg ${avg.toInt()}").apply {
+                lineColor = Color.GRAY
+                lineWidth = 1f
+                enableDashedLine(10f, 5f, 0f)
+                textColor = Color.WHITE
+                textSize = 9f
+            }
+        )
+
+        chart.data = LineData(listOfNotNull(mainDataSet, maxDataSet))
+        chart.description.isEnabled = false
+        chart.legend.isEnabled = false
+        chart.axisRight.isEnabled = false
         chart.xAxis.apply {
             position = XAxis.XAxisPosition.BOTTOM
             granularity = 1f
             setDrawGridLines(false)
+            textColor = Color.WHITE
+            if (xLabels != null) {
+                valueFormatter = IndexAxisValueFormatter(xLabels)
+                labelRotationAngle = -25f
+                labelCount = xLabels.size
+            }
+        }
+        chart.axisLeft.apply {
+            axisMinimum = 0f
+            textColor = Color.WHITE
         }
 
-        chart.axisLeft.axisMinimum = 0f
-
-        if (!lastOnly) {
+        if (!compact) {
             chart.setVisibleXRangeMaximum(7f)
             chart.moveViewToX(entries.last().x)
         }
+        chart.invalidate()
+    }
 
+    // Multi-line chart: multiple groups over time, X = date index
+    private fun renderMultiLineChart(
+        chart: LineChart,
+        groups: Map<String, List<Pair<String, Float>>>,
+        allDates: List<String>,
+        compact: Boolean
+    ) {
+        val visibleDates = if (compact) allDates.takeLast(7) else allDates
+        val dateIndex = visibleDates.withIndex().associate { (i, d) -> d to i.toFloat() }
+        val shortLabels = visibleDates.map { it.substring(5) } // MM-DD
+
+        val dataSets = groups.entries.mapIndexed { idx, (groupName, points) ->
+            val entries = points
+                .filter { (day, _) -> day in dateIndex }
+                .map { (day, value) -> Entry(dateIndex[day]!!, value) }
+                .sortedBy { it.x }
+            if (entries.isEmpty()) return@mapIndexed null
+
+            val color = lineColors[idx % lineColors.size]
+            LineDataSet(entries, groupName).apply {
+                this.color = color
+                setCircleColor(color)
+                lineWidth = 2f
+                circleRadius = 3f
+                mode = LineDataSet.Mode.LINEAR
+                setDrawValues(false)
+                setDrawCircleHole(false)
+            }
+        }.filterNotNull()
+
+        if (dataSets.isEmpty()) return
+
+        chart.data = LineData(dataSets)
+        chart.description.isEnabled = false
+        chart.legend.isEnabled = true
+        chart.legend.textColor = Color.WHITE
+        chart.legend.textSize = 10f
+        chart.axisRight.isEnabled = false
+        chart.xAxis.apply {
+            position = XAxis.XAxisPosition.BOTTOM
+            granularity = 1f
+            setDrawGridLines(false)
+            textColor = Color.WHITE
+            valueFormatter = IndexAxisValueFormatter(shortLabels)
+            labelRotationAngle = -25f
+            labelCount = shortLabels.size
+        }
+        chart.axisLeft.apply {
+            axisMinimum = 0f
+            textColor = Color.WHITE
+        }
+        chart.setVisibleXRangeMaximum(7f)
+        chart.moveViewToX(visibleDates.size.toFloat())
         chart.invalidate()
     }
 

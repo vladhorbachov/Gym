@@ -9,9 +9,13 @@ import com.gymshark.data.db.dao.ExercisesDao
 import com.gymshark.data.db.dao.TrainingsDao
 import com.gymshark.data.db.entity.BodyWeightEntity
 import com.gymshark.data.db.entity.TrainingsEntity
+import com.gymshark.domain.models.CategoryDayRow
+import com.gymshark.domain.models.CategoryStatRow
 import com.gymshark.domain.models.DailyStatsRow
+import com.gymshark.domain.models.ExerciseOneRmRow
 import com.gymshark.domain.models.MoodRow
 import com.gymshark.domain.models.Train
+import com.gymshark.domain.models.WeeklyVolumeRow
 import com.gymshark.data.training.mapper.PrUpdateMapper
 import com.gymshark.data.training.mapper.TrainingDraftMapper
 import com.gymshark.data.training.seed.ExercisesSeedDataSource
@@ -105,6 +109,18 @@ class TrainingRepositoryImpl(
 
     override fun observeMoodTimeline(): Flow<List<MoodRow>> =
         trainingsDao.observeMoodTimeline()
+
+    override fun observeCategoryStats(): Flow<List<CategoryStatRow>> =
+        trainingsDao.observeCategoryStats()
+
+    override fun observeCategoryDailyStats(): Flow<List<CategoryDayRow>> =
+        trainingsDao.observeCategoryDailyStats()
+
+    override fun observeWeeklyVolume(): Flow<List<WeeklyVolumeRow>> =
+        trainingsDao.observeWeeklyVolume()
+
+    override fun observeExerciseOneRM(): Flow<List<ExerciseOneRmRow>> =
+        trainingsDao.observeExerciseOneRM()
 
     override suspend fun seedExercisesIfEmpty() {
         if (exercisesDao.getAll().isNotEmpty()) return
