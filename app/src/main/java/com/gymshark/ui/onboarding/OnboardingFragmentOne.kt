@@ -1,27 +1,13 @@
 package com.gymshark.ui.onboarding
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import com.gymshark.databinding.FragmentOnboardingoneBinding
+import com.gymshark.utils.BaseFragment
 import com.gymshark.utils.view.WaveView
 
-
-class OnboardingFragmentOne : Fragment() {
-
-    private var _binding: FragmentOnboardingoneBinding? = null
-    private val binding get() = _binding!!
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentOnboardingoneBinding.inflate(inflater, container, false)
-        return binding.root
-    }
+class OnboardingFragmentOne :
+    BaseFragment<FragmentOnboardingoneBinding>(FragmentOnboardingoneBinding::inflate) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -41,10 +27,5 @@ class OnboardingFragmentOne : Fragment() {
                 WaveView.Harmonic(amplitude = 10f, frequency = 5f, phase = 2f)
             )
         )
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }

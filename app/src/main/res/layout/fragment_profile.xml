@@ -1,192 +1,163 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bgMain">
-
-
-    <LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:background="@color/bgMain"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/bg_card"
         android:orientation="vertical"
-        android:padding="16dp"
-        android:layout_marginBottom="16dp">
+        android:padding="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <FrameLayout
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
+                    android:background="@drawable/bg_circle"
+                    android:foreground="?attr/selectableItemBackgroundBorderless">
+
+                    <ImageView
+                        android:id="@+id/ivAvatar"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_profile"
+                        app:tint="@android:color/white" />
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="User"
+                        android:textColor="@color/textPrimary"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvProfileSummary"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Profile details"
+                        android:textColor="@color/textSecondary"
+                        android:textSize="13sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tvVisitSeries"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_card_inner"
+                    android:padding="12dp"
+                    android:text="Current series: 0"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <View
+                    android:layout_width="12dp"
+                    android:layout_height="1dp" />
+
+                <TextView
+                    android:id="@+id/tvVisitMaxSeries"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_card_inner"
+                    android:padding="12dp"
+                    android:text="Max series: 0"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="User Info"
-            android:textColor="@color/textPrimary"
-            android:textSize="18sp"
-            android:layout_marginBottom="8dp"/>
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="8dp"
+            android:text="Settings"
+            android:textColor="@color/textSecondary"
+            android:textSize="12sp"
+            android:textAllCaps="true" />
 
-        <com.google.android.material.textfield.TextInputLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Name"
-            android:layout_marginTop="8dp"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:padding="8dp">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etName"
+            <com.gymshark.ui.home.profile.row.ProfileRowView
+                android:id="@+id/rowPersonalData"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
-        </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Age"
-            android:layout_marginTop="8dp"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etAge"
+            <View
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="number" />
-        </com.google.android.material.textfield.TextInputLayout>
+                android:layout_height="1dp"
+                android:background="@color/strokeSubtle"
+                android:layout_marginHorizontal="8dp" />
 
-        <com.google.android.material.materialswitch.MaterialSwitch
-            android:id="@+id/swSex"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Male (off = Female)" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/bg_card"
-        android:orientation="vertical"
-        android:padding="16dp"
-        android:layout_marginBottom="16dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Training Setup"
-            android:textColor="@color/textPrimary"
-            android:textSize="18sp"
-            android:layout_marginBottom="8dp"/>
-
-        <com.gymshark.ui.home.profile.row.ProfileRowView
-            android:id="@+id/rowTrainingDays"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/strokeSubtle"
-            android:layout_marginVertical="4dp"/>
-
-
-        <com.gymshark.ui.home.profile.row.ProfileRowView
-            android:id="@+id/rowTrainingSet"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/strokeSubtle"
-            android:layout_marginVertical="4dp"/>
-
-
-        <com.gymshark.ui.home.profile.row.ProfileRowView
-            android:id="@+id/rowWeight"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/strokeSubtle"
-            android:layout_marginVertical="4dp"/>
-
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Height (cm)"
-            android:layout_marginTop="8dp"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etHeight"
+            <com.gymshark.ui.home.profile.row.ProfileRowView
+                android:id="@+id/rowTrainingDays"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="number" />
-        </com.google.android.material.textfield.TextInputLayout>
+                android:layout_height="wrap_content" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/strokeSubtle"
+                android:layout_marginHorizontal="8dp" />
+
+            <com.gymshark.ui.home.profile.row.ProfileRowView
+                android:id="@+id/rowTrainingSet"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/strokeSubtle"
+                android:layout_marginHorizontal="8dp" />
+
+            <com.gymshark.ui.home.profile.row.ProfileRowView
+                android:id="@+id/rowWeight"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
     </LinearLayout>
-
-        <TextView
-            android:id="@+id/tvVisitSeries"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/current_series_5_visits"
-            android:textColor="@color/textPrimary"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-        <TextView
-            android:id="@+id/tvVisitMaxSeries"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/max_series_s_visits"
-            android:textColor="@color/textPrimary"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnSave"
-        style="@style/Widget.Gym.PrimaryButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Save"
-        android:layout_marginTop="8dp"/>
-
-
-        <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="You can change this later"
-        android:textSize="12sp"
-        android:alpha="0.6"
-        android:layout_marginTop="8dp"
-        android:gravity="center" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnDebugDay0"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="DEBUG: set today" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnDebugDay1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="DEBUG: set yesterday" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnDebugDay5"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="DEBUG: set 5 days ago" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnDebugRegister"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="DEBUG: register activity" />
-
-</LinearLayout>
 </ScrollView>

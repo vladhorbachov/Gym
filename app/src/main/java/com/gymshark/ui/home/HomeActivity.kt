@@ -13,25 +13,23 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(ActivityHomeBinding::infl
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setSupportActionBar(binding.toolbar)
+//        setSupportActionBar(binding.toolbar)
 
         val navController = (supportFragmentManager
             .findFragmentById(R.id.nav_host) as NavHostFragment)
             .navController
 
-        val appBarConfiguration = AppBarConfiguration(
-            setOf(
-                R.id.navHome,
-                R.id.navStats,
-                R.id.navMeal,
-                R.id.navProfile
-            )
-        )
+//        val appBarConfiguration = AppBarConfiguration(
+//            setOf(
+//                R.id.navHome,
+//                R.id.navStats,
+//                R.id.navMeal,
+//                R.id.navProfile
+//            )
+//        )
 
-        binding.toolbar.setupWithNavController(navController, appBarConfiguration)
+//        binding.toolbar.setupWithNavController(navController, appBarConfiguration)
 
         binding.bnMainNav.setupWithNavController(navController)
-
-        applyInsetsTo(binding.root)
     }
 }

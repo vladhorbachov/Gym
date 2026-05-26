@@ -2,20 +2,18 @@ package com.gymshark.ui.auth
 
 import android.os.Bundle
 import android.view.View
-import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.gymshark.R
 import com.gymshark.databinding.FragmentLoginBinding
+import com.gymshark.utils.BaseFragment
 import com.gymshark.utils.visibleIf
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class LoginFragment : Fragment(R.layout.fragment_login) {
+class LoginFragment : BaseFragment<FragmentLoginBinding>(FragmentLoginBinding::inflate) {
     private val vm: AuthViewModel by viewModel()
-    private lateinit var binding: FragmentLoginBinding
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding = FragmentLoginBinding.bind(view)
 
         initView()
 
@@ -29,7 +27,10 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
     private fun goHome() {
         val intent =
             android.content.Intent(requireContext(), com.gymshark.ui.home.HomeActivity::class.java)
-                .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                .addFlags(
+                    android.content.Intent.FLAG_ACTIVITY_NEW_TASK or
+                            android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
+                )
         startActivity(intent)
         requireActivity().finish()
     }
@@ -49,4 +50,3 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
         }
     }
 }
-

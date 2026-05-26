@@ -59,8 +59,6 @@ class AuthActivity : BaseActivity<ActivityAuthBinding>(ActivityAuthBinding::infl
         }
 
         vm.loggedIn.observe(this) { if (it == true) openHomeAndFinish() }
-
-        applyInsetsTo(binding.root)
     }
 
     private fun ensureNavHost() {

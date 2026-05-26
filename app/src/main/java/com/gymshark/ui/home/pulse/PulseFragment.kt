@@ -7,7 +7,6 @@ import android.os.*
 import android.view.Surface
 import android.view.View
 import androidx.core.app.ActivityCompat
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
@@ -19,13 +18,11 @@ import com.gymshark.ui.home.pulse.heartrate.OutputAnalyzer
 import com.gymshark.ui.home.training.TrainingStatViewModel
 import com.gymshark.ui.home.training.TrainingViewModel
 import com.gymshark.ui.home.training.finish.FinishViewModel
+import com.gymshark.utils.BaseFragment
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
 
-class PulseFragment : Fragment(R.layout.fragment_pulse) {
-
-    private var _binding: FragmentPulseBinding? = null
-    private val binding get() = _binding!!
+class PulseFragment : BaseFragment<FragmentPulseBinding>(FragmentPulseBinding::inflate) {
 
     private val trainingVm: TrainingViewModel by activityViewModel()
     private val finishVm: FinishViewModel by activityViewModel()
@@ -35,7 +32,7 @@ class PulseFragment : Fragment(R.layout.fragment_pulse) {
     private var cameraService: CameraService? = null
     private var analyzer: OutputAnalyzer? = null
 
-    private val REQUEST_CODE_CAMERA = 100
+    private val requestCodeCamera = 100
 
     companion object {
         const val MESSAGE_UPDATE_REALTIME = 1
@@ -45,34 +42,27 @@ class PulseFragment : Fragment(R.layout.fragment_pulse) {
 
     @SuppressLint("HandlerLeak")
     private val mainHandler: Handler = object : Handler(Looper.getMainLooper()) {
-
         override fun handleMessage(msg: Message) {
-
             when (msg.what) {
-
                 MESSAGE_UPDATE_REALTIME -> {
                     binding.tvResult.text = msg.obj.toString()
                 }
-
                 MESSAGE_UPDATE_FINAL -> {
-
                     val pulse = msg.obj.toString().toDouble().toInt()
 
                     if (pulse > 40) {
-                        //pulseVm.addMeasurement(pulse)
+                        // pulseVm.addMeasurement(pulse)
                     }
 
                     binding.tvResult.text =
                         "Min: ${pulseVm.minBpm.value}  " +
-                                "Max: ${pulseVm.maxBpm.value}  " +
-                                "Avg: ${pulseVm.avgBpm.value}"
+                            "Max: ${pulseVm.maxBpm.value}  " +
+                            "Avg: ${pulseVm.avgBpm.value}"
                 }
-
                 MESSAGE_CAMERA_NOT_AVAILABLE -> {
-
                     Snackbar.make(
                         binding.root,
-                        "getString(R.string.camera_not_found)",
+                        "Workout data not found",
                         Snackbar.LENGTH_LONG
                     ).show()
 
@@ -85,15 +75,13 @@ class PulseFragment : Fragment(R.layout.fragment_pulse) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        _binding = FragmentPulseBinding.bind(view)
-
         cameraService = CameraService(requireActivity(), mainHandler)
         analyzer = OutputAnalyzer(requireContext(), binding.graphTextureView, mainHandler)
 
         ActivityCompat.requestPermissions(
             requireActivity(),
             arrayOf(Manifest.permission.CAMERA),
-            REQUEST_CODE_CAMERA
+            requestCodeCamera
         )
 
         binding.btnStart.setOnClickListener {
@@ -105,8 +93,8 @@ class PulseFragment : Fragment(R.layout.fragment_pulse) {
                 if (avg != null) {
                     binding.tvResult.text =
                         "Min: ${pulseVm.minBpm.value}  " +
-                                "Max: ${pulseVm.maxBpm.value}  " +
-                                "Avg: $avg"
+                            "Max: ${pulseVm.maxBpm.value}  " +
+                            "Avg: $avg"
                 }
             }
         }
@@ -118,30 +106,22 @@ class PulseFragment : Fragment(R.layout.fragment_pulse) {
     }
 
     private fun startMeasurement() {
-
         analyzer = OutputAnalyzer(requireContext(), binding.graphTextureView, mainHandler)
 
         val textureView = binding.textureView2
         val surfaceTexture = textureView.surfaceTexture
 
         if (surfaceTexture != null) {
-
             val previewSurface = Surface(surfaceTexture)
 
             cameraService?.apply {
-
                 start(previewSurface)
-
-                analyzer?.measurePulse(
-                    textureView,
-                    this
-                )
+                analyzer?.measurePulse(textureView, this)
             }
         }
     }
 
     private fun saveAndExit() {
-
         val navController = findNavController()
 
         trainingVm.finishTraining(
@@ -165,31 +145,27 @@ class PulseFragment : Fragment(R.layout.fragment_pulse) {
 
     override fun onPause() {
         super.onPause()
-
         cameraService?.stop()
         analyzer?.stop()
     }
 
     override fun onDestroyView() {
+        cameraService?.stop()
+        analyzer?.stop()
         super.onDestroyView()
-        _binding = null
     }
 
+    @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,
         grantResults: IntArray
     ) {
-
-        if (requestCode == REQUEST_CODE_CAMERA) {
-
-            if (!(grantResults.isNotEmpty() &&
-                        grantResults[0] == PackageManager.PERMISSION_GRANTED)
-            ) {
-
+        if (requestCode == requestCodeCamera) {
+            if (!(grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                 Snackbar.make(
                     binding.root,
-                    "getString(R.string.cameraPermissionRequired)",
+                    "Camera permission required",
                     Snackbar.LENGTH_LONG
                 ).show()
             }

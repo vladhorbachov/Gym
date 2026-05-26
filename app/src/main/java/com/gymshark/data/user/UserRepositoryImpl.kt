@@ -19,6 +19,9 @@ class UserRepositoryImpl(
     private val currentUserStore: CurrentUserStore,
     private val prefs: UserPrefs
 ) : UserRepository {
+    private fun currentUserIdOrFallback(): String =
+        currentUserStore.currentUserIdOrNull() ?: prefs.getCurrentUserId() ?: "1"
+
     override suspend fun upsert(user: UserEntity) = userDao.upsert(user)
     override suspend fun getById(id: String) = userDao.getById(id)
     override fun observeById(id: String): Flow<UserEntity?> = userDao.observeById(id)
@@ -46,21 +49,21 @@ class UserRepositoryImpl(
     }
 
     override fun observePlannedDays(): Flow<Set<DayOfWeek>> =
-        observeById(prefs.getCurrentUserId())
+        observeById(currentUserIdOrFallback())
             .map { user ->
                 user?.trainingSlots?.map { it.day }?.toSet() ?: emptySet()
             }
             .distinctUntilChanged()
 
     override fun observeDaySlots(): Flow<List<DaySlot>> =
-        observeById(prefs.getCurrentUserId())
+        observeById(currentUserIdOrFallback())
             .map { user ->
                 user?.trainingSlots ?: emptyList()
             }
             .distinctUntilChanged()
 
     override suspend fun registerActivity(currentTimeMillis: Long) {
-        val user = userDao.getById(prefs.getCurrentUserId()) ?: return
+        val user = userDao.getById(currentUserIdOrFallback()) ?: return
 
         if (user.series.lastSession == 0L) {
             userDao.upsert(
@@ -128,7 +131,7 @@ class UserRepositoryImpl(
     }
 
     override suspend fun refreshSeriesState(currentTimeMillis: Long) {
-        val userId = currentUserStore.currentUserIdOrNull() ?: return
+        val userId = currentUserIdOrFallback()
         val user = userDao.getById(userId) ?: return
 
         val lastSession = user.series.lastSession
@@ -167,11 +170,11 @@ class UserRepositoryImpl(
 
     override suspend fun savePlannedDays(days: Set<DayOfWeek>) {
         val slots = days.toList().toDaysSlot()
-        setTrainingSlots(prefs.getCurrentUserId(), slots)
+        setTrainingSlots(currentUserIdOrFallback(), slots)
     }
 
     override suspend fun debugSetSeries(series: Series) {
-        val user = userDao.getById(prefs.getCurrentUserId()) ?: return
+        val user = userDao.getById(currentUserIdOrFallback()) ?: return
         userDao.upsert(user.copy(series = series))
     }
 }

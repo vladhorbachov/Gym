@@ -30,6 +30,8 @@ class ProfileRowView @JvmOverloads constructor(
     fun bind(model: ProfileRowModel) {
         tvTitle.text = model.title
         tvValue.text = model.value
+        isEnabled = model.enabled
+        alpha = if (model.enabled) 1f else 0.55f
     }
 
     fun flash() {

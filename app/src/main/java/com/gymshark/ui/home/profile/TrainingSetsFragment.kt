@@ -2,15 +2,14 @@ package com.gymshark.ui.home.profile
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.gymshark.R
 import com.gymshark.domain.models.DaySlot
 import com.gymshark.databinding.FragmentTrainingSetsBinding
+import com.gymshark.utils.BaseFragment
 import com.gymshark.utils.view.SetsDayView
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -19,17 +18,13 @@ import java.time.DayOfWeek
 import java.time.format.TextStyle
 import java.util.Locale
 
-class TrainingSetsFragment : Fragment(R.layout.fragment_training_sets) {
-
-    private var _binding: FragmentTrainingSetsBinding? = null
-    private val binding get() = _binding!!
+class TrainingSetsFragment : BaseFragment<FragmentTrainingSetsBinding>(FragmentTrainingSetsBinding::inflate) {
 
     private val vm: TrainingSetsViewModel by viewModel()
     private val locale: Locale get() = Locale.getDefault()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        _binding = FragmentTrainingSetsBinding.bind(view)
 
         viewLifecycleOwner.lifecycleScope.launch {
             vm.baseDays.collectLatest { vm.syncWithBase() }
@@ -41,7 +36,7 @@ class TrainingSetsFragment : Fragment(R.layout.fragment_training_sets) {
 
         binding.ivAdd.setOnClickListener {
             vm.addNext()
-            Log.d("TSF", "add clicked; baseDays=${vm.baseDays.value} slots=${vm.displayedSlots.value}")
+            android.util.Log.d("TSF", "add clicked; baseDays=${vm.baseDays.value} slots=${vm.displayedSlots.value}")
         }
     }
 
@@ -106,9 +101,4 @@ class TrainingSetsFragment : Fragment(R.layout.fragment_training_sets) {
 
     private fun Int.dp(context: Context) =
         (this * context.resources.displayMetrics.density).toInt()
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
 }

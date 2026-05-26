@@ -3,11 +3,8 @@ package com.gymshark.ui.home.meal
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.gymshark.R
@@ -16,28 +13,17 @@ import com.gymshark.databinding.FragmentPrepareMealBinding
 import com.gymshark.domain.models.MealType
 import com.gymshark.domain.models.Product
 import com.gymshark.ui.home.meal.adapter.TodayMealsAdapter
+import com.gymshark.utils.BaseFragment
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class PrepareMealFragment : Fragment() {
-
-    private var _binding: FragmentPrepareMealBinding? = null
-    private val binding get() = _binding!!
+class PrepareMealFragment : BaseFragment<FragmentPrepareMealBinding>(FragmentPrepareMealBinding::inflate) {
 
     private val viewModel: MealViewModel by viewModel()
     private var foodList: List<FoodEntity> = emptyList()
 
     private lateinit var mealsAdapter: TodayMealsAdapter
     private var isHistoryMode = false
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentPrepareMealBinding.inflate(inflater, container, false)
-        return binding.root
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -46,7 +32,6 @@ class PrepareMealFragment : Fragment() {
             ?.savedStateHandle
             ?.getLiveData<Product>("scanned_food")
             ?.observe(viewLifecycleOwner) { product ->
-
                 binding.actProductName.setText(product.productName ?: "")
 
                 val nutriments = product.nutriments
@@ -118,6 +103,7 @@ class PrepareMealFragment : Fragment() {
             }
         }
     }
+
     private fun observeMeals() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.todayMealsState.collect { meals ->
@@ -220,17 +206,12 @@ class PrepareMealFragment : Fragment() {
     private fun validateForm() {
         val isValid =
             binding.actMealType.text?.isNotBlank() == true &&
-                    binding.actProductName.text?.isNotBlank() == true &&
-                    binding.etCalories.text?.isNotBlank() == true &&
-                    binding.etProtein.text?.isNotBlank() == true &&
-                    binding.etFat.text?.isNotBlank() == true &&
-                    binding.etCarbs.text?.isNotBlank() == true
+                binding.actProductName.text?.isNotBlank() == true &&
+                binding.etCalories.text?.isNotBlank() == true &&
+                binding.etProtein.text?.isNotBlank() == true &&
+                binding.etFat.text?.isNotBlank() == true &&
+                binding.etCarbs.text?.isNotBlank() == true
 
         binding.btnSaveMeal.isEnabled = isValid
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }

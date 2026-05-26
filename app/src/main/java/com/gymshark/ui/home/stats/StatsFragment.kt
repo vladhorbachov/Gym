@@ -4,7 +4,6 @@ import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.LimitLine
@@ -13,17 +12,14 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
-import com.gymshark.R
-import com.gymshark.domain.models.MoodUi
 import com.gymshark.databinding.FragmentStatsBinding
+import com.gymshark.domain.models.MoodUi
 import com.gymshark.ui.home.stats.viewmodel.StatsViewModel
+import com.gymshark.utils.BaseFragment
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
 
-class StatsFragment : Fragment(R.layout.fragment_stats) {
-
-    private var _binding: FragmentStatsBinding? = null
-    private val binding get() = _binding!!
+class StatsFragment : BaseFragment<FragmentStatsBinding>(FragmentStatsBinding::inflate) {
 
     private val vm: StatsViewModel by activityViewModel()
 
@@ -36,7 +32,6 @@ class StatsFragment : Fragment(R.layout.fragment_stats) {
     private var isVolumeFull = false
     private var isOneRmFull = false
 
-    // Palette for multi-line charts
     private val lineColors = listOf(
         Color.parseColor("#4FC3F7"),
         Color.parseColor("#81C784"),
@@ -49,9 +44,7 @@ class StatsFragment : Fragment(R.layout.fragment_stats) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        _binding = FragmentStatsBinding.bind(view)
 
-        // Single-line time-series charts
         viewLifecycleOwner.lifecycleScope.launch {
             vm.weightProgress.collect { points ->
                 if (points.isNotEmpty()) renderLineChart(binding.lineChart, points, !isWeightFull)
@@ -73,7 +66,6 @@ class StatsFragment : Fragment(R.layout.fragment_stats) {
             }
         }
 
-        // Today summary
         viewLifecycleOwner.lifecycleScope.launch {
             vm.dailyStats.collect { list ->
                 val today = list.firstOrNull() ?: return@collect
@@ -83,17 +75,16 @@ class StatsFragment : Fragment(R.layout.fragment_stats) {
             }
         }
 
-        // Mood
         viewLifecycleOwner.lifecycleScope.launch {
             vm.moodTimeline.collect { list ->
                 binding.moodContainer.removeAllViews()
                 list.forEach { item ->
                     val tv = TextView(requireContext()).apply {
                         text = when (item.mood) {
-                            MoodUi.BAD     -> "😣"
-                            MoodUi.NEUTRAL -> "😐"
-                            MoodUi.GOOD    -> "🙂"
-                            MoodUi.AMAZING -> "🔥"
+                            MoodUi.BAD -> "Bad"
+                            MoodUi.NEUTRAL -> "Neutral"
+                            MoodUi.GOOD -> "Good"
+                            MoodUi.AMAZING -> "Amazing"
                         }
                         textSize = 24f
                         setPadding(12, 0, 12, 0)
@@ -104,11 +95,10 @@ class StatsFragment : Fragment(R.layout.fragment_stats) {
         }
         viewLifecycleOwner.lifecycleScope.launch {
             vm.weeklyMood.collect { mood ->
-                binding.tvWeeklyMood.text = mood?.let { "This week: $it" } ?: "This week: —"
+                binding.tvWeeklyMood.text = mood?.let { "This week: $it" } ?: "This week: -"
             }
         }
 
-        // Multi-line: max weight per muscle group over time
         viewLifecycleOwner.lifecycleScope.launch {
             vm.categoryDailyStats.collect { rows ->
                 if (rows.isEmpty()) return@collect
@@ -119,7 +109,6 @@ class StatsFragment : Fragment(R.layout.fragment_stats) {
             }
         }
 
-        // Multi-line: total sets per muscle group over time
         viewLifecycleOwner.lifecycleScope.launch {
             vm.categoryDailyStats.collect { rows ->
                 if (rows.isEmpty()) return@collect
@@ -130,17 +119,15 @@ class StatsFragment : Fragment(R.layout.fragment_stats) {
             }
         }
 
-        // Weekly volume (tonnage)
         viewLifecycleOwner.lifecycleScope.launch {
             vm.weeklyVolume.collect { rows ->
                 if (rows.isEmpty()) return@collect
                 val points = rows.mapIndexed { i, r -> ChartPoint(i.toFloat(), r.totalVolume) }
-                val labels = rows.map { it.week.takeLast(3) } // "W12"
+                val labels = rows.map { it.week.takeLast(3) }
                 renderLineChart(binding.lineChartVolume, points, !isVolumeFull, xLabels = labels)
             }
         }
 
-        // Estimated 1RM — top exercises multi-line
         viewLifecycleOwner.lifecycleScope.launch {
             vm.topExerciseOneRM.collect { rows ->
                 if (rows.isEmpty()) return@collect
@@ -151,7 +138,6 @@ class StatsFragment : Fragment(R.layout.fragment_stats) {
             }
         }
 
-        // Click toggles — single-line charts
         binding.lineChart.setOnClickListener {
             isWeightFull = !isWeightFull
             renderLineChart(binding.lineChart, vm.weightProgress.value, !isWeightFull)
@@ -176,7 +162,6 @@ class StatsFragment : Fragment(R.layout.fragment_stats) {
             renderLineChart(binding.lineChartVolume, points, !isVolumeFull, xLabels = labels)
         }
 
-        // Click toggles — multi-line charts
         binding.lineChartCategoryWeight.setOnClickListener {
             isCategoryWeightFull = !isCategoryWeightFull
             val rows = vm.categoryDailyStats.value
@@ -203,7 +188,6 @@ class StatsFragment : Fragment(R.layout.fragment_stats) {
         }
     }
 
-    // Single-line chart: one metric over time, with max highlight + avg line
     private fun renderLineChart(
         chart: LineChart,
         points: List<ChartPoint>,
@@ -275,7 +259,6 @@ class StatsFragment : Fragment(R.layout.fragment_stats) {
         chart.invalidate()
     }
 
-    // Multi-line chart: multiple groups over time, X = date index
     private fun renderMultiLineChart(
         chart: LineChart,
         groups: Map<String, List<Pair<String, Float>>>,
@@ -284,7 +267,7 @@ class StatsFragment : Fragment(R.layout.fragment_stats) {
     ) {
         val visibleDates = if (compact) allDates.takeLast(7) else allDates
         val dateIndex = visibleDates.withIndex().associate { (i, d) -> d to i.toFloat() }
-        val shortLabels = visibleDates.map { it.substring(5) } // MM-DD
+        val shortLabels = visibleDates.map { it.substring(5) }
 
         val dataSets = groups.entries.mapIndexed { idx, (groupName, points) ->
             val entries = points
@@ -329,10 +312,5 @@ class StatsFragment : Fragment(R.layout.fragment_stats) {
         chart.setVisibleXRangeMaximum(7f)
         chart.moveViewToX(visibleDates.size.toFloat())
         chart.invalidate()
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }

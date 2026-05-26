@@ -8,8 +8,10 @@
 
     <string name="choose_types_title">Виберіть типи тренування</string>
     <string name="choose_types_placeholder">Натисніть, щоб обрати</string>
+    <string name="camera_permission_required">Натисніть, щоб обрати</string>
 
     <string name="no_train_selected">No workout</string>
+    <string name="camera_not_found">No workout</string>
 
     <string name="no_muscles_planned">No muscle groups selected</string>
 

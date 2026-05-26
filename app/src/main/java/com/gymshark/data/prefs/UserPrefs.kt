@@ -13,8 +13,8 @@ class UserPrefs(context: Context) {
         prefs.edit { putString(KEY_CURRENT_USER_ID, userId) }
     }
 
-    fun getCurrentUserId(): String {
-        return prefs.getString(KEY_CURRENT_USER_ID, null)?:"321"
+    fun getCurrentUserId(): String? {
+        return prefs.getString(KEY_CURRENT_USER_ID, null)
     }
 
     fun clearCurrentUserId() {

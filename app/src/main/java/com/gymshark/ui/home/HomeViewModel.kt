@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gymshark.data.user.UserRepository
 import com.gymshark.data.db.entity.UserEntity
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModel(
     private val repo: UserRepository
 ) : ViewModel() {
@@ -24,7 +26,7 @@ class HomeViewModel(
     fun saveUser(user: UserEntity) {
         viewModelScope.launch {
             repo.upsert(user)
-            repo.setCurrentUserId()
+            repo.setCurrentUserId(user.userId)
         }
     }
 }

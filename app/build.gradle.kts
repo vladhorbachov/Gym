@@ -98,8 +98,6 @@ dependencies {
 
     implementation ("com.google.android.material:material:1.13.0")
 
-    implementation ("androidx.datastore:datastore-preferences:1.1.1")
-
     // Moshi (Square)
     implementation("com.squareup.moshi:moshi-kotlin:1.15.1")
     ksp("com.squareup.moshi:moshi-kotlin-codegen:1.15.1")

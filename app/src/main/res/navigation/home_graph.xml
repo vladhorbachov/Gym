@@ -14,6 +14,9 @@
         <action
             android:id="@+id/action_navHome_to_prepareFragment"
             app:destination="@id/prepareFragment" />
+        <action
+            android:id="@+id/action_navHome_to_navProfile"
+            app:destination="@id/navProfile" />
 
     </fragment>
 
