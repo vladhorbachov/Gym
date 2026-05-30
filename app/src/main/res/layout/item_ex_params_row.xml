@@ -1,40 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="64dp"
+    android:layout_marginBottom="8dp"
+    android:background="@drawable/bg_set_row"
+    android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingBottom="8dp"
-    android:weightSum="2">
+    android:paddingHorizontal="10dp">
+
+    <TextView
+        android:id="@+id/tvSetNumber"
+        android:layout_width="42dp"
+        android:layout_height="42dp"
+        android:background="@drawable/bg_training_step"
+        android:gravity="center"
+        android:text="1"
+        android:textColor="@color/textPrimary"
+        android:textSize="14sp"
+        android:textStyle="bold" />
 
     <com.google.android.material.textfield.TextInputLayout
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1">
+        android:layout_marginStart="10dp"
+        android:layout_weight="1"
+        android:hint="reps"
+        app:boxBackgroundColor="@color/trainingSurface"
+        app:boxCornerRadiusBottomEnd="16dp"
+        app:boxCornerRadiusBottomStart="16dp"
+        app:boxCornerRadiusTopEnd="16dp"
+        app:boxCornerRadiusTopStart="16dp"
+        app:boxStrokeColor="@color/training_field_stroke"
+        app:hintTextColor="@color/textSecondary">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etLeft"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:gravity="center"
             android:inputType="number"
-            android:hint="reps" />
+            android:maxLength="3"
+            android:padding="0dp"
+            android:textColor="@color/textPrimary"
+            android:textColorHint="@color/textSecondary"
+            android:textSize="16sp"
+            android:textStyle="bold" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <Space
-        android:layout_width="12dp"
-        android:layout_height="0dp" />
-
     <com.google.android.material.textfield.TextInputLayout
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1">
+        android:layout_marginStart="10dp"
+        android:layout_weight="1"
+        android:hint="kg"
+        app:boxBackgroundColor="@color/trainingSurface"
+        app:boxCornerRadiusBottomEnd="16dp"
+        app:boxCornerRadiusBottomStart="16dp"
+        app:boxCornerRadiusTopEnd="16dp"
+        app:boxCornerRadiusTopStart="16dp"
+        app:boxStrokeColor="@color/training_field_stroke"
+        app:hintTextColor="@color/textSecondary">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etRight"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:gravity="center"
             android:inputType="numberDecimal"
-            android:hint="weight" />
+            android:maxLength="5"
+            android:padding="0dp"
+            android:textColor="@color/textPrimary"
+            android:textColorHint="@color/textSecondary"
+            android:textSize="16sp"
+            android:textStyle="bold" />
     </com.google.android.material.textfield.TextInputLayout>
 </LinearLayout>

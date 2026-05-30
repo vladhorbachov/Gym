@@ -15,10 +15,15 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 class StatsViewModel(
     private val trainingRepository: TrainingRepository
 ) : ViewModel() {
+
+    private val shortDateFormatter = DateTimeFormatter.ofPattern("MM.dd")
 
     private val rawDailyStats = trainingRepository.observeDailyStats()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
@@ -60,25 +65,33 @@ class StatsViewModel(
     val weightProgress = trainingRepository.observeBodyWeight()
         .map { list ->
             list.sortedBy { it.day }
-                .mapIndexed { i, w -> ChartPoint(i.toFloat(), w.weight) }
+                .mapIndexed { i, w ->
+                    ChartPoint(
+                        x = i.toFloat(),
+                        y = w.weight,
+                        label = Instant.ofEpochMilli(w.day)
+                            .atZone(ZoneId.systemDefault())
+                            .format(shortDateFormatter)
+                    )
+                }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val durationProgress = rawDailyStats.map { list ->
         list.reversed().mapIndexed { i, row ->
-            ChartPoint(i.toFloat(), row.totalDuration / 60f)
+            ChartPoint(i.toFloat(), row.totalDuration / 60f, row.day.toShortLabel())
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val caloriesProgress = rawDailyStats.map { list ->
         list.reversed().mapIndexed { i, row ->
-            ChartPoint(i.toFloat(), row.totalCalories.toFloat())
+            ChartPoint(i.toFloat(), row.totalCalories.toFloat(), row.day.toShortLabel())
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val bpmProgress = rawDailyStats.map { list ->
         list.reversed().mapIndexed { i, row ->
-            row.avgBpm?.let { ChartPoint(i.toFloat(), it) }
+            row.avgBpm?.let { ChartPoint(i.toFloat(), it, row.day.toShortLabel()) }
         }.filterNotNull()
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
@@ -102,4 +115,7 @@ class StatsViewModel(
                 rows.filter { it.exerciseName in top5 }
             }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    private fun String.toShortLabel(): String =
+        if (length >= 10) substring(5).replace("-", ".") else this
 }

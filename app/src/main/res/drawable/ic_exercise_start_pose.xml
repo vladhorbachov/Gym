@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="140dp"
+    android:height="120dp"
+    android:viewportWidth="140"
+    android:viewportHeight="120">
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M16,96 L124,96"
+        android:strokeColor="@color/trainingOutline"
+        android:strokeLineCap="round"
+        android:strokeWidth="4" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M42,42 L98,42"
+        android:strokeColor="@color/trainingAction"
+        android:strokeLineCap="round"
+        android:strokeWidth="7" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M56,44 L64,68 L54,90"
+        android:strokeColor="@color/textPrimary"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:strokeWidth="6" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M84,44 L76,68 L88,90"
+        android:strokeColor="@color/textPrimary"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:strokeWidth="6" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M64,68 L76,68"
+        android:strokeColor="@color/textPrimary"
+        android:strokeLineCap="round"
+        android:strokeWidth="6" />
+    <path
+        android:fillColor="@color/trainingStatus"
+        android:pathData="M70,22 m-10,0 a10,10 0,1 0,20 0 a10,10 0,1 0,-20 0" />
+</vector>

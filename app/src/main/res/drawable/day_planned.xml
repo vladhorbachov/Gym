@@ -2,6 +2,6 @@
     <solid android:color="@android:color/transparent"/>
     <stroke
         android:width="2dp"
-        android:color="@color/accent_500"/>
+        android:color="@color/trainingAction"/>
     <corners android:radius="@dimen/radius_16"/>
 </shape>

@@ -43,6 +43,13 @@ class PulseViewModel(
         _isMeasuring.value = false
     }
 
+    fun addMeasurement(bpm: Int) {
+        _samples.add(bpm)
+        _minBpm.value = _samples.minOrNull()
+        _maxBpm.value = _samples.maxOrNull()
+        _avgBpm.value = _samples.average().toInt()
+    }
+
     fun setPulse(pulseEntity: PulseEntity){
         viewModelScope.launch {
             runCatching {

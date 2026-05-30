@@ -20,11 +20,35 @@
     <color name="textDisabled">#66FFFFFF</color>
 
     <color name="strokeSubtle">#2A2738</color>
+    <color name="chartGrid">#3A3648</color>
+    <color name="chartBlue">#4CC9F0</color>
+    <color name="chartGreen">#22C55E</color>
+    <color name="chartAmber">#FBBF24</color>
+    <color name="chartRose">#FB7185</color>
+    <color name="chartViolet">#A78BFA</color>
+    <color name="chartTeal">#2DD4BF</color>
+    <color name="chartLime">#A3E635</color>
+    <color name="chartPeak">#FF6B6B</color>
+    <color name="trainingAction">#38BDF8</color>
+    <color name="trainingActionDark">#075985</color>
+    <color name="trainingActionSurface">#123044</color>
+    <color name="trainingOnAction">#04131D</color>
+    <color name="trainingStatus">#34D399</color>
+    <color name="trainingStatusDark">#047857</color>
+    <color name="trainingStatusSurface">#12382D</color>
+    <color name="trainingWarmup">#F59E0B</color>
+    <color name="trainingSurface">#181A25</color>
+    <color name="trainingSurfaceRaised">#202332</color>
+    <color name="trainingOutline">#334155</color>
+    <color name="trainingAccent">#38BDF8</color>
+    <color name="trainingAccentDark">#075985</color>
+    <color name="trainingProgress">#34D399</color>
+    <color name="trainingProgressDark">#047857</color>
     <color name="md_theme_background">#0F0F17</color>
     <color name="md_theme_surface">#171726</color>
     <color name="md_theme_surfaceContainer">#1E1E30</color>
 
-    <color name="md_theme_primary">#7C4DFF</color>
+    <color name="md_theme_primary">#38BDF8</color>
     <color name="md_theme_onPrimary">#FFFFFF</color>
 
     <color name="md_theme_onBackground">#F2F2F7</color>
@@ -67,4 +91,3 @@
     <color name="Deep_Blue_Light">#534bae</color>
 
 </resources>
-

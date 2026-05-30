@@ -14,6 +14,7 @@ import com.gymshark.data.db.entity.ExercisesEntity
 import com.gymshark.databinding.FragmentHomeBinding
 import com.gymshark.ui.home.adapter.ExerciseListItem
 import com.gymshark.ui.home.adapter.RecommendedExercisesAdapter
+import com.gymshark.ui.home.training.ExerciseInfoBottomSheet
 import com.gymshark.ui.home.training.TrainingViewModel
 import com.gymshark.utils.BaseAlert
 import com.gymshark.utils.BaseFragment
@@ -27,6 +28,13 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
     private var lastSelectedTypes: List<String> = emptyList()
     private val recommendedAdapter by lazy {
         RecommendedExercisesAdapter { exercise ->
+            ExerciseInfoBottomSheet
+                .newInstance(
+                    title = exercise.name,
+                    category = exercise.baseCategory,
+                    difficulty = exercise.difficulty
+                )
+                .show(parentFragmentManager, "exercise_info")
         }
     }
 

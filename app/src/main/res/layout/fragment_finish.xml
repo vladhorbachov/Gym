@@ -1,47 +1,186 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:padding="24dp"
-    android:gravity="center"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/bgMain"
+    android:paddingStart="20dp"
+    android:paddingTop="28dp"
+    android:paddingEnd="20dp"
+    android:paddingBottom="24dp">
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnBack"
+        style="@style/Widget.Material3.Button.Icon"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        app:backgroundTint="@color/training_secondary_button_bg"
+        app:cornerRadius="22dp"
+        app:icon="@drawable/arrow"
+        app:iconPadding="0dp"
+        app:iconTint="@color/trainingAction"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:text="How was your workout?"
-        android:textSize="20sp"
-        android:layout_marginBottom="24dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-    
+        android:id="@+id/tvKicker"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:text="Session complete"
+        android:textColor="@color/trainingStatus"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/btnBack"
+        app:layout_constraintTop_toTopOf="@id/btnBack"
+        app:layout_constraintBottom_toBottomOf="@id/btnBack" />
 
-    <Button
-        android:id="@+id/btnBad"
-        android:text="😣 Bad"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="How did it feel?"
+        android:textColor="@color/textPrimary"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvKicker" />
 
-    <Button
-        android:id="@+id/btnNeutral"
-        android:text="😐 Neutral"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+    <TextView
+        android:id="@+id/tvSubtitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:lineSpacingExtra="3dp"
+        android:text="Save the mood now. The next step can capture pulse and make the stats richer."
+        android:textColor="@color/textSecondary"
+        android:textSize="15sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvTitle" />
 
-    <Button
-        android:id="@+id/btnGood"
-        android:text="🙂 Good"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+    <GridLayout
+        android:id="@+id/moodGrid"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
+        android:columnCount="2"
+        android:rowCount="2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvSubtitle">
 
-    <Button
-        android:id="@+id/btnAmazing"
-        android:text="🔥 Amazing"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnBad"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="86dp"
+            android:layout_columnWeight="1"
+            android:layout_marginEnd="6dp"
+            android:layout_marginBottom="12dp"
+            android:text="Hard"
+            android:textAllCaps="false"
+            android:textColor="@color/training_secondary_button_text"
+            app:backgroundTint="@color/training_secondary_button_bg"
+            app:cornerRadius="20dp"
+            app:strokeColor="@color/training_secondary_button_stroke" />
 
-    <Button
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnNeutral"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="86dp"
+            android:layout_columnWeight="1"
+            android:layout_marginStart="6dp"
+            android:layout_marginBottom="12dp"
+            android:text="Steady"
+            android:textAllCaps="false"
+            android:textColor="@color/training_secondary_button_text"
+            app:backgroundTint="@color/training_secondary_button_bg"
+            app:cornerRadius="20dp"
+            app:strokeColor="@color/training_secondary_button_stroke" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnGood"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="86dp"
+            android:layout_columnWeight="1"
+            android:layout_marginEnd="6dp"
+            android:text="Strong"
+            android:textAllCaps="false"
+            android:textColor="@color/training_secondary_button_text"
+            app:backgroundTint="@color/training_secondary_button_bg"
+            app:cornerRadius="20dp"
+            app:strokeColor="@color/training_secondary_button_stroke" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAmazing"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="86dp"
+            android:layout_columnWeight="1"
+            android:layout_marginStart="6dp"
+            android:text="Peak"
+            android:textAllCaps="false"
+            android:textColor="@color/training_secondary_button_text"
+            app:backgroundTint="@color/training_secondary_button_bg"
+            app:cornerRadius="20dp"
+            app:strokeColor="@color/training_secondary_button_stroke" />
+    </GridLayout>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardNext"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        app:cardBackgroundColor="@color/surfaceCard"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/moodGrid"
+        app:strokeColor="@color/strokeSubtle"
+        app:strokeWidth="1dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Next: pulse check"
+                android:textColor="@color/textPrimary"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvSelectedMood"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="Mood: Steady"
+                android:textColor="@color/textSecondary"
+                android:textSize="13sp" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnContinue"
+        style="@style/Widget.Gym.PrimaryButton"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
         android:text="Continue"
-        android:layout_marginTop="32dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-</LinearLayout>
+        app:icon="@drawable/ic_chevron_right"
+        app:iconGravity="textEnd"
+        app:iconTint="@color/trainingOnAction"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

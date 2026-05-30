@@ -2,12 +2,14 @@ package com.gymshark.ui.home.pulse
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.pm.PackageManager
 import android.os.*
 import android.view.Surface
 import android.view.View
-import androidx.core.app.ActivityCompat
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
@@ -32,7 +34,18 @@ class PulseFragment : BaseFragment<FragmentPulseBinding>(FragmentPulseBinding::i
     private var cameraService: CameraService? = null
     private var analyzer: OutputAnalyzer? = null
 
-    private val requestCodeCamera = 100
+    private val cameraPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (granted) {
+                startMeasurement()
+            } else {
+                Snackbar.make(
+                    binding.root,
+                    "Camera permission required",
+                    Snackbar.LENGTH_LONG
+                ).show()
+            }
+        }
 
     companion object {
         const val MESSAGE_UPDATE_REALTIME = 1
@@ -42,22 +55,20 @@ class PulseFragment : BaseFragment<FragmentPulseBinding>(FragmentPulseBinding::i
 
     @SuppressLint("HandlerLeak")
     private val mainHandler: Handler = object : Handler(Looper.getMainLooper()) {
-        override fun handleMessage(msg: Message) {
+    override fun handleMessage(msg: Message) {
             when (msg.what) {
                 MESSAGE_UPDATE_REALTIME -> {
                     binding.tvResult.text = msg.obj.toString()
+                    binding.tvHint.text = "Hold steady. The signal is being analyzed."
                 }
                 MESSAGE_UPDATE_FINAL -> {
                     val pulse = msg.obj.toString().toDouble().toInt()
 
                     if (pulse > 40) {
-                        // pulseVm.addMeasurement(pulse)
+                        pulseVm.addMeasurement(pulse)
                     }
 
-                    binding.tvResult.text =
-                        "Min: ${pulseVm.minBpm.value}  " +
-                            "Max: ${pulseVm.maxBpm.value}  " +
-                            "Avg: ${pulseVm.avgBpm.value}"
+                    renderMetrics()
                 }
                 MESSAGE_CAMERA_NOT_AVAILABLE -> {
                     Snackbar.make(
@@ -78,34 +89,64 @@ class PulseFragment : BaseFragment<FragmentPulseBinding>(FragmentPulseBinding::i
         cameraService = CameraService(requireActivity(), mainHandler)
         analyzer = OutputAnalyzer(requireContext(), binding.graphTextureView, mainHandler)
 
-        ActivityCompat.requestPermissions(
-            requireActivity(),
-            arrayOf(Manifest.permission.CAMERA),
-            requestCodeCamera
-        )
+        setupMetrics()
+        playIntro()
+
+        binding.btnBack.setOnClickListener {
+            it.pressPulse()
+            findNavController().navigateUp()
+        }
 
         binding.btnStart.setOnClickListener {
-            startMeasurement()
+            it.pressPulse()
+            startMeasurementWithPermission()
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
-            pulseVm.avgBpm.collect { avg ->
-                if (avg != null) {
-                    binding.tvResult.text =
-                        "Min: ${pulseVm.minBpm.value}  " +
-                            "Max: ${pulseVm.maxBpm.value}  " +
-                            "Avg: $avg"
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                pulseVm.avgBpm.collect { avg ->
+                    if (avg != null) {
+                        renderMetrics()
+                    }
                 }
             }
         }
 
         binding.btnFinish.setOnClickListener {
+            it.pressPulse()
             finishVm.registerActivity(System.currentTimeMillis())
             saveAndExit()
         }
     }
 
+    private fun setupMetrics() = with(binding) {
+        metricMin.tvLabel.text = "min"
+        metricAvg.tvLabel.text = "avg"
+        metricMax.tvLabel.text = "max"
+    }
+
+    private fun startMeasurementWithPermission() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) ==
+            android.content.pm.PackageManager.PERMISSION_GRANTED
+        ) {
+            startMeasurement()
+        } else {
+            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+        }
+    }
+
     private fun startMeasurement() {
+        binding.tvResult.text = "Measuring..."
+        binding.tvHint.text = "Cover the camera fully and avoid movement."
+        binding.cameraFrame.animate()
+            .scaleX(1.04f)
+            .scaleY(1.04f)
+            .setDuration(180L)
+            .withEndAction {
+                binding.cameraFrame.animate().scaleX(1f).scaleY(1f).setDuration(220L).start()
+            }
+            .start()
+
         analyzer = OutputAnalyzer(requireContext(), binding.graphTextureView, mainHandler)
 
         val textureView = binding.textureView2
@@ -118,21 +159,41 @@ class PulseFragment : BaseFragment<FragmentPulseBinding>(FragmentPulseBinding::i
                 start(previewSurface)
                 analyzer?.measurePulse(textureView, this)
             }
+        } else {
+            binding.tvHint.text = "Camera preview is preparing. Try again in a moment."
+        }
+    }
+
+    private fun renderMetrics() = with(binding) {
+        val min = pulseVm.minBpm.value
+        val avg = pulseVm.avgBpm.value
+        val max = pulseVm.maxBpm.value
+
+        metricMin.tvValue.text = min?.toString() ?: "-"
+        metricAvg.tvValue.text = avg?.toString() ?: "-"
+        metricMax.tvValue.text = max?.toString() ?: "-"
+        tvResult.text = avg?.let { "$it bpm" } ?: "Ready to measure"
+        tvHint.text = if (avg == null) {
+            "Camera access is requested only when measurement starts."
+        } else {
+            "Pulse captured. Save to finish the workout."
         }
     }
 
     private fun saveAndExit() {
         val navController = findNavController()
+        val durationSec = statVm.elapsedSeconds.value
 
         trainingVm.finishTraining(
             title = "Workout",
             finishTime = System.currentTimeMillis(),
-            durationSec = statVm.elapsedSeconds.value,
+            durationSec = durationSec,
             mood = finishVm.mood.value.name.lowercase(),
             minBpm = pulseVm.minBpm.value,
             maxBpm = pulseVm.maxBpm.value,
             avgBpm = pulseVm.avgBpm.value
         )
+        statVm.stopAndReset()
 
         navController.navigate(
             R.id.navStats,
@@ -154,21 +215,23 @@ class PulseFragment : BaseFragment<FragmentPulseBinding>(FragmentPulseBinding::i
         analyzer?.stop()
         super.onDestroyView()
     }
-
-    @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        if (requestCode == requestCodeCamera) {
-            if (!(grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                Snackbar.make(
-                    binding.root,
-                    "Camera permission required",
-                    Snackbar.LENGTH_LONG
-                ).show()
+    private fun playIntro() = with(binding) {
+        listOf(btnBack, tvKicker, tvTitle, tvSubtitle, cardPulse, actionRow)
+            .forEachIndexed { index, target ->
+                target.alpha = 0f
+                target.translationY = 24f
+                target.animate()
+                    .alpha(1f)
+                    .translationY(0f)
+                    .setStartDelay(index * 55L)
+                    .setDuration(260L)
+                    .start()
             }
-        }
+    }
+
+    private fun View.pressPulse() {
+        animate().scaleX(0.97f).scaleY(0.97f).setDuration(80L).withEndAction {
+            animate().scaleX(1f).scaleY(1f).setDuration(120L).start()
+        }.start()
     }
 }
