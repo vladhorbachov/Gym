@@ -35,7 +35,6 @@
         <item name="android:paddingHorizontal">16dp</item>
     </style>
 
-
     <style name="Theme.Gym.Profile" parent="Theme.Material3.Dark.NoActionBar">
 
         <item name="colorPrimary">@color/trainingAction</item>

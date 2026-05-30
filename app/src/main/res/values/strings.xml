@@ -5,6 +5,8 @@
     <string name="email_6">Перевір email і пароль (мін. 6 символів)</string>
     <string name="home">Home</string>
     <string name="stats">Stats</string>
+    <string name="meal">Meal</string>
+    <string name="profile">Profile</string>
 
     <string name="choose_types_title">Виберіть типи тренування</string>
     <string name="choose_types_placeholder">Натисніть, щоб обрати</string>
