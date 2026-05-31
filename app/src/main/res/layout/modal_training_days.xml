@@ -1,93 +1,249 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_margin="16dp"
-    app:cardCornerRadius="28dp"
+    android:layout_height="match_parent"
+    android:layout_margin="14dp"
+    app:cardBackgroundColor="@color/surfaceCard"
+    app:cardCornerRadius="30dp"
     app:cardElevation="0dp"
-    app:strokeWidth="0dp"
-    android:background="@color/md_theme_surfaceContainer">
+    app:strokeColor="@color/strokeSubtle"
+    app:strokeWidth="1dp">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="20dp">
+        android:layout_height="match_parent"
+        android:padding="16dp">
 
         <include
             android:id="@+id/header"
-            layout="@layout/include_modal_header" />
-
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/chipGroupDays"
-            android:layout_width="match_parent"
+            layout="@layout/include_modal_header"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            app:chipSpacingHorizontal="8dp"
-            app:chipSpacingVertical="8dp"
-            app:singleSelection="false">
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipMon"
-                style="@style/Widget.Gym.DayChip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Mon" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipTue"
-                style="@style/Widget.Gym.DayChip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Tue" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipWed"
-                style="@style/Widget.Gym.DayChip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Wed" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipThu"
-                style="@style/Widget.Gym.DayChip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Thu" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipFri"
-                style="@style/Widget.Gym.DayChip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Fri" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipSat"
-                style="@style/Widget.Gym.DayChip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Sat" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipSun"
-                style="@style/Widget.Gym.DayChip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Sun" />
-
-        </com.google.android.material.chip.ChipGroup>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSave"
-            style="@style/Widget.Material3.Button"
-            android:layout_width="match_parent"
+        <LinearLayout
+            android:id="@+id/introPanel"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="Save"
-            app:cornerRadius="16dp" />
+            android:layout_marginTop="6dp"
+            android:background="@drawable/bg_profile_sheet_header"
+            android:orientation="vertical"
+            android:padding="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/header">
 
-    </LinearLayout>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Weekly rhythm"
+                android:textColor="@color/trainingAction"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:lineSpacingExtra="2dp"
+                android:text="Build the week from clear day tiles. Selected days become available in the training plan."
+                android:textColor="@color/textSecondary"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/daysPanel"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/bg_profile_sheet_panel"
+            android:orientation="vertical"
+            android:padding="10dp"
+            app:layout_constraintBottom_toTopOf="@id/footerPanel"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/introPanel">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:baselineAligned="false"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:id="@+id/chipMon"
+                    style="@style/Widget.Gym.DayTile"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_margin="5dp"
+                    android:layout_weight="1">
+
+                    <TextView
+                        style="@style/Widget.Gym.DayTileName"
+                        android:text="MON" />
+
+                    <TextView
+                        style="@style/Widget.Gym.DayTileCaption"
+                        android:text="Start" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/chipTue"
+                    style="@style/Widget.Gym.DayTile"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_margin="5dp"
+                    android:layout_weight="1">
+
+                    <TextView
+                        style="@style/Widget.Gym.DayTileName"
+                        android:text="TUE" />
+
+                    <TextView
+                        style="@style/Widget.Gym.DayTileCaption"
+                        android:text="Build" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/chipWed"
+                    style="@style/Widget.Gym.DayTile"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_margin="5dp"
+                    android:layout_weight="1">
+
+                    <TextView
+                        style="@style/Widget.Gym.DayTileName"
+                        android:text="WED" />
+
+                    <TextView
+                        style="@style/Widget.Gym.DayTileCaption"
+                        android:text="Push" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:baselineAligned="false"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:id="@+id/chipThu"
+                    style="@style/Widget.Gym.DayTile"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_margin="5dp"
+                    android:layout_weight="1">
+
+                    <TextView
+                        style="@style/Widget.Gym.DayTileName"
+                        android:text="THU" />
+
+                    <TextView
+                        style="@style/Widget.Gym.DayTileCaption"
+                        android:text="Pull" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/chipFri"
+                    style="@style/Widget.Gym.DayTile"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_margin="5dp"
+                    android:layout_weight="1">
+
+                    <TextView
+                        style="@style/Widget.Gym.DayTileName"
+                        android:text="FRI" />
+
+                    <TextView
+                        style="@style/Widget.Gym.DayTileCaption"
+                        android:text="Peak" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/chipSat"
+                    style="@style/Widget.Gym.DayTile"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_margin="5dp"
+                    android:layout_weight="1">
+
+                    <TextView
+                        style="@style/Widget.Gym.DayTileName"
+                        android:text="SAT" />
+
+                    <TextView
+                        style="@style/Widget.Gym.DayTileCaption"
+                        android:text="Power" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:baselineAligned="false"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:id="@+id/chipSun"
+                    style="@style/Widget.Gym.DayTile"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_margin="5dp"
+                    android:layout_weight="1">
+
+                    <TextView
+                        style="@style/Widget.Gym.DayTileName"
+                        android:text="SUN" />
+
+                    <TextView
+                        style="@style/Widget.Gym.DayTileCaption"
+                        android:text="Reset" />
+                </LinearLayout>
+
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_margin="5dp"
+                    android:layout_weight="1" />
+
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_margin="5dp"
+                    android:layout_weight="1" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/footerPanel"
+            android:layout_width="0dp"
+            android:layout_height="72dp"
+            android:background="@drawable/bg_profile_sheet_footer"
+            android:padding="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSave"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_gravity="center"
+                android:text="Save days"
+                android:textColor="@color/trainingOnAction"
+                app:backgroundTint="@color/trainingAction"
+                app:cornerRadius="26dp" />
+        </FrameLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

@@ -95,12 +95,12 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>(FragmentProfileBind
             user?.age?.takeIf { it > 0 }?.let { add("$it y.o.") }
             user?.height?.takeIf { it > 0 }?.let { add("$it cm") }
             add(if (user?.sex == true) "Male" else "Female")
-        }.joinToString(" • ")
+        }.joinToString(" / ")
 
         tvName.text = safeName
         tvProfileSummary.text = summary
-        tvVisitSeries.text = "Current series: ${user?.series?.current ?: 0}"
-        tvVisitMaxSeries.text = "Max series: ${user?.series?.maxSeries ?: 0}"
+        tvVisitSeries.text = "Current streak\n${user?.series?.current ?: 0}"
+        tvVisitMaxSeries.text = "Best streak\n${user?.series?.maxSeries ?: 0}"
 
         rowPersonalData.bind(
             ProfileRowModel(
@@ -127,7 +127,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>(FragmentProfileBind
         val grouped = slots.groupBy { it.day }
         return grouped.entries
             .sortedBy { it.key.ordinal }
-            .joinToString(" · ") { (day, daySlots) ->
+            .joinToString(" / ") { (day, daySlots) ->
                 val types = daySlots.flatMap { it.types }.distinct()
                 val typesText = if (types.isEmpty()) "Not set" else types.joinToString("/")
                 "${day.getDisplayName(TextStyle.SHORT, locale)}: $typesText"

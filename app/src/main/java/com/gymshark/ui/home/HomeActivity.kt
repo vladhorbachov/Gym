@@ -2,20 +2,29 @@ package com.gymshark.ui.home
 
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import android.widget.FrameLayout
+import android.widget.ScrollView
 import androidx.core.view.doOnLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
+import androidx.core.widget.NestedScrollView
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.gymshark.R
 import com.gymshark.databinding.ActivityHomeBinding
 import com.gymshark.utils.BaseActivity
 
 class HomeActivity : BaseActivity<ActivityHomeBinding>(ActivityHomeBinding::inflate) {
+
+    private var contentBottomInset = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,43 +48,32 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(ActivityHomeBinding::infl
 
         setupBottomNavigation(navController)
         setupBottomNavBlur()
+        setupContentInsets()
         applyHomeInsets()
     }
 
     private fun setupBottomNavigation(navController: NavController) = with(binding) {
-        navHomeItem.setOnClickListener { navigateTopLevel(navController, R.id.navHome) }
-        navStatsItem.setOnClickListener { navigateTopLevel(navController, R.id.navStats) }
-        navMealItem.setOnClickListener { navigateTopLevel(navController, R.id.prepareMealFragment) }
-        navProfileItem.setOnClickListener { navigateTopLevel(navController, R.id.navProfile) }
+        morphingBottomNav.setOnTabSelectedListener { index ->
+            val destinationId = when (index) {
+                1 -> R.id.navStats
+                2 -> R.id.prepareMealFragment
+                3 -> R.id.navProfile
+                else -> R.id.navHome
+            }
+            navigateTopLevel(navController, destinationId)
+        }
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            val selectedItem = when (destination.id) {
-                R.id.navStats -> navStatsItem
+            val selectedIndex = when (destination.id) {
+                R.id.navStats -> 1
                 R.id.prepareMealFragment,
-                R.id.navMeal -> navMealItem
-                R.id.navProfile -> navProfileItem
-                else -> navHomeItem
+                R.id.navMeal -> 2
+                R.id.navProfile -> 3
+                else -> 0
             }
 
-            listOf(navHomeItem, navStatsItem, navMealItem, navProfileItem)
-                .forEach { updateTabSelection(it, it == selectedItem) }
+            morphingBottomNav.setSelectedTab(selectedIndex, animate = false)
         }
-    }
-
-    private fun updateTabSelection(tabContent: View, isSelected: Boolean) {
-        val tabContainer = tabContent.parent as? View
-        tabContent.isSelected = isSelected
-        tabContainer?.isSelected = isSelected
-
-        val targetScale = if (isSelected) 1f else 0.96f
-        val targetAlpha = if (isSelected) 1f else 0.42f
-
-        tabContent.animate()
-            .scaleX(targetScale)
-            .scaleY(targetScale)
-            .alpha(targetAlpha)
-            .setDuration(180L)
-            .start()
     }
 
     private fun navigateTopLevel(navController: NavController, destinationId: Int) {
@@ -110,12 +108,109 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(ActivityHomeBinding::infl
                 bottomMargin = nav.bottom + 16.dp
             }
 
+            contentBottomInset = nav.bottom + 108.dp
+            applyContentBottomInsetToCurrentFragment()
+
             insets
         }
 
         ViewCompat.requestApplyInsets(binding.root)
     }
 
+    private fun setupContentInsets() {
+        val navHost = supportFragmentManager
+            .findFragmentById(R.id.nav_host) as NavHostFragment
+
+        navHost.childFragmentManager.registerFragmentLifecycleCallbacks(
+            object : FragmentManager.FragmentLifecycleCallbacks() {
+                override fun onFragmentViewCreated(
+                    fm: FragmentManager,
+                    fragment: Fragment,
+                    view: View,
+                    savedInstanceState: Bundle?
+                ) {
+                    applyContentBottomInset(view)
+                }
+            },
+            true
+        )
+    }
+
+    private fun applyContentBottomInsetToCurrentFragment() {
+        val navHost = supportFragmentManager
+            .findFragmentById(R.id.nav_host) as NavHostFragment
+
+        navHost.childFragmentManager.fragments
+            .lastOrNull { it.view != null }
+            ?.view
+            ?.let(::applyContentBottomInset)
+    }
+
+    private fun applyContentBottomInset(root: View) {
+        val scrollTargets = mutableListOf<View>()
+        root.collectBottomInsetTargets(scrollTargets)
+
+        if (scrollTargets.isEmpty()) {
+            root.updateBottomPaddingKeepingBase(contentBottomInset)
+            return
+        }
+
+        scrollTargets.forEach { target ->
+            target.updateBottomPaddingKeepingBase(contentBottomInset)
+            when (target) {
+                is RecyclerView -> target.clipToPadding = false
+                is ScrollView -> target.clipToPadding = false
+                is NestedScrollView -> target.clipToPadding = false
+            }
+        }
+    }
+
+    private fun View.collectBottomInsetTargets(targets: MutableList<View>) {
+        if (this is RecyclerView) {
+            if (isVerticalRecyclerView()) {
+                targets += this
+            }
+            return
+        }
+
+        if (this is ScrollView || this is NestedScrollView) {
+            targets += this
+            return
+        }
+
+        if (this is ViewGroup) {
+            for (index in 0 until childCount) {
+                getChildAt(index).collectBottomInsetTargets(targets)
+            }
+        }
+    }
+
+    private fun RecyclerView.isVerticalRecyclerView(): Boolean {
+        val linearLayoutManager = layoutManager as? LinearLayoutManager
+        return linearLayoutManager?.orientation != LinearLayoutManager.HORIZONTAL
+    }
+
+    private fun View.updateBottomPaddingKeepingBase(extraBottom: Int) {
+        val base = getTag(R.id.tag_home_content_padding) as? PaddingSnapshot
+            ?: PaddingSnapshot(paddingLeft, paddingTop, paddingRight, paddingBottom).also {
+                setTag(R.id.tag_home_content_padding, it)
+            }
+
+        updatePadding(
+            left = base.left,
+            top = base.top,
+            right = base.right,
+            bottom = base.bottom + extraBottom
+        )
+    }
+
     private val Int.dp: Int
         get() = (this * resources.displayMetrics.density).toInt()
+
+    private data class PaddingSnapshot(
+        val left: Int,
+        val top: Int,
+        val right: Int,
+        val bottom: Int
+    )
 }

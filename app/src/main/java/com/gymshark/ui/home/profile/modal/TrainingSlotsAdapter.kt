@@ -3,9 +3,11 @@ package com.gymshark.ui.home.profile.modal
 import android.view.DragEvent
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.gymshark.R
 import com.gymshark.databinding.ItemSlotBinding
 import com.gymshark.domain.models.DaySlot
 
@@ -23,12 +25,26 @@ class TrainingSlotsAdapter(
 
         fun bind(slot: DaySlot) {
             b.day.text = slot.day.name.take(3)
-            b.types.text = slot.types.joinToString(", ").ifEmpty { "Drop here" }
+            b.types.text = slot.types.joinToString(", ").ifEmpty { "Drop muscle" }
+            val dropSurface = b.root.getChildAt(0)
 
             b.root.setOnDragListener { _, event ->
-                if (event.action == DragEvent.ACTION_DROP) {
-                    val type = event.clipData.getItemAt(0).text.toString()
-                    onTypeDropped(slot, type)
+                when (event.action) {
+                    DragEvent.ACTION_DRAG_ENTERED -> {
+                        dropSurface.background = ContextCompat.getDrawable(b.root.context, R.drawable.bg_slot_drag_active)
+                        b.root.animate().scaleX(1.04f).scaleY(1.04f).setDuration(120L).start()
+                    }
+                    DragEvent.ACTION_DRAG_EXITED,
+                    DragEvent.ACTION_DRAG_ENDED -> {
+                        dropSurface.background = ContextCompat.getDrawable(b.root.context, R.drawable.bg_slot_default)
+                        b.root.animate().scaleX(1f).scaleY(1f).setDuration(120L).start()
+                    }
+                    DragEvent.ACTION_DROP -> {
+                        val type = event.clipData.getItemAt(0).text.toString()
+                        dropSurface.background = ContextCompat.getDrawable(b.root.context, R.drawable.bg_slot_default)
+                        b.root.animate().scaleX(1f).scaleY(1f).setDuration(120L).start()
+                        onTypeDropped(slot, type)
+                    }
                 }
                 true
             }

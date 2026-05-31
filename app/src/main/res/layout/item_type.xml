@@ -1,9 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.chip.Chip
+<com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/Widget.Material3.Chip.Assist"
-    android:id="@+id/title"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="Chest"
-    android:layout_margin="6dp"/>
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="52dp"
+    android:layout_marginHorizontal="2dp"
+    android:layout_marginVertical="1dp"
+    android:foreground="?attr/selectableItemBackground"
+    app:cardBackgroundColor="@android:color/transparent"
+    app:cardCornerRadius="14dp"
+    app:cardElevation="0dp"
+    app:strokeWidth="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="10dp">
+
+        <FrameLayout
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@drawable/bg_type_drag_handle">
+
+            <View
+                android:layout_width="9dp"
+                android:layout_height="9dp"
+                android:layout_gravity="center"
+                android:background="@drawable/bg_type_drag_dot" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="Chest"
+            android:textColor="@color/textPrimary"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="18dp"
+            android:layout_height="28dp"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <View
+                android:layout_width="12dp"
+                android:layout_height="2dp"
+                android:layout_marginBottom="4dp"
+                android:background="@color/strokeSubtle" />
+
+            <View
+                android:layout_width="12dp"
+                android:layout_height="2dp"
+                android:layout_marginBottom="4dp"
+                android:background="@color/strokeSubtle" />
+
+            <View
+                android:layout_width="12dp"
+                android:layout_height="2dp"
+                android:background="@color/strokeSubtle" />
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

@@ -2,6 +2,10 @@ package com.gymshark.ui.home.training
 
 import android.os.Bundle
 import android.view.View
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -19,6 +23,7 @@ class TrainingFragment : BaseFragment<FragmentTrainingBinding>(FragmentTrainingB
 
     private val trainingVm: TrainingViewModel by activityViewModel()
     private val statVm: TrainingStatViewModel by activityViewModel()
+    private var isPaused = false
 
     private val adapter = ExerciseAdapter { item ->
         ExerciseActionsBottomSheet.newInstance(item.exerciseId)
@@ -29,12 +34,18 @@ class TrainingFragment : BaseFragment<FragmentTrainingBinding>(FragmentTrainingB
         super.onViewCreated(view, savedInstanceState)
 
         with(binding) {
+            applyActionBarInsets()
             rvExercises.layoutManager = LinearLayoutManager(requireContext())
             rvExercises.adapter = adapter
 
             btnBack.setOnClickListener {
                 it.pressPulse()
                 findNavController().navigateUp()
+            }
+
+            btnPause.setOnClickListener {
+                it.pressPulse()
+                togglePause()
             }
 
             btnFinish.setOnClickListener {
@@ -83,8 +94,22 @@ class TrainingFragment : BaseFragment<FragmentTrainingBinding>(FragmentTrainingB
         }
     }
 
+    private fun applyActionBarInsets() = with(binding) {
+        ViewCompat.setOnApplyWindowInsetsListener(root) { _, insets ->
+            val nav = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+
+            workoutActionBar.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                bottomMargin = nav.bottom + 96.dp
+            }
+
+            insets
+        }
+
+        ViewCompat.requestApplyInsets(root)
+    }
+
     private fun playIntro() = with(binding) {
-        listOf(header, rvExercises, btnFinish).forEachIndexed { index, target ->
+        listOf(header, rvExercises, workoutActionBar).forEachIndexed { index, target ->
             target.alpha = 0f
             target.translationY = 22f
             target.animate()
@@ -108,9 +133,25 @@ class TrainingFragment : BaseFragment<FragmentTrainingBinding>(FragmentTrainingB
         return "%02d:%02d".format(minutes, seconds)
     }
 
+    private fun togglePause() = with(binding) {
+        isPaused = !isPaused
+        if (isPaused) {
+            statVm.pause()
+            tvTrainingStatus.text = "Workout paused"
+            btnPause.text = "Resume"
+        } else {
+            statVm.start()
+            tvTrainingStatus.text = "Live workout"
+            btnPause.text = "Pause"
+        }
+    }
+
     private fun View.pressPulse() {
         animate().scaleX(0.97f).scaleY(0.97f).setDuration(80L).withEndAction {
             animate().scaleX(1f).scaleY(1f).setDuration(120L).start()
         }.start()
     }
+
+    private val Int.dp: Int
+        get() = (this * resources.displayMetrics.density).toInt()
 }

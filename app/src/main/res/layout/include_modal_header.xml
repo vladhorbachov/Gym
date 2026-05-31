@@ -3,24 +3,23 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingTop="8dp"
-    android:paddingBottom="12dp"
-    android:paddingHorizontal="16dp">
+    android:paddingTop="4dp"
+    android:paddingBottom="10dp">
 
     <View
         android:layout_width="40dp"
         android:layout_height="4dp"
         android:layout_gravity="center_horizontal"
         android:background="@drawable/bg_drag_handle"
-        android:layout_marginBottom="12dp"/>
+        android:layout_marginBottom="14dp"/>
 
     <TextView
         android:id="@+id/tvTitle"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Title"
         android:textStyle="bold"
-        android:textSize="20sp"
+        android:textSize="22sp"
         android:textColor="@color/textPrimary"/>
 
 </LinearLayout>

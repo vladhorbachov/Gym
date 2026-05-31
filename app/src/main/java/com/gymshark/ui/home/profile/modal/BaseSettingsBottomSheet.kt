@@ -5,12 +5,17 @@ import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.gymshark.R
 
 abstract class BaseSettingsBottomSheet : BottomSheetDialogFragment() {
+
+    protected open val sheetHeightRatio: Float = 0.78f
 
     override fun getTheme(): Int = R.style.ThemeOverlay_Gym_BottomSheet
 
@@ -33,7 +38,19 @@ abstract class BaseSettingsBottomSheet : BottomSheetDialogFragment() {
             behavior.isDraggable = true
 
             sheet.layoutParams.height =
-                (resources.displayMetrics.heightPixels * 0.85f).toInt()
+                if (sheetHeightRatio > 0f) {
+                    (resources.displayMetrics.heightPixels * sheetHeightRatio).toInt()
+                } else {
+                    android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+                }
+            sheet.requestLayout()
+
+            ViewCompat.setOnApplyWindowInsetsListener(sheet) { v, insets ->
+                val nav = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+                v.updatePadding(bottom = nav.bottom)
+                insets
+            }
+            ViewCompat.requestApplyInsets(sheet)
         }
 
         return dialog

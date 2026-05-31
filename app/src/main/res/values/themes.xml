@@ -74,6 +74,32 @@
 
     </style>
 
+    <style name="Widget.Gym.DayTile" parent="">
+        <item name="android:background">@drawable/bg_day_tile_default</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:foreground">?attr/selectableItemBackground</item>
+        <item name="android:gravity">center</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:padding">10dp</item>
+    </style>
+
+    <style name="Widget.Gym.DayTileName" parent="">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/textPrimary</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="Widget.Gym.DayTileCaption" parent="">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">4dp</item>
+        <item name="android:textColor">@color/textSecondary</item>
+        <item name="android:textSize">11sp</item>
+    </style>
+
 
     <style name="ThemeOverlay.Material3.BottomSheetDialog"
         parent="ThemeOverlay.Material3.Dialog">

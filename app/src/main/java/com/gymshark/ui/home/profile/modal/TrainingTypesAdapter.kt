@@ -22,12 +22,23 @@ class TrainingTypesAdapter :
 
         fun bind(type: String) {
             b.title.text = type
+            b.root.scaleX = 1f
+            b.root.scaleY = 1f
+            b.root.alpha = 1f
 
             b.root.setOnLongClickListener {
+                it.animate().scaleX(1.08f).scaleY(1.08f).alpha(0.72f).setDuration(120L).start()
                 val data = ClipData.newPlainText("type", type)
                 val shadow = View.DragShadowBuilder(it)
                 it.startDragAndDrop(data, shadow, null, 0)
                 true
+            }
+
+            b.root.setOnDragListener { view, event ->
+                if (event.action == android.view.DragEvent.ACTION_DRAG_ENDED) {
+                    view.animate().scaleX(1f).scaleY(1f).alpha(1f).setDuration(140L).start()
+                }
+                false
             }
         }
     }

@@ -7,6 +7,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.gymshark.databinding.BsExerciseInfoBinding
@@ -27,12 +32,23 @@ class ExerciseInfoBottomSheet : BottomSheetDialogFragment() {
             setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
             setDimAmount(0.45f)
         }
-        (dialog as? BottomSheetDialog)
+        val sheet = (dialog as? BottomSheetDialog)
             ?.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
-            ?.setBackgroundColor(Color.TRANSPARENT)
+        sheet?.setBackgroundColor(Color.TRANSPARENT)
+        sheet?.layoutParams?.height = (resources.displayMetrics.heightPixels * 0.82f).toInt()
+        sheet?.requestLayout()
+        sheet?.let {
+            BottomSheetBehavior.from(it).apply {
+                isDraggable = false
+                skipCollapsed = true
+                state = BottomSheetBehavior.STATE_EXPANDED
+            }
+        }
     }
 
     override fun onViewCreated(view: View, state: Bundle?) {
+        applyBottomSheetInsets()
+
         val title = requireArguments().getString(ARG_TITLE).orEmpty()
         val category = requireArguments().getString(ARG_CATEGORY).orEmpty()
         val difficulty = requireArguments().getInt(ARG_DIFFICULTY, 1).coerceIn(1, 3)
@@ -51,6 +67,20 @@ class ExerciseInfoBottomSheet : BottomSheetDialogFragment() {
             separator = "\n"
         ) { "- $it" }
         binding.btnClose.setOnClickListener { dismiss() }
+    }
+
+    private fun applyBottomSheetInsets() {
+        val baseBottomPadding = (14 * resources.displayMetrics.density).toInt()
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.infoSheetContent) { content, insets ->
+            val nav = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+
+            content.updatePadding(bottom = baseBottomPadding + nav.bottom)
+
+            insets
+        }
+
+        ViewCompat.requestApplyInsets(binding.infoSheetContent)
     }
 
     override fun onDestroyView() {

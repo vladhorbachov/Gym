@@ -1,123 +1,157 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/profileScroll"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bgMain"
-    android:fillViewport="true">
+    android:clipToPadding="false"
+    android:fillViewport="true"
+    android:overScrollMode="ifContentScrolls">
 
     <LinearLayout
+        android:id="@+id/profileContent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:paddingHorizontal="16dp"
+        android:paddingTop="18dp"
+        android:paddingBottom="32dp">
 
-        <LinearLayout
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_card"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:text="Profile"
+            android:textColor="@color/textPrimary"
+            android:textSize="30sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Your body metrics and weekly training setup"
+            android:textColor="@color/textSecondary"
+            android:textSize="14sp" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:background="@drawable/bg_profile_glass"
+            android:padding="18dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <FrameLayout
-                    android:layout_width="72dp"
-                    android:layout_height="72dp"
-                    android:background="@drawable/bg_circle"
-                    android:foreground="?attr/selectableItemBackgroundBorderless">
-
-                    <ImageView
-                        android:id="@+id/ivAvatar"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:layout_gravity="center"
-                        android:contentDescription="@null"
-                        android:src="@drawable/ic_profile"
-                        app:tint="@android:color/white" />
-                </FrameLayout>
+                android:orientation="vertical">
 
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <FrameLayout
+                        android:layout_width="76dp"
+                        android:layout_height="76dp"
+                        android:background="@drawable/bg_profile_avatar"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?attr/selectableItemBackgroundBorderless">
+
+                        <ImageView
+                            android:id="@+id/ivAvatar"
+                            android:layout_width="38dp"
+                            android:layout_height="38dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_profile"
+                            app:tint="@android:color/white" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tvName"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="User"
+                            android:textColor="@color/textPrimary"
+                            android:textSize="22sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvProfileSummary"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:text="Profile details"
+                            android:textColor="@color/textSecondary"
+                            android:textSize="13sp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    android:orientation="horizontal">
 
                     <TextView
-                        android:id="@+id/tvName"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="User"
+                        android:id="@+id/tvVisitSeries"
+                        android:layout_width="0dp"
+                        android:layout_height="72dp"
+                        android:layout_marginEnd="6dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_profile_metric_current"
+                        android:gravity="center"
+                        android:padding="12dp"
+                        android:text="Current series: 0"
                         android:textColor="@color/textPrimary"
-                        android:textSize="22sp"
+                        android:textSize="14sp"
                         android:textStyle="bold" />
 
                     <TextView
-                        android:id="@+id/tvProfileSummary"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="Profile details"
-                        android:textColor="@color/textSecondary"
-                        android:textSize="13sp" />
+                        android:id="@+id/tvVisitMaxSeries"
+                        android:layout_width="0dp"
+                        android:layout_height="72dp"
+                        android:layout_marginStart="6dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_profile_metric_best"
+                        android:gravity="center"
+                        android:padding="12dp"
+                        android:text="Max series: 0"
+                        android:textColor="@color/textPrimary"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
                 </LinearLayout>
             </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/tvVisitSeries"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_card_inner"
-                    android:padding="12dp"
-                    android:text="Current series: 0"
-                    android:textColor="@color/textPrimary"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-
-                <View
-                    android:layout_width="12dp"
-                    android:layout_height="1dp" />
-
-                <TextView
-                    android:id="@+id/tvVisitMaxSeries"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_card_inner"
-                    android:padding="12dp"
-                    android:text="Max series: 0"
-                    android:textColor="@color/textPrimary"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-        </LinearLayout>
+        </FrameLayout>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginTop="22dp"
+            android:background="@drawable/bg_profile_section_label"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp"
             android:text="Settings"
-            android:textColor="@color/textSecondary"
-            android:textSize="12sp"
-            android:textAllCaps="true" />
+            android:textAllCaps="true"
+            android:textColor="@color/trainingAction"
+            android:textSize="11sp"
+            android:textStyle="bold" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_card"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_profile_glass"
             android:orientation="vertical"
             android:padding="8dp">
 
@@ -126,38 +160,23 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/strokeSubtle"
-                android:layout_marginHorizontal="8dp" />
-
             <com.gymshark.ui.home.profile.row.ProfileRowView
                 android:id="@+id/rowTrainingDays"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/strokeSubtle"
-                android:layout_marginHorizontal="8dp" />
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" />
 
             <com.gymshark.ui.home.profile.row.ProfileRowView
                 android:id="@+id/rowTrainingSet"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/strokeSubtle"
-                android:layout_marginHorizontal="8dp" />
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" />
 
             <com.gymshark.ui.home.profile.row.ProfileRowView
                 android:id="@+id/rowWeight"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" />
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

@@ -8,6 +8,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.os.bundleOf
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import androidx.core.view.isEmpty
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -42,12 +47,22 @@ class ExerciseActionsBottomSheet : BottomSheetDialogFragment() {
             setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
             setDimAmount(0.45f)
         }
-        (dialog as? BottomSheetDialog)
+        val sheet = (dialog as? BottomSheetDialog)
             ?.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
-            ?.setBackgroundColor(Color.TRANSPARENT)
+        sheet?.setBackgroundColor(Color.TRANSPARENT)
+        sheet?.layoutParams?.height = (resources.displayMetrics.heightPixels * 0.72f).toInt()
+        sheet?.requestLayout()
+        sheet?.let {
+            BottomSheetBehavior.from(it).apply {
+                skipCollapsed = true
+                state = BottomSheetBehavior.STATE_EXPANDED
+            }
+        }
     }
 
     override fun onViewCreated(view: View, s: Bundle?) {
+        applyBottomSheetInsets()
+
         val ex = trainingVm.getExerciseDraft(exerciseId)
 
         binding.tvTitle.text = ex?.title ?: "Exercise"
@@ -56,7 +71,7 @@ class ExerciseActionsBottomSheet : BottomSheetDialogFragment() {
         val sets = ex?.sets.orEmpty()
         if (binding.rowsContainer.isEmpty()) {
             if (sets.isEmpty()) {
-                addRow()
+                addRow(scrollToRow = false)
             } else {
                 sets.forEach { addRowWithValues(it) }
             }
@@ -64,7 +79,7 @@ class ExerciseActionsBottomSheet : BottomSheetDialogFragment() {
 
         binding.btnPlus.setOnClickListener {
             it.pressPulse()
-            addRow()
+            addRow(scrollToRow = true)
         }
         binding.btnMinus.setOnClickListener {
             it.pressPulse()
@@ -87,6 +102,20 @@ class ExerciseActionsBottomSheet : BottomSheetDialogFragment() {
 
         updateMinusEnabled()
         updateSummary()
+    }
+
+    private fun applyBottomSheetInsets() {
+        val baseBottomPadding = (16 * resources.displayMetrics.density).toInt()
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.actionSheetContent) { content, insets ->
+            val nav = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+
+            content.updatePadding(bottom = baseBottomPadding + nav.bottom)
+
+            insets
+        }
+
+        ViewCompat.requestApplyInsets(binding.actionSheetContent)
     }
 
     override fun onDismiss(dialog: android.content.DialogInterface) {
@@ -113,13 +142,14 @@ class ExerciseActionsBottomSheet : BottomSheetDialogFragment() {
         }
     }
 
-    private fun addRow() {
+    private fun addRow(scrollToRow: Boolean) {
         val row = layoutInflater.inflate(R.layout.item_ex_params_row, binding.rowsContainer, false)
         binding.rowsContainer.addView(row)
         configureRow(row, binding.rowsContainer.childCount)
         animateRowIn(row)
         updateMinusEnabled()
         updateSummary()
+        if (scrollToRow) scrollSetsToRow(row)
     }
 
     private fun addRowWithValues(set: SetEntry) {
@@ -131,6 +161,13 @@ class ExerciseActionsBottomSheet : BottomSheetDialogFragment() {
         animateRowIn(row)
         updateMinusEnabled()
         updateSummary()
+    }
+
+    private fun scrollSetsToRow(row: View) {
+        binding.setsScroll.post {
+            val targetY = (row.bottom - binding.setsScroll.height + row.height).coerceAtLeast(0)
+            binding.setsScroll.smoothScrollTo(0, targetY)
+        }
     }
 
     private fun removeRow() {

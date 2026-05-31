@@ -17,6 +17,13 @@ class ProfileRowView @JvmOverloads constructor(
     private val tvValue: TextView
 
     init {
+        orientation = HORIZONTAL
+        gravity = android.view.Gravity.CENTER_VERTICAL
+        setPadding(dp(14), dp(12), dp(14), dp(12))
+        background = androidx.core.content.ContextCompat.getDrawable(context, R.drawable.bg_profile_glass_soft)
+        isClickable = true
+        isFocusable = true
+
         LayoutInflater.from(context).inflate(R.layout.view_profile_row, this, true)
 
         tvTitle = findViewById(R.id.tvTitle)
@@ -33,6 +40,8 @@ class ProfileRowView @JvmOverloads constructor(
         isEnabled = model.enabled
         alpha = if (model.enabled) 1f else 0.55f
     }
+
+    private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
 
     fun flash() {
         animate().alpha(0.5f).setDuration(80).withEndAction {

@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
 import com.gymshark.R
 import com.gymshark.databinding.ModalTrainingDaysBinding
 import com.gymshark.ui.home.profile.ProfileViewModel
@@ -18,6 +19,7 @@ import java.time.DayOfWeek
 class TrainingDaysBottomSheet(
     private val initialDays: Set<DayOfWeek>
 ) : BaseSettingsBottomSheet() {
+
     private val vm: ProfileViewModel by activityViewModel()
     private lateinit var binding: ModalTrainingDaysBinding
     private val selectedDays = initialDays.toMutableSet()
@@ -61,24 +63,45 @@ class TrainingDaysBottomSheet(
             DayOfWeek.SUNDAY to chipSun
         )
 
-        map.forEach { (day, chip) ->
+        map.forEach { (day, tile) ->
+            renderDayTile(tile, selectedDays.contains(day))
 
-            chip.isChecked = selectedDays.contains(day)
-
-            chip.setOnCheckedChangeListener { v, isChecked ->
+            tile.setOnClickListener { v ->
                 v.hapticTick()
 
-                if (isChecked) selectedDays.add(day)
-                else selectedDays.remove(day)
+                if (selectedDays.contains(day)) selectedDays.remove(day)
+                else selectedDays.add(day)
 
-                v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(80)
+                renderDayTile(tile, selectedDays.contains(day))
+                v.animate().scaleX(1.05f).scaleY(1.05f).setDuration(90)
                     .withEndAction {
-                        v.animate().scaleX(1f).scaleY(1f).duration = 80
+                        v.animate().scaleX(1f).scaleY(1f).setDuration(110).start()
                     }
+                    .start()
 
                 updateSaveState()
             }
+        }
+    }
 
+    private fun renderDayTile(tile: View, selected: Boolean) {
+        val background = if (selected) R.drawable.bg_day_tile_selected else R.drawable.bg_day_tile_default
+        tile.background = ContextCompat.getDrawable(tile.context, background)
+        tile.isSelected = selected
+        val nameColor = if (selected) R.color.trainingOnAction else R.color.textPrimary
+        val captionColor = if (selected) R.color.trainingOnAction else R.color.textSecondary
+        setTextColors(tile, nameColor, captionColor)
+    }
+
+    private fun setTextColors(view: View, nameColor: Int, captionColor: Int) {
+        if (view is TextView) {
+            val color = if (view.text.length <= 3) nameColor else captionColor
+            view.setTextColor(ContextCompat.getColor(view.context, color))
+        }
+        if (view is ViewGroup) {
+            for (i in 0 until view.childCount) {
+                setTextColors(view.getChildAt(i), nameColor, captionColor)
+            }
         }
     }
 

@@ -12,7 +12,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.gymshark.R
 import com.gymshark.databinding.ModalTrainingSetsBinding
 import com.gymshark.ui.home.profile.TrainingSetsViewModel
@@ -23,6 +22,8 @@ import org.koin.androidx.viewmodel.ext.android.activityViewModel
 
 
 class TrainingSetsBottomSheet : BaseSettingsBottomSheet() {
+
+    override val sheetHeightRatio: Float = 0.78f
 
     private var _binding: ModalTrainingSetsBinding? = null
     private val binding get() = _binding!!
@@ -51,6 +52,10 @@ class TrainingSetsBottomSheet : BaseSettingsBottomSheet() {
             }
 
             vm.addNext()
+            binding.slotsList.post {
+                val lastIndex = slotsAdapter.itemCount - 1
+                if (lastIndex >= 0) binding.slotsList.smoothScrollToPosition(lastIndex)
+            }
         }
 
 
@@ -73,7 +78,7 @@ class TrainingSetsBottomSheet : BaseSettingsBottomSheet() {
 
 
         binding.slotsList.layoutManager =
-            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+            GridLayoutManager(requireContext(), 2)
 
         binding.slotsList.adapter = slotsAdapter
 
@@ -97,7 +102,7 @@ class TrainingSetsBottomSheet : BaseSettingsBottomSheet() {
         typesAdapter = TrainingTypesAdapter()
 
         binding.typesList.layoutManager =
-            GridLayoutManager(requireContext(), 3)
+            GridLayoutManager(requireContext(), 1)
 
         binding.typesList.adapter = typesAdapter
     }

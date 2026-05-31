@@ -111,25 +111,58 @@
         android:clipToPadding="false"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
-        android:paddingBottom="96dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:paddingBottom="24dp"
+        app:layout_constraintBottom_toTopOf="@id/workoutActionBar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/header" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnFinish"
-        style="@style/Widget.Gym.PrimaryButton"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/workoutActionBar"
         android:layout_width="0dp"
-        android:layout_height="56dp"
+        android:layout_height="72dp"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
-        android:layout_marginBottom="24dp"
-        android:text="Finish workout"
-        app:icon="@drawable/ic_chevron_right"
-        app:iconGravity="textEnd"
-        app:iconTint="@color/trainingOnAction"
+        android:layout_marginBottom="112dp"
+        app:cardBackgroundColor="@color/surfaceCard"
+        app:cardCornerRadius="28dp"
+        app:cardElevation="0dp"
+        app:strokeColor="@color/strokeSubtle"
+        app:strokeWidth="1dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="10dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPause"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="0dp"
+                android:layout_height="52dp"
+                android:layout_marginEnd="10dp"
+                android:layout_weight="1"
+                android:text="Pause"
+                android:textAllCaps="false"
+                android:textColor="@color/training_secondary_button_text"
+                app:backgroundTint="@color/training_secondary_button_bg"
+                app:cornerRadius="26dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnFinish"
+                style="@style/Widget.Gym.PrimaryButton"
+                android:layout_width="0dp"
+                android:layout_height="52dp"
+                android:layout_weight="1"
+                android:text="Finish"
+                app:icon="@drawable/ic_chevron_right"
+                app:iconGravity="textEnd"
+                app:iconTint="@color/trainingOnAction" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 </androidx.constraintlayout.widget.ConstraintLayout>
