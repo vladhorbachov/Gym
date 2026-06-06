@@ -1,5 +1,6 @@
 package com.gymshark.ui.home.training
 
+import android.content.SharedPreferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gymshark.data.db.entity.ExercisesEntity
@@ -30,8 +31,13 @@ import java.time.LocalDate
 class TrainingViewModel(
     private val trainingRepository: TrainingRepository,
     private val userRepository: UserRepository,
-    private val exerciseRepository: ExerciseRepository
+    private val exerciseRepository: ExerciseRepository,
+    private val prefs: SharedPreferences
 ) : ViewModel() {
+
+    companion object {
+        private const val KEY_ORDER_PREFIX = "training_exercise_order_"
+    }
 
     init {
         viewModelScope.launch {
@@ -52,6 +58,8 @@ class TrainingViewModel(
         MutableStateFlow<List<ExercisesEntity>>(emptyList())
     val suggestedExercisesFlow: StateFlow<List<ExercisesEntity>> =
         _suggestedExercisesFlow.asStateFlow()
+
+    private var currentOrderKey: String? = null
 
     val trainsFlow: StateFlow<List<Train>> =
         trainingRepository.getCompletedTrains()
@@ -79,7 +87,9 @@ class TrainingViewModel(
             if (from !in list.indices || to !in list.indices) return@update cur
             val item = list.removeAt(from)
             list.add(to, item)
-            cur.copy(exercises = list)
+            cur.copy(exercises = list).also {
+                persistCurrentExerciseOrder(list)
+            }
         }
     }
 
@@ -88,15 +98,21 @@ class TrainingViewModel(
             if (index !in cur.exercises.indices) return@update cur
             val list = cur.exercises.toMutableList()
             list.removeAt(index)
-            cur.copy(exercises = list)
+            cur.copy(exercises = list).also {
+                persistCurrentExerciseOrder(list)
+            }
         }
     }
 
     fun setExercisesFromSuggested(list: List<ExercisesEntity>) {
+        val orderKey = buildOrderKey(list)
+        currentOrderKey = orderKey
+        val savedOrder = readExerciseOrder(orderKey)
+
         _draft.update { cur ->
             val oldById = cur.exercises.associateBy { it.exerciseId }
 
-            val newExercises = list.map { e ->
+            val newExercises = applySavedExerciseOrder(list, savedOrder).map { e ->
                 val id = e.id.toLong()
                 val old = oldById[id]
                 old?.copy(title = e.name)
@@ -110,6 +126,39 @@ class TrainingViewModel(
 
             cur.copy(exercises = newExercises)
         }
+    }
+
+    private fun buildOrderKey(list: List<ExercisesEntity>): String {
+        val signature = list
+            .map { it.baseCategory }
+            .distinct()
+            .sorted()
+            .joinToString(separator = "|")
+            .ifBlank { "empty" }
+        return KEY_ORDER_PREFIX + signature
+    }
+
+    private fun applySavedExerciseOrder(
+        list: List<ExercisesEntity>,
+        savedOrder: List<Int>?
+    ): List<ExercisesEntity> {
+        if (savedOrder == null) return list
+        val byId = list.associateBy { it.id }
+        return savedOrder.mapNotNull { byId[it] }
+    }
+
+    private fun persistCurrentExerciseOrder(list: List<ExerciseDraft>) {
+        val key = currentOrderKey ?: return
+        val value = list.joinToString(separator = ",") { it.exerciseId.toString() }
+        prefs.edit().putString(key, value).apply()
+    }
+
+    private fun readExerciseOrder(key: String): List<Int>? {
+        if (!prefs.contains(key)) return null
+        return prefs.getString(key, "")
+            .orEmpty()
+            .split(",")
+            .mapNotNull { it.toIntOrNull() }
     }
 
     fun updateExerciseSets(exerciseId: Long, sets: List<SetEntry>) {
@@ -206,5 +255,57 @@ class TrainingViewModel(
                 _suggestedExercisesFlow.value = emptyList()
             }
         }
+    }
+
+    fun moveTrainingSlot(sourceDate: LocalDate, targetDate: LocalDate) {
+        if (sourceDate == targetDate) return
+
+        viewModelScope.launch {
+            val userId = userRepository.currentUserId() ?: return@launch
+            val slots = userRepository.getTrainingSlots(userId)
+            val sourceSlot = slotForDate(sourceDate, slots)?.takeIf { it.types.isNotEmpty() }
+                ?: return@launch
+
+            val targetSlot = slotForDate(targetDate, slots)
+            if (targetSlot?.types?.isNotEmpty() == true) return@launch
+
+            val updated = if (targetSlot != null) {
+                slots.map { slot ->
+                    when (slot.id) {
+                        sourceSlot.id -> slot.copy(types = emptyList())
+                        targetSlot.id -> slot.copy(types = sourceSlot.types)
+                        else -> slot
+                    }
+                }
+            } else {
+                slots.map { slot ->
+                    if (slot.id == sourceSlot.id) {
+                        slot.copy(day = targetDate.dayOfWeek)
+                    } else {
+                        slot
+                    }
+                }
+            }
+
+            userRepository.setTrainingSlots(userId, updated)
+        }
+    }
+
+    private fun slotForDate(date: LocalDate, slots: List<DaySlot>): DaySlot? {
+        val slotsForDay = slots
+            .filter { it.day == date.dayOfWeek }
+            .sortedBy { it.id }
+
+        if (slotsForDay.isEmpty()) return null
+
+        val firstPlannedDate = LocalDate.now()
+            .with(java.time.temporal.TemporalAdjusters.nextOrSame(date.dayOfWeek))
+
+        if (date.isBefore(firstPlannedDate)) return null
+
+        val weeksBetween = java.time.temporal.ChronoUnit.WEEKS.between(firstPlannedDate, date)
+        val index = (weeksBetween % slotsForDay.size).toInt()
+
+        return slotsForDay[index]
     }
 }

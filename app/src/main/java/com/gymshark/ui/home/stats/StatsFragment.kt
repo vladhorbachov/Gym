@@ -6,313 +6,321 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.LimitLine
 import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.data.BarData
+import com.github.mikephil.charting.data.BarDataSet
+import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.gymshark.R
 import com.gymshark.databinding.FragmentStatsBinding
+import com.gymshark.databinding.ItemProgressInsightBinding
+import com.gymshark.databinding.ItemProgressLineChartBinding
+import com.gymshark.databinding.ItemProgressMetricBinding
+import com.gymshark.domain.models.CategoryStatRow
+import com.gymshark.domain.models.DailyStatsUi
+import com.gymshark.domain.models.MoodDayUi
 import com.gymshark.domain.models.MoodUi
 import com.gymshark.ui.home.stats.viewmodel.StatsViewModel
 import com.gymshark.utils.BaseFragment
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
+import kotlin.math.abs
+import kotlin.math.roundToInt
 
 class StatsFragment : BaseFragment<FragmentStatsBinding>(FragmentStatsBinding::inflate) {
 
     private val vm: StatsViewModel by activityViewModel()
 
-    private var isWeightFull = false
-    private var isDurationFull = false
-    private var isCaloriesFull = false
-    private var isBpmFull = false
-    private var isCategoryWeightFull = false
-    private var isCategorySetsFull = false
-    private var isVolumeFull = false
-    private var isOneRmFull = false
-
-    private val chartLineColors: List<Int>
-        get() = listOf(
-            color(R.color.chartBlue),
-            color(R.color.chartGreen),
-            color(R.color.chartAmber),
-            color(R.color.chartRose),
-            color(R.color.chartViolet),
-            color(R.color.chartTeal),
-            color(R.color.chartLime),
-        )
+    private var range = Range.DAYS_30
+    private var dailyStats: List<DailyStatsUi> = emptyList()
+    private var durationPoints: List<ChartPoint> = emptyList()
+    private var caloriesPoints: List<ChartPoint> = emptyList()
+    private var bpmPoints: List<ChartPoint> = emptyList()
+    private var weightPoints: List<ChartPoint> = emptyList()
+    private var categoryStats: List<CategoryStatRow> = emptyList()
+    private var moodDays: List<MoodDayUi> = emptyList()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setupEmptyStates()
+        applyInsets()
+        setupStaticText()
+        setupRangeSelector()
+        playIntro()
 
         viewLifecycleOwner.lifecycleScope.launch {
-            vm.weightProgress.collect { points ->
-                renderLineChart(binding.lineChart, points, isWeightFull, color(R.color.chartBlue))
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch { vm.dailyStats.collect { dailyStats = it.sortedBy { row -> row.day }; renderAll() } }
+                launch { vm.durationProgress.collect { durationPoints = it; renderAll() } }
+                launch { vm.caloriesProgress.collect { caloriesPoints = it; renderAll() } }
+                launch { vm.bpmProgress.collect { bpmPoints = it; renderAll() } }
+                launch { vm.weightProgress.collect { weightPoints = it; renderAll() } }
+                launch { vm.categoryStats.collect { categoryStats = it; renderAll() } }
+                launch { vm.moodTimeline.collect { moodDays = it; renderAll() } }
             }
-        }
-        viewLifecycleOwner.lifecycleScope.launch {
-            vm.durationProgress.collect { points ->
-                renderLineChart(binding.lineChartDuration, points, isDurationFull, color(R.color.trainingAccent))
-            }
-        }
-        viewLifecycleOwner.lifecycleScope.launch {
-            vm.caloriesProgress.collect { points ->
-                renderLineChart(binding.lineChartCalories, points, isCaloriesFull, color(R.color.chartAmber))
-            }
-        }
-        viewLifecycleOwner.lifecycleScope.launch {
-            vm.bpmProgress.collect { points ->
-                renderLineChart(binding.lineChartBpm, points, isBpmFull, color(R.color.chartRose))
-            }
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            vm.dailyStats.collect { list ->
-                val today = list.firstOrNull() ?: return@collect
-                binding.tvTime.text = "Training time: ${today.totalMinutes} min"
-                binding.tvCalories.text = "Calories: ${today.calories}"
-                binding.tvBpm.text = today.avgBpm?.let { "Avg BPM: $it" } ?: "Avg BPM: not measured"
-            }
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            vm.moodTimeline.collect { list ->
-                binding.moodContainer.removeAllViews()
-                list.forEach { item ->
-                    val tv = TextView(requireContext()).apply {
-                        text = when (item.mood) {
-                            MoodUi.BAD -> "Bad"
-                            MoodUi.NEUTRAL -> "Neutral"
-                            MoodUi.GOOD -> "Good"
-                            MoodUi.AMAZING -> "Amazing"
-                        }
-                        textSize = 15f
-                        setTextColor(color(R.color.textPrimary))
-                        setBackgroundResource(R.drawable.bg_stats_chip)
-                        setPadding(18, 8, 18, 8)
-                        layoutParams = LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.WRAP_CONTENT,
-                            LinearLayout.LayoutParams.WRAP_CONTENT
-                        ).apply {
-                            marginEnd = 8
-                        }
-                    }
-                    binding.moodContainer.addView(tv)
-                }
-            }
-        }
-        viewLifecycleOwner.lifecycleScope.launch {
-            vm.weeklyMood.collect { mood ->
-                binding.tvWeeklyMood.text = mood?.let { "This week: $it" } ?: "This week: -"
-            }
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            vm.categoryDailyStats.collect { rows ->
-                val groups = rows.groupBy { it.category }
-                    .mapValues { (_, v) -> v.map { it.day to it.maxWeight } }
-                val dates = rows.map { it.day }.distinct().sorted()
-                renderMultiLineChart(binding.lineChartCategoryWeight, groups, dates, isCategoryWeightFull)
-            }
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            vm.categoryDailyStats.collect { rows ->
-                val groups = rows.groupBy { it.category }
-                    .mapValues { (_, v) -> v.map { it.day to it.totalSets.toFloat() } }
-                val dates = rows.map { it.day }.distinct().sorted()
-                renderMultiLineChart(binding.lineChartCategorySets, groups, dates, isCategorySetsFull)
-            }
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            vm.weeklyVolume.collect { rows ->
-                val points = rows.mapIndexed { i, r ->
-                    ChartPoint(i.toFloat(), r.totalVolume, r.week.substringAfter("-"))
-                }
-                renderLineChart(binding.lineChartVolume, points, isVolumeFull, color(R.color.chartGreen))
-            }
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            vm.topExerciseOneRM.collect { rows ->
-                val groups = rows.groupBy { it.exerciseName }
-                    .mapValues { (_, v) -> v.map { it.day to it.estimated1RM } }
-                val dates = rows.map { it.day }.distinct().sorted()
-                renderMultiLineChart(binding.lineChartOneRM, groups, dates, isOneRmFull)
-            }
-        }
-
-        binding.lineChart.setOnClickListener {
-            isWeightFull = !isWeightFull
-            renderLineChart(binding.lineChart, vm.weightProgress.value, isWeightFull, color(R.color.chartBlue))
-        }
-        binding.lineChartDuration.setOnClickListener {
-            isDurationFull = !isDurationFull
-            renderLineChart(binding.lineChartDuration, vm.durationProgress.value, isDurationFull, color(R.color.trainingAccent))
-        }
-        binding.lineChartCalories.setOnClickListener {
-            isCaloriesFull = !isCaloriesFull
-            renderLineChart(binding.lineChartCalories, vm.caloriesProgress.value, isCaloriesFull, color(R.color.chartAmber))
-        }
-        binding.lineChartBpm.setOnClickListener {
-            isBpmFull = !isBpmFull
-            renderLineChart(binding.lineChartBpm, vm.bpmProgress.value, isBpmFull, color(R.color.chartRose))
-        }
-        binding.lineChartVolume.setOnClickListener {
-            isVolumeFull = !isVolumeFull
-            val points = vm.weeklyVolume.value.mapIndexed { i, r ->
-                ChartPoint(i.toFloat(), r.totalVolume, r.week.substringAfter("-"))
-            }
-            renderLineChart(binding.lineChartVolume, points, isVolumeFull, color(R.color.chartGreen))
-        }
-
-        binding.lineChartCategoryWeight.setOnClickListener {
-            isCategoryWeightFull = !isCategoryWeightFull
-            val rows = vm.categoryDailyStats.value
-            val groups = rows.groupBy { it.category }
-                .mapValues { (_, v) -> v.map { it.day to it.maxWeight } }
-            val dates = rows.map { it.day }.distinct().sorted()
-            renderMultiLineChart(binding.lineChartCategoryWeight, groups, dates, isCategoryWeightFull)
-        }
-        binding.lineChartCategorySets.setOnClickListener {
-            isCategorySetsFull = !isCategorySetsFull
-            val rows = vm.categoryDailyStats.value
-            val groups = rows.groupBy { it.category }
-                .mapValues { (_, v) -> v.map { it.day to it.totalSets.toFloat() } }
-            val dates = rows.map { it.day }.distinct().sorted()
-            renderMultiLineChart(binding.lineChartCategorySets, groups, dates, isCategorySetsFull)
-        }
-        binding.lineChartOneRM.setOnClickListener {
-            isOneRmFull = !isOneRmFull
-            val rows = vm.topExerciseOneRM.value
-            val groups = rows.groupBy { it.exerciseName }
-                .mapValues { (_, v) -> v.map { it.day to it.estimated1RM } }
-            val dates = rows.map { it.day }.distinct().sorted()
-            renderMultiLineChart(binding.lineChartOneRM, groups, dates, isOneRmFull)
         }
     }
 
-    private fun renderLineChart(
-        chart: LineChart,
-        points: List<ChartPoint>,
-        showAll: Boolean,
-        lineColor: Int
-    ) {
-        if (points.isEmpty()) {
-            chart.clear()
+    private fun setupStaticText() = with(binding) {
+        setupChartCard(
+            durationCard,
+            title = "Training duration",
+            emptyTitle = "No workouts yet",
+            emptyMessage = "Complete a workout to see your duration trend.",
+            emptyIcon = "t"
+        )
+        setupChartCard(
+            caloriesCard,
+            title = "Calories burned",
+            emptyTitle = "Calories will appear here",
+            emptyMessage = "Tracked sessions will build a clearer energy trend.",
+            emptyIcon = "c"
+        )
+        setupChartCard(
+            bpmCard,
+            title = "Avg BPM trend",
+            emptyTitle = "Heart rate data will appear",
+            emptyMessage = "Heart rate data will appear after tracked workouts.",
+            emptyIcon = "h"
+        )
+        setupChartCard(
+            weightCard,
+            title = "Body weight",
+            emptyTitle = "Add body weight entries",
+            emptyMessage = "Your body metric trend becomes useful after a few check-ins.",
+            emptyIcon = "w"
+        )
+    }
+
+    private fun setupRangeSelector() = with(binding) {
+        rangeGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (!isChecked) return@addOnButtonCheckedListener
+            range = when (checkedId) {
+                R.id.range7 -> Range.DAYS_7
+                R.id.range3m -> Range.MONTHS_3
+                R.id.range1y -> Range.YEAR_1
+                R.id.rangeAll -> Range.ALL
+                else -> Range.DAYS_30
+            }
+            renderAll()
+        }
+    }
+
+    private fun renderAll() {
+        if (_binding == null) return
+        renderSummary()
+        renderCharts()
+        renderStrength()
+        renderInsights()
+        renderMood()
+    }
+
+    private fun renderSummary() = with(binding) {
+        val current = ranged(dailyStats)
+        val previous = previousWindow(dailyStats)
+        val totalMinutes = current.sumOf { it.totalMinutes }
+        val previousMinutes = previous.sumOf { it.totalMinutes }
+        val calories = current.sumOf { it.calories }
+        val previousCalories = previous.sumOf { it.calories }
+        val avgBpm = current.mapNotNull { it.avgBpm }.averageOrNull()
+        val previousBpm = previous.mapNotNull { it.avgBpm }.averageOrNull()
+
+        bindMetric(cardTime, "Total time", formatDuration(totalMinutes), deltaText(totalMinutes.toFloat(), previousMinutes.toFloat()), "t")
+        bindMetric(cardWorkouts, "Workouts", current.size.toString(), deltaText(current.size.toFloat(), previous.size.toFloat()), "w")
+        bindMetric(cardCalories, "Calories", calories.toString(), deltaText(calories.toFloat(), previousCalories.toFloat()), "c")
+        bindMetric(cardBpm, "Avg BPM", avgBpm?.roundToInt()?.toString() ?: "No data", avgBpm?.let { deltaText(it.toFloat(), previousBpm?.toFloat()) } ?: "Track HR to compare", "h")
+    }
+
+    private fun renderCharts() = with(binding) {
+        renderLine(
+            card = durationCard,
+            points = ranged(durationPoints),
+            color = color(R.color.trainingAction),
+            meta = metricMeta(ranged(durationPoints), suffix = "min avg"),
+            averageLine = true
+        )
+        renderLine(
+            card = caloriesCard,
+            points = ranged(caloriesPoints).filterNot { it.y == 0f && ranged(caloriesPoints).any { p -> p.y > 0f } },
+            color = color(R.color.chartAmber),
+            meta = metricMeta(ranged(caloriesPoints), suffix = "kcal avg"),
+            averageLine = true
+        )
+        renderLine(
+            card = bpmCard,
+            points = ranged(bpmPoints),
+            color = color(R.color.chartRose),
+            meta = metricMeta(ranged(bpmPoints), suffix = "bpm avg"),
+            averageLine = false
+        )
+        renderLine(
+            card = weightCard,
+            points = ranged(weightPoints),
+            color = color(R.color.trainingStatus),
+            meta = weightMeta(ranged(weightPoints)),
+            averageLine = false
+        )
+    }
+
+    private fun renderStrength(): Unit = with(binding) {
+        val rows = categoryStats
+            .filter { it.maxWeight > 0f }
+            .sortedByDescending { it.maxWeight }
+            .take(5)
+
+        strengthEmpty.isVisible = rows.isEmpty()
+        barStrength.isVisible = rows.isNotEmpty()
+
+        if (rows.isEmpty()) {
+            barStrength.clear()
             return
         }
 
-        val visible = if (showAll) points else points.takeLast(DEFAULT_VISIBLE_POINTS)
-        val entries = visible.mapIndexed { index, point -> Entry(index.toFloat(), point.y) }
-        val labels = visible.map { it.label }
-
-        val mainDataSet = LineDataSet(entries, "").apply {
-            color = lineColor
-            setCircleColor(lineColor)
-            setDrawValues(false)
-            setDrawCircleHole(false)
-            setDrawCircles(true)
-            circleRadius = 3.5f
-            lineWidth = 2.4f
-            mode = LineDataSet.Mode.CUBIC_BEZIER
+        val entries = rows.mapIndexed { index, row -> BarEntry(index.toFloat(), row.maxWeight) }
+        val dataSet = BarDataSet(entries, "").apply {
+            color = color(R.color.trainingAction)
+            valueTextColor = color(R.color.textPrimary)
+            valueTextSize = 10f
+            setDrawValues(true)
         }
 
-        val maxDataSet = entries.maxByOrNull { it.y }?.let {
-            LineDataSet(listOf(it), "").apply {
-                lineWidth = 0f
-                setDrawCircles(true)
-                setDrawCircleHole(false)
-                circleRadius = 6f
-                setCircleColor(color(R.color.chartPeak))
-                setDrawValues(true)
-                valueTextSize = 10f
-                valueTextColor = color(R.color.chartPeak)
+        barStrength.apply {
+            data = BarData(dataSet).apply { barWidth = 0.48f }
+            description.isEnabled = false
+            legend.isEnabled = false
+            setDrawGridBackground(false)
+            setDrawBorders(false)
+            setScaleEnabled(false)
+            setPinchZoom(false)
+            setFitBars(true)
+            animateY(650)
+            xAxis.apply {
+                position = XAxis.XAxisPosition.BOTTOM
+                valueFormatter = IndexAxisValueFormatter(rows.map { it.category.compactCategory() })
+                textColor = color(R.color.textSecondary)
+                setDrawGridLines(false)
+                granularity = 1f
             }
+            axisLeft.apply {
+                textColor = color(R.color.textSecondary)
+                gridColor = color(R.color.chartGrid)
+                axisMinimum = 0f
+                setDrawAxisLine(false)
+            }
+            axisRight.isEnabled = false
+            invalidate()
+        }
+    }
+
+    private fun renderInsights() = with(binding) {
+        val current = ranged(dailyStats)
+        val longest = current.maxByOrNull { it.totalMinutes }
+        val bestDay = current.maxByOrNull { it.calories + it.totalMinutes.toInt() }
+        val currentWeights = ranged(weightPoints)
+
+        bindInsight(insightLongest, "Longest workout", longest?.let { "${it.totalMinutes} min on ${it.day.toShortDate()}" } ?: "Complete a workout to unlock", "l")
+        bindInsight(insightBestDay, "Best training day", bestDay?.let { "${it.day.toShortDate()} - ${it.calories} kcal" } ?: "No completed sessions yet", "b")
+        bindInsight(insightStreak, "Current streak", "${current.size} tracked days in this range", "s")
+        bindInsight(insightWeight, "Weight change", weightMeta(currentWeights).ifBlank { "Add weight entries to compare" }, "w")
+    }
+
+    private fun renderMood() = with(binding) {
+        moodBars.removeAllViews()
+        if (moodDays.isEmpty()) {
+            tvRecoverySummary.text = "Log workout feeling after sessions to spot recovery patterns."
+            addMoodBar(MoodUi.NEUTRAL, 1)
+            return
         }
 
-        chart.axisLeft.removeAllLimitLines()
-        if (entries.size > 1) {
+        val counts = moodDays.groupingBy { it.mood }.eachCount()
+        val top = counts.maxByOrNull { it.value }?.key ?: MoodUi.NEUTRAL
+        tvRecoverySummary.text = "This week trends ${top.label().lowercase()} across ${moodDays.size} tracked sessions."
+
+        MoodUi.values().forEach { mood ->
+            addMoodBar(mood, counts[mood] ?: 0)
+        }
+    }
+
+    private fun renderLine(
+        card: ItemProgressLineChartBinding,
+        points: List<ChartPoint>,
+        color: Int,
+        meta: String,
+        averageLine: Boolean
+    ) {
+        card.tvChartMeta.text = meta
+        card.emptyState.isVisible = points.isEmpty()
+        card.lineChart.isVisible = points.isNotEmpty()
+
+        if (points.isEmpty()) {
+            card.lineChart.clear()
+            return
+        }
+
+        val entries = points.mapIndexed { index, point -> Entry(index.toFloat(), point.y) }
+        val labels = points.map { it.label }
+        val dataSet = LineDataSet(entries, "").apply {
+            this.color = color
+            setCircleColor(color)
+            setDrawCircleHole(false)
+            setDrawCircles(entries.size <= 18)
+            circleRadius = 3.5f
+            lineWidth = 2.6f
+            mode = LineDataSet.Mode.CUBIC_BEZIER
+            setDrawValues(false)
+            setDrawFilled(true)
+            fillColor = color
+            fillAlpha = 34
+        }
+        val latest = LineDataSet(listOf(entries.last()), "").apply {
+            lineWidth = 0f
+            setDrawValues(false)
+            setDrawCircles(true)
+            setDrawCircleHole(false)
+            circleRadius = 6f
+            setCircleColor(color(R.color.chartPeak))
+        }
+
+        card.lineChart.axisLeft.removeAllLimitLines()
+        if (averageLine && entries.size > 1) {
             val avg = entries.map { it.y }.average().toFloat()
-            chart.axisLeft.addLimitLine(
-                LimitLine(avg, "avg ${avg.toInt()}").apply {
-                    this.lineColor = color(R.color.chartGrid)
+            card.lineChart.axisLeft.addLimitLine(
+                LimitLine(avg, "avg").apply {
+                    lineColor = color(R.color.chartGrid)
                     lineWidth = 1f
-                    enableDashedLine(10f, 6f, 0f)
+                    enableDashedLine(10f, 7f, 0f)
                     textColor = color(R.color.textSecondary)
                     textSize = 9f
                 }
             )
         }
 
-        chart.data = LineData(listOfNotNull(mainDataSet, maxDataSet))
-        styleChart(chart, labels, entries)
+        card.lineChart.data = LineData(dataSet, latest)
+        styleLineChart(card.lineChart, labels, entries)
     }
 
-    private fun renderMultiLineChart(
-        chart: LineChart,
-        groups: Map<String, List<Pair<String, Float>>>,
-        allDates: List<String>,
-        showAll: Boolean
-    ) {
-        if (groups.isEmpty() || allDates.isEmpty()) {
-            chart.clear()
-            return
-        }
-
-        val visibleDates = if (showAll) allDates else allDates.takeLast(DEFAULT_VISIBLE_POINTS)
-        val dateIndex = visibleDates.withIndex().associate { (i, d) -> d to i.toFloat() }
-        val shortLabels = visibleDates.map { it.toShortDateLabel() }
-        val colors = chartLineColors
-
-        val dataSets = groups.entries.mapIndexedNotNull { index, (groupName, points) ->
-            val entries = points
-                .filter { (day, _) -> day in dateIndex }
-                .map { (day, value) -> Entry(dateIndex.getValue(day), value) }
-                .sortedBy { it.x }
-            if (entries.isEmpty()) return@mapIndexedNotNull null
-
-            val lineColor = colors[index % colors.size]
-            LineDataSet(entries, groupName).apply {
-                color = lineColor
-                setCircleColor(lineColor)
-                lineWidth = 2.2f
-                circleRadius = 3f
-                mode = LineDataSet.Mode.LINEAR
-                setDrawValues(false)
-                setDrawCircleHole(false)
-            }
-        }
-
-        if (dataSets.isEmpty()) {
-            chart.clear()
-            return
-        }
-
-        chart.data = LineData(dataSets)
-        chart.legend.apply {
-            isEnabled = true
-            textColor = color(R.color.textSecondary)
-            textSize = 10f
-            formSize = 8f
-            xEntrySpace = 12f
-        }
-        styleChart(chart, shortLabels, dataSets.flatMap { it.values.map { value -> Entry(value.x, value.y) } })
-    }
-
-    private fun styleChart(chart: LineChart, labels: List<String>, entries: List<Entry>) {
+    private fun styleLineChart(chart: LineChart, labels: List<String>, entries: List<Entry>) {
         val axisTextColor = color(R.color.textSecondary)
         val gridColor = color(R.color.chartGrid)
+        val minY = entries.minOf { it.y }
+        val maxY = entries.maxOf { it.y }
+        val padding = ((maxY - minY) * 0.2f).coerceAtLeast(1f)
 
         chart.apply {
             description.isEnabled = false
+            legend.isEnabled = false
             setDrawBorders(false)
             setTouchEnabled(true)
             isDragEnabled = true
@@ -320,72 +328,162 @@ class StatsFragment : BaseFragment<FragmentStatsBinding>(FragmentStatsBinding::i
             setPinchZoom(false)
             setBackgroundColor(Color.TRANSPARENT)
             setNoDataTextColor(axisTextColor)
-            setExtraOffsets(6f, 8f, 10f, 8f)
+            setExtraOffsets(4f, 8f, 8f, 6f)
+            animateX(520)
         }
-
         chart.xAxis.apply {
             position = XAxis.XAxisPosition.BOTTOM
             granularity = 1f
             setDrawGridLines(false)
             textColor = axisTextColor
             valueFormatter = IndexAxisValueFormatter(labels)
-            labelRotationAngle = -30f
-            labelCount = labels.size.coerceAtMost(6)
+            labelRotationAngle = -25f
+            labelCount = labels.size.coerceAtMost(5)
             axisMinimum = -0.2f
             axisMaximum = (labels.lastIndex + 0.2f).coerceAtLeast(0.8f)
         }
-
-        val minY = entries.minOf { it.y }
-        val maxY = entries.maxOf { it.y }
-        val padding = ((maxY - minY) * 0.18f).coerceAtLeast(1f)
         chart.axisLeft.apply {
             axisMinimum = if (minY >= 0f) (minY - padding).coerceAtLeast(0f) else minY - padding
             axisMaximum = maxY + padding
             textColor = axisTextColor
             setGridColor(gridColor)
-            setAxisLineColor(gridColor)
-            setDrawZeroLine(false)
+            setDrawAxisLine(false)
         }
         chart.axisRight.isEnabled = false
-
-        if (chart.legend.isEnabled) {
-            chart.legend.textColor = axisTextColor
-        }
-
-        val maxVisible = DEFAULT_VISIBLE_POINTS.toFloat()
-        if (labels.size > DEFAULT_VISIBLE_POINTS) {
-            chart.setVisibleXRangeMaximum(maxVisible)
-            chart.moveViewToX(labels.lastIndex.toFloat())
-        } else {
-            chart.fitScreen()
-        }
-
         chart.invalidate()
     }
 
-    private fun setupEmptyStates() {
-        listOf(
-            binding.lineChart,
-            binding.lineChartDuration,
-            binding.lineChartCalories,
-            binding.lineChartBpm,
-            binding.lineChartCategoryWeight,
-            binding.lineChartCategorySets,
-            binding.lineChartVolume,
-            binding.lineChartOneRM
-        ).forEach {
-            it.setNoDataText("No data yet")
-            it.setNoDataTextColor(color(R.color.textSecondary))
-        }
+    private fun setupChartCard(
+        card: ItemProgressLineChartBinding,
+        title: String,
+        emptyTitle: String,
+        emptyMessage: String,
+        emptyIcon: String
+    ) {
+        card.tvChartTitle.text = title
+        card.tvEmptyTitle.text = emptyTitle
+        card.tvEmptyMessage.text = emptyMessage
+        card.tvEmptyIcon.text = emptyIcon
     }
 
-    private fun String.toShortDateLabel(): String =
+    private fun bindMetric(
+        card: ItemProgressMetricBinding,
+        title: String,
+        value: String,
+        delta: String,
+        icon: String
+    ) {
+        card.tvMetricTitle.text = title
+        card.tvMetricValue.text = value
+        card.tvMetricDelta.text = delta
+        card.tvMetricIcon.text = icon
+    }
+
+    private fun bindInsight(card: ItemProgressInsightBinding, title: String, value: String, icon: String) {
+        card.tvInsightTitle.text = title
+        card.tvInsightValue.text = value
+        card.tvInsightIcon.text = icon
+    }
+
+    private fun addMoodBar(mood: MoodUi, count: Int) {
+        val weight = count.coerceAtLeast(1).toFloat()
+        val view = TextView(requireContext()).apply {
+            text = mood.label()
+            gravity = android.view.Gravity.CENTER
+            textSize = 11f
+            setTextColor(color(R.color.textPrimary))
+            setBackgroundColor(mood.color())
+            alpha = if (count == 0) 0.28f else 0.9f
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, weight).apply {
+                marginEnd = 6
+            }
+        }
+        binding.moodBars.addView(view)
+    }
+
+    private fun applyInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.statsScroll) { view, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(view.paddingLeft, bars.top, view.paddingRight, 0)
+            insets
+        }
+        ViewCompat.requestApplyInsets(binding.statsScroll)
+    }
+
+    private fun playIntro() {
+        binding.content.alpha = 0f
+        binding.content.translationY = 18f
+        binding.content.animate().alpha(1f).translationY(0f).setDuration(280L).start()
+    }
+
+    private fun <T> ranged(list: List<T>): List<T> =
+        range.maxItems?.let { list.takeLast(it) } ?: list
+
+    private fun previousWindow(list: List<DailyStatsUi>): List<DailyStatsUi> {
+        val count = range.maxItems ?: return emptyList()
+        return list.dropLast(count).takeLast(count)
+    }
+
+    private fun metricMeta(points: List<ChartPoint>, suffix: String): String {
+        if (points.isEmpty()) return "No data in this range"
+        val avg = points.map { it.y }.average().roundToInt()
+        val latest = points.last().y.roundToInt()
+        return "Latest $latest - $avg $suffix"
+    }
+
+    private fun weightMeta(points: List<ChartPoint>): String {
+        if (points.isEmpty()) return "No weight data in this range"
+        val current = points.last().y
+        if (points.size == 1) return "Current ${current.clean()} kg"
+        val delta = current - points.first().y
+        val sign = if (delta >= 0f) "+" else ""
+        return "Current ${current.clean()} kg - $sign${delta.clean()} kg"
+    }
+
+    private fun deltaText(current: Float, previous: Float?): String {
+        if (previous == null || previous <= 0f) return "No previous period"
+        val change = ((current - previous) / previous * 100f).roundToInt()
+        val sign = if (change >= 0) "+" else ""
+        return "$sign$change% vs last period"
+    }
+
+    private fun formatDuration(minutes: Long): String =
+        if (minutes >= 60) "${minutes / 60}h ${minutes % 60}m" else "${minutes}m"
+
+    private fun List<Int>.averageOrNull(): Double? =
+        if (isEmpty()) null else average()
+
+    private fun String.toShortDate(): String =
         if (length >= 10) substring(5).replace("-", ".") else this
+
+    private fun String.compactCategory(): String =
+        take(9).replaceFirstChar { it.uppercase() }
+
+    private fun Float.clean(): String =
+        if (abs(this - roundToInt()) < 0.05f) roundToInt().toString() else "%.1f".format(this)
+
+    private fun MoodUi.label(): String = when (this) {
+        MoodUi.BAD -> "Low"
+        MoodUi.NEUTRAL -> "Neutral"
+        MoodUi.GOOD -> "Good"
+        MoodUi.AMAZING -> "Strong"
+    }
+
+    private fun MoodUi.color(): Int = when (this) {
+        MoodUi.BAD -> color(R.color.chartRose)
+        MoodUi.NEUTRAL -> color(R.color.chartViolet)
+        MoodUi.GOOD -> color(R.color.trainingAction)
+        MoodUi.AMAZING -> color(R.color.trainingStatus)
+    }
 
     private fun color(resId: Int): Int =
         ContextCompat.getColor(requireContext(), resId)
 
-    private companion object {
-        const val DEFAULT_VISIBLE_POINTS = 12
+    private enum class Range(val maxItems: Int?) {
+        DAYS_7(7),
+        DAYS_30(30),
+        MONTHS_3(90),
+        YEAR_1(365),
+        ALL(null)
     }
 }

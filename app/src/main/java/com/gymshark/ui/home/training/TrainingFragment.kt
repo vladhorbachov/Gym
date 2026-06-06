@@ -6,6 +6,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -98,9 +99,15 @@ class TrainingFragment : BaseFragment<FragmentTrainingBinding>(FragmentTrainingB
         ViewCompat.setOnApplyWindowInsetsListener(root) { _, insets ->
             val nav = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
 
+            // Global bottom nav lives in HomeActivity as a glass overlay. Keep these controls
+            // above it with a visible gap instead of stacking two bars together.
             workoutActionBar.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                bottomMargin = nav.bottom + 96.dp
+                bottomMargin = nav.bottom + CONTROL_BOTTOM_OFFSET_DP.dp
             }
+
+            // RecyclerView stays constrained to parent bottom, so exercise cards can scroll
+            // behind the haze/blur nav. Padding only ensures the last card remains reachable.
+            rvExercises.updatePadding(bottom = nav.bottom + SCROLL_BOTTOM_PADDING_DP.dp)
 
             insets
         }
@@ -154,4 +161,12 @@ class TrainingFragment : BaseFragment<FragmentTrainingBinding>(FragmentTrainingB
 
     private val Int.dp: Int
         get() = (this * resources.displayMetrics.density).toInt()
+
+    private companion object {
+        // Adjust with activity_home.xml bottom nav height/margin if the global nav changes.
+        const val CONTROL_BOTTOM_OFFSET_DP = 124
+
+        // Tune this for how high the last exercise can scroll above the floating controls.
+        const val SCROLL_BOTTOM_PADDING_DP = 188
+    }
 }

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardBackgroundColor="@color/surfaceCard"
+    app:cardCornerRadius="22dp"
+    app:cardElevation="0dp"
+    app:strokeColor="@color/strokeSubtle"
+    app:strokeWidth="1dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/tvChartTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/textPrimary"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            tools:text="Training duration" />
+
+        <TextView
+            android:id="@+id/tvChartMeta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="@color/textSecondary"
+            android:textSize="12sp"
+            tools:text="Average 48 min" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="238dp"
+            android:layout_marginTop="10dp">
+
+            <com.github.mikephil.charting.charts.LineChart
+                android:id="@+id/lineChart"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <LinearLayout
+                android:id="@+id/emptyState"
+                style="@style/Widget.Gym.ProgressEmptyState"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/tvEmptyIcon"
+                    style="@style/Widget.Gym.ProgressEmptyIcon"
+                    android:text="+" />
+
+                <TextView
+                    android:id="@+id/tvEmptyTitle"
+                    style="@style/Widget.Gym.ProgressEmptyTitle"
+                    android:text="No data yet" />
+
+                <TextView
+                    android:id="@+id/tvEmptyMessage"
+                    style="@style/Widget.Gym.ProgressEmptyMessage"
+                    android:text="Complete your first workout to start tracking progress." />
+            </LinearLayout>
+        </FrameLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

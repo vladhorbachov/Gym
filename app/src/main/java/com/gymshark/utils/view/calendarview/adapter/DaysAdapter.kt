@@ -1,6 +1,9 @@
 package com.gymshark.utils.view.calendarview.adapter
 
+import android.content.ClipData
+import android.view.DragEvent
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
@@ -16,7 +19,8 @@ import java.util.Locale
 
 class DaysAdapter(
     private val typesProvider: (LocalDate) -> List<String>,
-    private val onClick: (TrainingCalendarDay, List<String>) -> Unit
+    private val onClick: (TrainingCalendarDay, List<String>) -> Unit,
+    private val onTrainingDropped: (sourceDate: LocalDate, targetDate: LocalDate) -> Unit
 ) : ListAdapter<TrainingCalendarDay, DaysAdapter.DayVH>(DiffCallback()) {
 
     var plannedDays: Set<DayOfWeek> = emptySet()
@@ -38,6 +42,12 @@ class DaysAdapter(
             if (wasPlanned != isPlannedNow) {
                 notifyItemChanged(index, PAYLOAD_STYLE_ONLY)
             }
+        }
+    }
+
+    fun refreshStyles() {
+        currentList.indices.forEach { index ->
+            notifyItemChanged(index, PAYLOAD_STYLE_ONLY)
         }
     }
 
@@ -81,6 +91,8 @@ class DaysAdapter(
                 binding.root.isEnabled = true
 
                 binding.root.setOnClickListener { view ->
+                    val currentTypes = typesProvider(item.date)
+
                     view.animate().cancel()
                     view.scaleX = 1f
                     view.scaleY = 1f
@@ -97,11 +109,36 @@ class DaysAdapter(
                                 .setDuration(110L)
                                 .withEndAction {
                                     view.isEnabled = true
-                                    onClick(item, typesForDay)
+                                    onClick(item, currentTypes)
                                 }
                                 .start()
                         }
                         .start()
+                }
+
+                binding.root.setOnLongClickListener { view ->
+                    val currentTypes = typesProvider(item.date)
+                    if (!canStartDrag(item, currentTypes)) return@setOnLongClickListener false
+
+                    view.animate().cancel()
+                    view.alpha = 0.72f
+                    view.scaleX = 0.94f
+                    view.scaleY = 0.94f
+
+                    val payload = CalendarDragPayload(sourceDate = item.date)
+                    val clip = ClipData.newPlainText(DRAG_LABEL, item.date.toString())
+                    val started = view.startDragAndDrop(
+                        clip,
+                        View.DragShadowBuilder(view),
+                        payload,
+                        0
+                    )
+                    if (!started) resetDragTarget(view)
+                    true
+                }
+
+                binding.root.setOnDragListener { view, event ->
+                    handleDrag(view, event, item)
                 }
             }
 
@@ -113,19 +150,27 @@ class DaysAdapter(
             val isToday = date == today
             val hasCompletedTrain = item.train != null
             val isPlanned = plannedDays.contains(date.dayOfWeek)
+            val hasPlannedTrain = isPlanned && typesForDay.isNotEmpty()
 
             when {
+                isToday && (hasCompletedTrain || hasPlannedTrain) -> applyTodayWithTraining()
                 isToday -> applyToday()
                 hasCompletedTrain -> applyCompleted()
-                isPlanned && typesForDay.isNotEmpty() -> applyPlanned()
+                hasPlannedTrain -> applyPlanned()
                 else -> applyDefault()
             }
         }
 
         private fun applyToday() {
             binding.root.setBackgroundResource(R.drawable.day_today)
-            binding.dayNumber.setTextColor(getColor(R.color.text_primary))
-            binding.dayName.setTextColor(getColor(R.color.text_primary))
+            binding.dayNumber.setTextColor(getColor(R.color.trainingOnAction))
+            binding.dayName.setTextColor(getColor(R.color.trainingOnAction))
+        }
+
+        private fun applyTodayWithTraining() {
+            binding.root.setBackgroundResource(R.drawable.day_today_planned)
+            binding.dayNumber.setTextColor(getColor(R.color.trainingOnAction))
+            binding.dayName.setTextColor(getColor(R.color.trainingOnAction))
         }
 
         private fun applyCompleted() {
@@ -149,6 +194,71 @@ class DaysAdapter(
         private fun getColor(id: Int): Int {
             return ContextCompat.getColor(binding.root.context, id)
         }
+
+        private fun canStartDrag(
+            item: TrainingCalendarDay,
+            typesForDay: List<String>
+        ): Boolean {
+            return !item.date.isBefore(today) &&
+                typesForDay.isNotEmpty()
+        }
+
+        private fun canDropOn(item: TrainingCalendarDay): Boolean {
+            return item.train == null &&
+                !item.date.isBefore(today) &&
+                typesProvider(item.date).isEmpty()
+        }
+
+        private fun handleDrag(
+            view: View,
+            event: DragEvent,
+            target: TrainingCalendarDay
+        ): Boolean {
+            val payload = event.localState as? CalendarDragPayload ?: return false
+
+            return when (event.action) {
+                DragEvent.ACTION_DRAG_STARTED -> true
+                DragEvent.ACTION_DRAG_ENTERED -> {
+                    if (canDropOn(target) && payload.sourceDate != target.date) {
+                        view.animate()
+                            .scaleX(1.08f)
+                            .scaleY(1.08f)
+                            .alpha(0.86f)
+                            .setDuration(100L)
+                            .start()
+                    }
+                    true
+                }
+                DragEvent.ACTION_DRAG_EXITED -> {
+                    resetDragTarget(view)
+                    true
+                }
+                DragEvent.ACTION_DROP -> {
+                    resetDragTarget(view)
+                    if (canDropOn(target) && payload.sourceDate != target.date) {
+                        onTrainingDropped(payload.sourceDate, target.date)
+                        true
+                    } else {
+                        false
+                    }
+                }
+                DragEvent.ACTION_DRAG_ENDED -> {
+                    resetDragTarget(view)
+                    true
+                }
+                else -> true
+            }
+        }
+
+        private fun resetDragTarget(view: View) {
+            view.animate().cancel()
+            view.animate()
+                .alpha(1f)
+                .scaleX(1f)
+                .scaleY(1f)
+                .setDuration(120L)
+                .start()
+        }
     }
 
     private class DiffCallback : DiffUtil.ItemCallback<TrainingCalendarDay>() {
@@ -165,5 +275,10 @@ class DaysAdapter(
 
     private companion object {
         const val PAYLOAD_STYLE_ONLY = "payload_style_only"
+        const val DRAG_LABEL = "training_calendar_day"
     }
+
+    private data class CalendarDragPayload(
+        val sourceDate: LocalDate
+    )
 }

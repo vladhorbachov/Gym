@@ -39,10 +39,14 @@ class CalendarView @JvmOverloads constructor(
         typesProvider = ::typesForDate,
         onClick = { day, types ->
             onDayClick?.invoke(day.date, day.train, types)
+        },
+        onTrainingDropped = { sourceDate, targetDate ->
+            onTrainingDropped?.invoke(sourceDate, targetDate)
         }
     )
 
     var onDayClick: ((LocalDate, Train?, List<String>) -> Unit)? = null
+    var onTrainingDropped: ((sourceDate: LocalDate, targetDate: LocalDate) -> Unit)? = null
 
     init {
         orientation = VERTICAL
@@ -87,6 +91,7 @@ class CalendarView @JvmOverloads constructor(
     fun setTrainingSlots(slots: List<DaySlot>) {
         if (trainingSlots == slots) return
         trainingSlots = slots
+        adapter.refreshStyles()
         requestAutoSelectToday()
         requestMonthRefresh()
     }

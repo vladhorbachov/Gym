@@ -30,7 +30,8 @@ val viewModelModule = module {
         TrainingViewModel(
             trainingRepository = get(),
             userRepository = get(),
-            exerciseRepository = get()
+            exerciseRepository = get(),
+            prefs = get()
         )
     }
 

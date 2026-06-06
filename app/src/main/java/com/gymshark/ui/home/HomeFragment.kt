@@ -60,6 +60,9 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
             lastSelectedTypes = types
             trainingVm.loadSuggestedExercises(types)
         }
+        binding.cvCalendar.onTrainingDropped = { sourceDate, targetDate ->
+            trainingVm.moveTrainingSlot(sourceDate, targetDate)
+        }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -80,23 +83,26 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
                 }
                 launch {
                     trainingVm.draft.collect { draft ->
-                        val sectionedItems =
-                            draft.exercises
-                                .groupBy { it.baseCategory }
-                                .flatMap { (category, list) ->
-                                    listOf(ExerciseListItem.Header(category)) +
-                                        list.map { draftExercise ->
-                                            ExerciseListItem.ExerciseRow(
-                                                ExercisesEntity(
-                                                    id = draftExercise.exerciseId.toInt(),
-                                                    name = draftExercise.title,
-                                                    baseCategory = draftExercise.baseCategory,
-                                                    subCategory = "",
-                                                    difficulty = 1
-                                                )
-                                            )
-                                        }
+                        val sectionedItems = buildList {
+                            var lastCategory: String? = null
+                            draft.exercises.forEach { draftExercise ->
+                                if (draftExercise.baseCategory != lastCategory) {
+                                    add(ExerciseListItem.Header(draftExercise.baseCategory))
+                                    lastCategory = draftExercise.baseCategory
                                 }
+                                add(
+                                    ExerciseListItem.ExerciseRow(
+                                        ExercisesEntity(
+                                            id = draftExercise.exerciseId.toInt(),
+                                            name = draftExercise.title,
+                                            baseCategory = draftExercise.baseCategory,
+                                            subCategory = "",
+                                            difficulty = 1
+                                        )
+                                    )
+                                )
+                            }
+                        }
                         updateTodayCard(draft.exercises.size)
                         binding.rvExercises.isVisible = draft.exercises.isNotEmpty()
                         recommendedAdapter.submitList(sectionedItems)

@@ -29,7 +29,7 @@ class UserRepositoryImpl(
 
     override val currentUserIdFlow: Flow<String?> = currentUserStore.currentUserIdFlow
     override suspend fun setCurrentUserId(id: String) = currentUserStore.setCurrentUserId(id)
-    override suspend fun currentUserId(): String? = currentUserStore.currentUserIdOrNull()
+    override suspend fun currentUserId(): String? = currentUserIdOrFallback()
     override suspend fun setTrainingDayTypes(userId: String, dayToTypes: Map<Int, Set<String>>) {
         val user = userDao.getById(userId) ?: return
         userDao.upsert(user.copy(trainingDayTypes = dayToTypes))

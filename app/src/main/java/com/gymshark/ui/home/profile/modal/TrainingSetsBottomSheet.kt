@@ -3,6 +3,7 @@ package com.gymshark.ui.home.profile.modal
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
@@ -105,6 +106,16 @@ class TrainingSetsBottomSheet : BaseSettingsBottomSheet() {
             GridLayoutManager(requireContext(), 1)
 
         binding.typesList.adapter = typesAdapter
+        binding.typesList.isNestedScrollingEnabled = true
+        binding.typesList.setOnTouchListener { view, event ->
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN,
+                MotionEvent.ACTION_MOVE -> view.parent.requestDisallowInterceptTouchEvent(true)
+                MotionEvent.ACTION_UP,
+                MotionEvent.ACTION_CANCEL -> view.parent.requestDisallowInterceptTouchEvent(false)
+            }
+            false
+        }
     }
 
     private fun observeVm() {
