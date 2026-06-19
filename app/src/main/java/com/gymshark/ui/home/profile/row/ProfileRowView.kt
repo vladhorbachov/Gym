@@ -19,7 +19,8 @@ class ProfileRowView @JvmOverloads constructor(
     init {
         orientation = HORIZONTAL
         gravity = android.view.Gravity.CENTER_VERTICAL
-        setPadding(dp(14), dp(12), dp(14), dp(12))
+        minimumHeight = dp(78)
+        setPadding(dp(16), dp(14), dp(16), dp(14))
         background = androidx.core.content.ContextCompat.getDrawable(context, R.drawable.bg_profile_glass_soft)
         isClickable = true
         isFocusable = true

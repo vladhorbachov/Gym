@@ -68,7 +68,9 @@ class HomeActivity : BaseActivity<ActivityHomeBinding>(ActivityHomeBinding::infl
                 R.id.navStats -> 1
                 R.id.prepareMealFragment,
                 R.id.navMeal -> 2
-                R.id.navProfile -> 3
+                R.id.navProfile,
+                R.id.profileSettingsFragment,
+                R.id.trainingPlanEditorFragment -> 3
                 else -> 0
             }
 

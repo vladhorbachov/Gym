@@ -5,7 +5,6 @@ import com.gymshark.data.db.entity.UserEntity
 import com.gymshark.data.prefs.UserPrefs
 import com.gymshark.domain.models.DaySlot
 import com.gymshark.domain.models.Series
-import com.gymshark.domain.models.toDaysSlot
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -169,8 +168,24 @@ class UserRepositoryImpl(
     }
 
     override suspend fun savePlannedDays(days: Set<DayOfWeek>) {
-        val slots = days.toList().toDaysSlot()
-        setTrainingSlots(currentUserIdOrFallback(), slots)
+        val weekOrder = listOf(
+            DayOfWeek.MONDAY,
+            DayOfWeek.TUESDAY,
+            DayOfWeek.WEDNESDAY,
+            DayOfWeek.THURSDAY,
+            DayOfWeek.FRIDAY,
+            DayOfWeek.SATURDAY,
+            DayOfWeek.SUNDAY
+        )
+        val userId = currentUserIdOrFallback()
+        val existingSlots = getTrainingSlots(userId).associateBy { it.day }
+        val slots = weekOrder
+            .filter { it in days }
+            .map { day ->
+                existingSlots[day]?.copy(id = day.value.toLong(), day = day)
+                    ?: DaySlot(id = day.value.toLong(), day = day, types = emptyList())
+            }
+        setTrainingSlots(userId, slots)
     }
 
     override suspend fun debugSetSeries(series: Series) {

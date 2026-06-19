@@ -1,43 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
 
     <LinearLayout
         android:id="@+id/headerLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="48dp"
+        android:background="@android:color/transparent"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:gravity="center"
-        android:padding="8dp">
+        android:paddingHorizontal="2dp">
 
-        <ImageView
+        <ImageButton
             android:id="@+id/arrowLeft"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:src="@android:drawable/ic_media_previous"
-            app:tint="@android:color/darker_gray" />
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="@drawable/bg_calendar_arrow_button"
+            android:contentDescription="@null"
+            android:padding="9dp"
+            android:scaleType="center"
+            android:src="@drawable/ic_calendar_chevron_left" />
 
-        <TextView
-            android:id="@+id/monthText"
+        <LinearLayout
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="38dp"
+            android:layout_marginHorizontal="6dp"
             android:layout_weight="1"
+            android:background="@drawable/bg_calendar_month_chip"
             android:gravity="center"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            android:orientation="horizontal"
+            android:paddingHorizontal="10dp">
 
-        <ImageView
+            <TextView
+                android:id="@+id/monthText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxLines="1"
+                android:text="June"
+                android:textColor="@color/textPrimary"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/yearText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:gravity="center"
+                android:text="2026"
+                android:textColor="@color/trainingAction"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <ImageButton
             android:id="@+id/arrowRight"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:src="@android:drawable/ic_media_next"
-            app:tint="@android:color/darker_gray" />
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="@drawable/bg_calendar_arrow_button"
+            android:contentDescription="@null"
+            android:padding="9dp"
+            android:scaleType="center"
+            android:src="@drawable/ic_calendar_chevron_right" />
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/daysRecycler"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingVertical="8dp"
-        android:orientation="horizontal" />
+        android:orientation="horizontal"
+        android:paddingVertical="6dp" />
 </merge>

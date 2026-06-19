@@ -27,7 +27,7 @@ class TrainingTypesAdapter :
             b.root.alpha = 1f
 
             b.root.setOnLongClickListener {
-                it.animate().scaleX(1.08f).scaleY(1.08f).alpha(0.72f).setDuration(120L).start()
+                it.animate().scaleX(1.03f).scaleY(1.03f).alpha(0.78f).setDuration(110L).start()
                 val data = ClipData.newPlainText("type", type)
                 val shadow = View.DragShadowBuilder(it)
                 it.startDragAndDrop(data, shadow, null, 0)

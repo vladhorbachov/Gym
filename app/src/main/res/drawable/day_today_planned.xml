@@ -1,10 +1,10 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
     <gradient
         android:angle="270"
-        android:endColor="@color/chartAmber"
-        android:startColor="@color/Sunny_Yellow" />
+        android:endColor="@color/trainingAction"
+        android:startColor="@color/trainingStatusDark" />
     <stroke
         android:width="2dp"
-        android:color="@color/trainingAction" />
+        android:color="@color/profile_glass_stroke" />
     <corners android:radius="@dimen/radius_16" />
 </shape>

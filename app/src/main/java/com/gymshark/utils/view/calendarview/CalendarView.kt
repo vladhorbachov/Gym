@@ -5,6 +5,7 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.gymshark.R
 import com.gymshark.databinding.ViewCalendarBinding
 import com.gymshark.domain.models.DaySlot
 import com.gymshark.domain.models.Train
@@ -28,6 +29,7 @@ class CalendarView @JvmOverloads constructor(
     private var trainingSlots: List<DaySlot> = emptyList()
     private var trains: List<Train> = emptyList()
     private var plannedDays: Set<DayOfWeek> = emptySet()
+    private var selectedDate: LocalDate? = null
     private var currentMonth: YearMonth = YearMonth.now()
 
     private var isMonthAnimating = false
@@ -38,7 +40,7 @@ class CalendarView @JvmOverloads constructor(
     private val adapter = DaysAdapter(
         typesProvider = ::typesForDate,
         onClick = { day, types ->
-            onDayClick?.invoke(day.date, day.train, types)
+            handleDayClick(day, types)
         },
         onTrainingDropped = { sourceDate, targetDate ->
             onTrainingDropped?.invoke(sourceDate, targetDate)
@@ -47,6 +49,12 @@ class CalendarView @JvmOverloads constructor(
 
     var onDayClick: ((LocalDate, Train?, List<String>) -> Unit)? = null
     var onTrainingDropped: ((sourceDate: LocalDate, targetDate: LocalDate) -> Unit)? = null
+
+    private fun handleDayClick(day: TrainingCalendarDay, types: List<String>) {
+        selectedDate = day.date
+        adapter.updateSelectedDate(day.date)
+        onDayClick?.invoke(day.date, day.train, types)
+    }
 
     init {
         orientation = VERTICAL
@@ -58,6 +66,7 @@ class CalendarView @JvmOverloads constructor(
 
         binding.arrowLeft.setOnClickListener {
             if (isMonthAnimating) return@setOnClickListener
+            animateArrow(binding.arrowLeft)
             currentMonth = currentMonth.minusMonths(1)
             lastAutoSelectKey = null
             updateMonth()
@@ -65,6 +74,7 @@ class CalendarView @JvmOverloads constructor(
 
         binding.arrowRight.setOnClickListener {
             if (isMonthAnimating) return@setOnClickListener
+            animateArrow(binding.arrowRight)
             currentMonth = currentMonth.plusMonths(1)
             lastAutoSelectKey = null
             updateMonth()
@@ -113,8 +123,8 @@ class CalendarView @JvmOverloads constructor(
     private fun updateMonth() {
         val locale = Locale.getDefault()
         val monthName = currentMonth.month.getDisplayName(TextStyle.FULL_STANDALONE, locale)
-        binding.monthText.text =
-            monthName.replaceFirstChar { it.titlecase(locale) } + " ${currentMonth.year}"
+        binding.monthText.text = monthName.replaceFirstChar { it.titlecase(locale) }
+        binding.yearText.text = currentMonth.year.toString()
 
         val days = buildMonthDays()
         val today = LocalDate.now()
@@ -142,6 +152,23 @@ class CalendarView @JvmOverloads constructor(
                 maybeAutoSelectToday()
             }
         }
+    }
+
+    private fun animateArrow(view: android.view.View) {
+        view.setBackgroundResource(R.drawable.bg_calendar_arrow_button_active)
+        view.animate()
+            .scaleX(0.92f)
+            .scaleY(0.92f)
+            .setDuration(90L)
+            .withEndAction {
+                view.setBackgroundResource(R.drawable.bg_calendar_arrow_button)
+                view.animate()
+                    .scaleX(1f)
+                    .scaleY(1f)
+                    .setDuration(110L)
+                    .start()
+            }
+            .start()
     }
 
     private fun buildMonthDays(): List<TrainingCalendarDay> {
@@ -223,6 +250,8 @@ class CalendarView @JvmOverloads constructor(
                         .scaleY(1f)
                         .setDuration(120L)
                         .withEndAction {
+                            selectedDate = today
+                            adapter.updateSelectedDate(today)
                             onEnd?.invoke()
                         }
                         .start()

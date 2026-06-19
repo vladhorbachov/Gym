@@ -1,6 +1,10 @@
 package com.gymshark.utils.view.calendarview.adapter
 
 import android.content.ClipData
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Point
+import android.graphics.RectF
 import android.view.DragEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -26,6 +30,8 @@ class DaysAdapter(
     var plannedDays: Set<DayOfWeek> = emptySet()
         private set
 
+    private var selectedDate: LocalDate? = null
+
     private val today: LocalDate
         get() = LocalDate.now()
 
@@ -48,6 +54,18 @@ class DaysAdapter(
     fun refreshStyles() {
         currentList.indices.forEach { index ->
             notifyItemChanged(index, PAYLOAD_STYLE_ONLY)
+        }
+    }
+
+    fun updateSelectedDate(date: LocalDate?) {
+        if (selectedDate == date) return
+        val oldDate = selectedDate
+        selectedDate = date
+
+        currentList.forEachIndexed { index, item ->
+            if (item.date == oldDate || item.date == selectedDate) {
+                notifyItemChanged(index, PAYLOAD_STYLE_ONLY)
+            }
         }
     }
 
@@ -120,16 +138,11 @@ class DaysAdapter(
                     val currentTypes = typesProvider(item.date)
                     if (!canStartDrag(item, currentTypes)) return@setOnLongClickListener false
 
-                    view.animate().cancel()
-                    view.alpha = 0.72f
-                    view.scaleX = 0.94f
-                    view.scaleY = 0.94f
-
                     val payload = CalendarDragPayload(sourceDate = item.date)
                     val clip = ClipData.newPlainText(DRAG_LABEL, item.date.toString())
                     val started = view.startDragAndDrop(
                         clip,
-                        View.DragShadowBuilder(view),
+                        TrainingOutlineShadow(view),
                         payload,
                         0
                     )
@@ -151,6 +164,11 @@ class DaysAdapter(
             val hasCompletedTrain = item.train != null
             val isPlanned = plannedDays.contains(date.dayOfWeek)
             val hasPlannedTrain = isPlanned && typesForDay.isNotEmpty()
+            binding.root.foreground = if (date == selectedDate) {
+                ContextCompat.getDrawable(binding.root.context, R.drawable.day_selected_foreground)
+            } else {
+                null
+            }
 
             when {
                 isToday && (hasCompletedTrain || hasPlannedTrain) -> applyTodayWithTraining()
@@ -281,4 +299,33 @@ class DaysAdapter(
     private data class CalendarDragPayload(
         val sourceDate: LocalDate
     )
+
+    private class TrainingOutlineShadow(
+        private val sourceView: View
+    ) : View.DragShadowBuilder(sourceView) {
+
+        private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            style = Paint.Style.STROKE
+            strokeWidth = sourceView.resources.displayMetrics.density * 2f
+            color = ContextCompat.getColor(sourceView.context, R.color.trainingAction)
+        }
+
+        override fun onProvideShadowMetrics(size: Point, touch: Point) {
+            size.set(sourceView.width, sourceView.height)
+            touch.set(sourceView.width / 2, sourceView.height / 2)
+        }
+
+        override fun onDrawShadow(canvas: Canvas) {
+            val inset = paint.strokeWidth / 2f
+            val radius = sourceView.resources.displayMetrics.density * 16f
+            val rect = RectF(
+                inset,
+                inset,
+                sourceView.width - inset,
+                sourceView.height - inset
+            )
+
+            canvas.drawRoundRect(rect, radius, radius, paint)
+        }
+    }
 }
