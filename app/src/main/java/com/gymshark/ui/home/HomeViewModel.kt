@@ -2,21 +2,31 @@ package com.gymshark.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gymshark.data.auth.UserRepository
+import com.gymshark.data.user.UserRepository
 import com.gymshark.data.db.entity.UserEntity
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalCoroutinesApi::class)
+class HomeViewModel(
+    private val repo: UserRepository
+) : ViewModel() {
 
-class HomeViewModel(private val repo: UserRepository) : ViewModel() {
-    private val _user = MutableSharedFlow<UserEntity?>(replay = 0)
-    val user = _user.asSharedFlow()
+    val user: StateFlow<UserEntity?> =
+        repo.currentUserIdFlow
+            .filterNotNull()
+            .flatMapLatest { id -> repo.observeById(id) }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     fun saveUser(user: UserEntity) {
         viewModelScope.launch {
-            repo.save(user)
-            _user.emit(repo.getById(user.userId))
+            repo.upsert(user)
+            repo.setCurrentUserId(user.userId)
         }
     }
 }

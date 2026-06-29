@@ -2,87 +2,98 @@ package com.gymshark.ui.home.profile
 
 import android.os.Bundle
 import android.view.View
-import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import com.gymshark.R
-import com.gymshark.data.db.entity.UserEntity
-import com.gymshark.data.models.Pentagon
-import com.gymshark.data.models.Series
-import com.gymshark.data.models.TrainingDay
 import com.gymshark.databinding.FragmentProfileBinding
+import com.gymshark.ui.home.profile.row.ProfileRowModel
+import com.gymshark.utils.BaseFragment
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.androidx.viewmodel.ext.android.activityViewModel
+import java.util.Locale
 
-class ProfileFragment : Fragment(R.layout.fragment_profile) {
+class ProfileFragment : BaseFragment<FragmentProfileBinding>(FragmentProfileBinding::inflate) {
 
-    private var _binding: FragmentProfileBinding? = null
-    private val binding get() = _binding!!
-
-    private val vm: ProfileViewModel by viewModel()
-
-    private val daysOfWeek = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
-    private val selectedDays = mutableSetOf<Int>()
+    private val vm: ProfileViewModel by activityViewModel()
+    private val locale: Locale get() = Locale.getDefault()
+    private var currentState = ProfileState()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        _binding = FragmentProfileBinding.bind(view)
-        binding.btnPickDays.setOnClickListener { showDayPicker() }
-        binding.btnSave.setOnClickListener { saveUser() }
+
+        setupActions()
+        observeProfileState()
+        vm.refreshSeriesState()
     }
 
-    private fun showDayPicker() {
-        val checkedItems = BooleanArray(daysOfWeek.size) { selectedDays.contains(it) }
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Pick training days")
-            .setMultiChoiceItems(daysOfWeek.toTypedArray(), checkedItems) { _, which, isChecked ->
-                if (isChecked) selectedDays.add(which) else selectedDays.remove(which)
-            }
-            .setPositiveButton("OK") { dialog, _ ->
-                binding.tvSelectedDays.text =
-                    if (selectedDays.isEmpty()) "Selected days: none"
-                    else "Selected days: " + selectedDays.joinToString { daysOfWeek[it] }
-                dialog.dismiss()
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
+    private fun setupActions() = with(binding) {
+        ivAvatar.setOnClickListener { openSettings(ProfileSettingsFragment.SECTION_PERSONAL) }
+        tvName.setOnClickListener { openSettings(ProfileSettingsFragment.SECTION_PERSONAL) }
+        tvProfileSummary.setOnClickListener { openSettings(ProfileSettingsFragment.SECTION_PERSONAL) }
+
+        rowPersonalData.setOnClickListener { openSettings(ProfileSettingsFragment.SECTION_PERSONAL) }
+        rowTrainingDays.setOnClickListener { openSettings(ProfileSettingsFragment.SECTION_DAYS) }
+        rowTrainingSet.setOnClickListener { openSettings(ProfileSettingsFragment.SECTION_PLAN) }
+        rowWeight.setOnClickListener { openSettings(ProfileSettingsFragment.SECTION_WEIGHT) }
     }
 
-    private fun saveUser() = with(binding) {
-        val user = UserEntity(
-            userId = etUserId.text.toString(),
-            name = etName.text.toString(),
-            age = etAge.text.toString().toIntOrNull() ?: 0,
-            sex = swSex.isChecked,
-            weight = etWeight.text.toString().toFloatOrNull() ?: 0f,
-            height = etHeight.text.toString().toIntOrNull() ?: 0,
-            minBPM = etMinBpm.text.toString().toIntOrNull() ?: 0,
-            maxBPM = etMaxBpm.text.toString().toIntOrNull() ?: 0,
-            avgBPM = etAvgBpm.text.toString().toIntOrNull() ?: 0,
-            pentagon = Pentagon(
-                strength = etStrength.text.toString().toIntOrNull() ?: 0,
-                power = etPower.text.toString().toIntOrNull() ?: 0,
-                agility = etAgility.text.toString().toIntOrNull() ?: 0,
-                endurance = etEndurance.text.toString().toIntOrNull() ?: 0,
-                mobility = etMobility.text.toString().toIntOrNull() ?: 0,
-            ),
-            trainingDay = TrainingDay(selectedDays.toMutableList()),
-            series = Series(
-                current = etCurrentSeries.text.toString().toIntOrNull() ?: 0,
-                maxSeries = etMaxSeries.text.toString().toIntOrNull() ?: 0,
-                isActive = swSeriesActive.isChecked
-            )
-        )
-
+    private fun observeProfileState() {
         viewLifecycleOwner.lifecycleScope.launch {
-            vm.saveUser(user)
-            Snackbar.make(requireView(), "User saved", Snackbar.LENGTH_SHORT).show()
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                vm.profileState.collectLatest { state ->
+                    currentState = state
+                    renderProfile(state)
+                }
+            }
         }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+    private fun renderProfile(state: ProfileState) = with(binding) {
+        val user = state.user
+        val detailsPreview = ProfilePreviewFormatter.personalDetails(user)
+
+        tvName.text = user?.name?.takeIf { it.isNotBlank() } ?: "Your profile"
+        tvProfileSummary.text = detailsPreview.takeUnless { it == "Not set" } ?: "Set up your profile"
+        tvVisitSeries.text = "Current streak\n${user?.series?.current ?: 0}"
+        tvVisitMaxSeries.text = "Best streak\n${user?.series?.maxSeries ?: 0}"
+
+        rowPersonalData.bind(
+            ProfileRowModel(
+                title = "Personal details",
+                value = detailsPreview
+            )
+        )
+        rowTrainingDays.bind(
+            ProfileRowModel(
+                title = "Training days",
+                value = ProfilePreviewFormatter.trainingDays(state.selectedDays, locale)
+            )
+        )
+        rowTrainingSet.bind(
+            ProfileRowModel(
+                title = "Training plan",
+                value = ProfilePreviewFormatter.trainingPlan(
+                    state.trainingSlots,
+                    state.selectedDays,
+                    locale
+                )
+            )
+        )
+        rowWeight.bind(
+            ProfileRowModel(
+                title = "Weight",
+                value = ProfilePreviewFormatter.weight(user)
+            )
+        )
+    }
+
+    private fun openSettings(section: String) {
+        findNavController().navigate(
+            R.id.action_navProfile_to_profileSettingsFragment,
+            Bundle().apply { putString(ProfileSettingsFragment.ARG_INITIAL_SECTION, section) }
+        )
     }
 }

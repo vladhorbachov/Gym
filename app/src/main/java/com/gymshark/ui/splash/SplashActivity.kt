@@ -2,14 +2,15 @@ package com.gymshark.ui.splash
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.gson.Gson
 import com.gymshark.R
-import com.gymshark.data.models.ExerciseJson
+import com.gymshark.databinding.ActivitySplashBinding
+import com.gymshark.domain.models.ExerciseJson
 import com.gymshark.ui.auth.AuthActivity
 import com.gymshark.ui.home.HomeActivity
+import com.gymshark.utils.BaseActivity
 import com.gymshark.utils.Constants
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -17,7 +18,7 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.io.InputStreamReader
 
-class SplashActivity : AppCompatActivity(R.layout.activity_splash) {
+class SplashActivity : BaseActivity<ActivitySplashBinding>(ActivitySplashBinding::inflate) {
 
     private val firebaseAuth: FirebaseAuth by inject()
     private val splashViewModel: SplashViewModel by viewModel()

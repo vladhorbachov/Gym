@@ -1,27 +1,101 @@
 <?xml version="1.0" encoding="utf-8"?>
-<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+<navigation
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/home_graph"
     app:startDestination="@id/navHome">
 
+
     <fragment
         android:id="@+id/navHome"
         android:name="com.gymshark.ui.home.HomeFragment"
-        android:label="HomeFragment" />
+        android:label="Home">
+
+        <action
+            android:id="@+id/action_navHome_to_prepareFragment"
+            app:destination="@id/prepareFragment" />
+        <action
+            android:id="@+id/action_navHome_to_navProfile"
+            app:destination="@id/navProfile" />
+
+    </fragment>
+
     <fragment
         android:id="@+id/navStats"
-        android:name="com.gymshark.ui.home.StatsFragment"
-        android:label="StatsFragment" />
+        android:name="com.gymshark.ui.home.stats.StatsFragment"
+        android:label="Stats" />
+
     <fragment
         android:id="@+id/navMeal"
-        android:name="com.gymshark.ui.home.MealFragment"
-        android:label="MealFragment" />
-    <fragment
-        android:id="@+id/navTraining"
-        android:name="com.gymshark.ui.home.training.TrainingFragment"
-        android:label="TrainingFragment" />
+        android:name="com.gymshark.ui.home.meal.MealFragment"
+        android:label="Meal" />
+
     <fragment
         android:id="@+id/navProfile"
         android:name="com.gymshark.ui.home.profile.ProfileFragment"
-        android:label="ProfileFragment" />
+        android:label="Profile">
+
+        <action
+            android:id="@+id/action_navProfile_to_profileSettingsFragment"
+            app:destination="@id/profileSettingsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/profileSettingsFragment"
+        android:name="com.gymshark.ui.home.profile.ProfileSettingsFragment"
+        android:label="Profile settings">
+
+        <argument
+            android:name="initialSection"
+            app:argType="string"
+            android:defaultValue="personal" />
+
+        <action
+            android:id="@+id/action_profileSettingsFragment_to_trainingPlanEditorFragment"
+            app:destination="@id/trainingPlanEditorFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/trainingPlanEditorFragment"
+        android:name="com.gymshark.ui.home.profile.TrainingPlanEditorFragment"
+        android:label="Training plan" />
+
+    <fragment
+        android:id="@+id/prepareMealFragment"
+        android:name="com.gymshark.ui.home.meal.PrepareMealFragment"
+        android:label="Meal"/>
+
+
+    <fragment
+        android:id="@+id/prepareFragment"
+        android:name="com.gymshark.ui.home.training.PrepareFragment">
+
+        <action
+            android:id="@+id/action_prepareFragment_to_trainingFragment"
+            app:destination="@id/trainingFragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/trainingFragment"
+        android:name="com.gymshark.ui.home.training.TrainingFragment">
+
+        <action
+            android:id="@+id/action_training_to_finish"
+            app:destination="@id/finishFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/finishFragment"
+        android:name="com.gymshark.ui.home.training.finish.FinishFragment">
+
+        <action
+            android:id="@+id/action_finish_to_pulse"
+            app:destination="@id/pulseFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/pulseFragment"
+        android:name="com.gymshark.ui.home.pulse.PulseFragment" />
+
 </navigation>

@@ -1,122 +1,265 @@
 package com.gymshark.ui.home.training
 
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.core.os.bundleOf
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import androidx.core.view.isEmpty
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.android.material.textfield.TextInputEditText
 import com.gymshark.R
-import com.gymshark.data.models.Exercise
 import com.gymshark.databinding.BsExerciseActionsBinding
+import com.gymshark.ui.home.training.drafts.SetEntry
+import org.koin.androidx.viewmodel.ext.android.activityViewModel
 
 class ExerciseActionsBottomSheet : BottomSheetDialogFragment() {
 
     private var _binding: BsExerciseActionsBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var exercise: Exercise
+    private val trainingVm: TrainingViewModel by activityViewModel()
+
+    private var exerciseId: Long = 0L
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        exerciseId = requireArguments().getLong(ARG_EXERCISE_ID)
+    }
 
     override fun onCreateView(i: LayoutInflater, c: ViewGroup?, s: Bundle?): View {
         _binding = BsExerciseActionsBinding.inflate(i, c, false)
         return binding.root
     }
 
+    override fun onStart() {
+        super.onStart()
+        dialog?.window?.apply {
+            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            setDimAmount(0.45f)
+        }
+        val sheet = (dialog as? BottomSheetDialog)
+            ?.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
+        sheet?.setBackgroundColor(Color.TRANSPARENT)
+        sheet?.layoutParams?.height = (resources.displayMetrics.heightPixels * 0.72f).toInt()
+        sheet?.requestLayout()
+        sheet?.let {
+            BottomSheetBehavior.from(it).apply {
+                skipCollapsed = true
+                state = BottomSheetBehavior.STATE_EXPANDED
+            }
+        }
+    }
+
     override fun onViewCreated(view: View, s: Bundle?) {
-        @Suppress("DEPRECATION")
-        exercise = requireArguments().getParcelable(ARG_EXERCISE)!!
-        binding.tvTitle.text = exercise.title
+        applyBottomSheetInsets()
 
-        if (binding.rowsContainer.isEmpty()) addRow()
+        val ex = trainingVm.getExerciseDraft(exerciseId)
 
-        binding.btnPlus.setOnClickListener { addRow() }
-        binding.btnMinus.setOnClickListener { removeRow() }
-        binding.btnInfo.setOnClickListener { callbacks()?.onInfoClicked(exercise) }
+        binding.tvTitle.text = ex?.title ?: "Exercise"
+        playIntro()
+
+        val sets = ex?.sets.orEmpty()
+        if (binding.rowsContainer.isEmpty()) {
+            if (sets.isEmpty()) {
+                addRow(scrollToRow = false)
+            } else {
+                sets.forEach { addRowWithValues(it) }
+            }
+        }
+
+        binding.btnPlus.setOnClickListener {
+            it.pressPulse()
+            addRow(scrollToRow = true)
+        }
+        binding.btnMinus.setOnClickListener {
+            it.pressPulse()
+            removeRow()
+        }
+        binding.btnDone.setOnClickListener {
+            it.pressPulse()
+            dismiss()
+        }
+
+        binding.btnInfo.setOnClickListener {
+            it.pressPulse()
+            ExerciseInfoBottomSheet
+                .newInstance(
+                    title = ex?.title.orEmpty(),
+                    category = ex?.baseCategory.orEmpty()
+                )
+                .show(parentFragmentManager, "exercise_info")
+        }
 
         updateMinusEnabled()
+        updateSummary()
+    }
+
+    private fun applyBottomSheetInsets() {
+        val baseBottomPadding = (16 * resources.displayMetrics.density).toInt()
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.actionSheetContent) { content, insets ->
+            val nav = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+
+            content.updatePadding(bottom = baseBottomPadding + nav.bottom)
+
+            insets
+        }
+
+        ViewCompat.requestApplyInsets(binding.actionSheetContent)
     }
 
     override fun onDismiss(dialog: android.content.DialogInterface) {
         super.onDismiss(dialog)
 
-        val weights = collectWeights()
-        val reps = collectReps()
-
-        val maxWeight: Float? = weights.maxOrNull()
-        val avgReps: Float? = if (reps.isNotEmpty()) reps.average().toFloat() else null
-        val setsCount = binding.rowsContainer.childCount
-
-        callbacks()?.onExerciseParamsChanged(
-            exerciseId = exercise.id,
-            maxWeight = maxWeight,
-            avgReps = avgReps,
-            sets = setsCount
-        )
+        val newSets = collectSets()
+        trainingVm.updateExerciseSets(exerciseId, newSets)
     }
 
-    private fun collectWeights(): List<Float> {
-        val res = mutableListOf<Float>()
+    private fun collectSets(): List<SetEntry> = buildList {
         repeat(binding.rowsContainer.childCount) { i ->
             val row = binding.rowsContainer.getChildAt(i)
-            val raw =
-                row.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etRight)
-                    ?.text?.toString().orEmpty()
-            val normalized = raw.replace(',', '.').filter { it.isDigit() || it == '.' }
-            normalized.toFloatOrNull()?.let(res::add)
+
+            val repsRaw = row.findViewById<TextInputEditText>(R.id.etLeft)
+                ?.text?.toString().orEmpty()
+            val weightRaw = row.findViewById<TextInputEditText>(R.id.etRight)
+                ?.text?.toString().orEmpty()
+
+            val reps = repsRaw.filter { it.isDigit() }.toIntOrNull()
+            val normalizedW = weightRaw.replace(',', '.').filter { it.isDigit() || it == '.' }
+            val weight = normalizedW.toFloatOrNull()
+
+            add(SetEntry(reps = reps, weight = weight))
         }
-        return res
     }
 
-    private fun collectReps(): List<Int> {
-        val res = mutableListOf<Int>()
-        repeat(binding.rowsContainer.childCount) { i ->
-            val row = binding.rowsContainer.getChildAt(i)
-            val raw =
-                row.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etLeft)
-                    ?.text?.toString().orEmpty()
-            val onlyDigits = raw.filter { it.isDigit() }
-            onlyDigits.toIntOrNull()?.let(res::add)
-        }
-        return res
-    }
-
-    private fun addRow() {
+    private fun addRow(scrollToRow: Boolean) {
         val row = layoutInflater.inflate(R.layout.item_ex_params_row, binding.rowsContainer, false)
         binding.rowsContainer.addView(row)
+        configureRow(row, binding.rowsContainer.childCount)
+        animateRowIn(row)
         updateMinusEnabled()
+        updateSummary()
+        if (scrollToRow) scrollSetsToRow(row)
+    }
+
+    private fun addRowWithValues(set: SetEntry) {
+        val row = layoutInflater.inflate(R.layout.item_ex_params_row, binding.rowsContainer, false)
+        row.findViewById<TextInputEditText>(R.id.etLeft)?.setText(set.reps?.toString().orEmpty())
+        row.findViewById<TextInputEditText>(R.id.etRight)?.setText(formatWeight(set.weight))
+        binding.rowsContainer.addView(row)
+        configureRow(row, binding.rowsContainer.childCount)
+        animateRowIn(row)
+        updateMinusEnabled()
+        updateSummary()
+    }
+
+    private fun scrollSetsToRow(row: View) {
+        binding.setsScroll.post {
+            val targetY = (row.bottom - binding.setsScroll.height + row.height).coerceAtLeast(0)
+            binding.setsScroll.smoothScrollTo(0, targetY)
+        }
     }
 
     private fun removeRow() {
         if (binding.rowsContainer.childCount > 1) {
             binding.rowsContainer.removeViewAt(binding.rowsContainer.childCount - 1)
         }
+        renumberRows()
         updateMinusEnabled()
+        updateSummary()
     }
 
     private fun updateMinusEnabled() {
         binding.btnMinus.isEnabled = binding.rowsContainer.childCount > 1
+        binding.btnMinus.alpha = if (binding.btnMinus.isEnabled) 1f else 0.45f
     }
 
-    private fun callbacks(): Callbacks? = parentFragment as? Callbacks ?: activity as? Callbacks
+    private fun configureRow(row: View, number: Int) {
+        row.findViewById<TextView>(R.id.tvSetNumber)?.text = number.toString()
+        val watcher = object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                updateSummary()
+            }
+            override fun afterTextChanged(s: android.text.Editable?) = Unit
+        }
+        row.findViewById<TextInputEditText>(R.id.etLeft)?.addTextChangedListener(watcher)
+        row.findViewById<TextInputEditText>(R.id.etRight)?.addTextChangedListener(watcher)
+    }
 
-    interface Callbacks {
-        fun onInfoClicked(exercise: Exercise)
+    private fun renumberRows() {
+        repeat(binding.rowsContainer.childCount) { index ->
+            binding.rowsContainer.getChildAt(index)
+                .findViewById<TextView>(R.id.tvSetNumber)
+                ?.text = (index + 1).toString()
+        }
+    }
 
-        fun onExerciseParamsChanged(
-            exerciseId: Long,
-            maxWeight: Float?,
-            avgReps: Float?,
-            sets: Int
-        )
+    private fun updateSummary() {
+        val sets = collectSets()
+        val totalReps = sets.sumOf { it.reps ?: 0 }
+        val topWeight = sets.mapNotNull { it.weight }.maxOrNull()
+
+        binding.tvSetCount.text = binding.rowsContainer.childCount.toString()
+        binding.tvTotalReps.text = totalReps.toString()
+        binding.tvTopWeight.text = formatWeight(topWeight).ifBlank { "-" }
+    }
+
+    private fun formatWeight(value: Float?): String {
+        val weight = value ?: return ""
+        return if (weight % 1f == 0f) weight.toInt().toString() else "%.1f".format(weight)
+    }
+
+    private fun playIntro() = with(binding) {
+        listOf(tvKicker, tvTitle, summaryRow, tableHeader, rowsContainer, btnPlus, btnDone)
+            .forEachIndexed { index, target ->
+                target.alpha = 0f
+                target.translationY = 18f
+                target.animate()
+                    .alpha(1f)
+                    .translationY(0f)
+                    .setStartDelay(index * 35L)
+                    .setDuration(220L)
+                    .start()
+            }
+    }
+
+    private fun animateRowIn(row: View) {
+        row.alpha = 0f
+        row.translationY = 18f
+        row.animate()
+            .alpha(1f)
+            .translationY(0f)
+            .setDuration(180L)
+            .start()
+    }
+
+    private fun View.pressPulse() {
+        animate().scaleX(0.96f).scaleY(0.96f).setDuration(70L).withEndAction {
+            animate().scaleX(1f).scaleY(1f).setDuration(110L).start()
+        }.start()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     companion object {
-        private const val ARG_EXERCISE = "arg_exercise"
+        private const val ARG_EXERCISE_ID = "arg_exercise_id"
 
-        @JvmStatic
-        fun newInstance(exercise: Exercise) = ExerciseActionsBottomSheet().apply {
-            arguments = bundleOf(ARG_EXERCISE to exercise)
+        fun newInstance(exerciseId: Long) = ExerciseActionsBottomSheet().apply {
+            arguments = bundleOf(ARG_EXERCISE_ID to exerciseId)
         }
     }
 }

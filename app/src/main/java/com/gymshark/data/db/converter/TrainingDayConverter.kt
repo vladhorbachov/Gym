@@ -2,7 +2,7 @@ package com.gymshark.data.db.converter
 
 import androidx.room.TypeConverter
 import com.google.gson.Gson
-import com.gymshark.data.models.TrainingDay
+import com.gymshark.domain.models.TrainingDay
 
 class TrainingDayConverter {
     private val gson = Gson()

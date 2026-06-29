@@ -15,9 +15,9 @@ data class TrainingsEntity(
     val finishTime: Long,
     val fullDuration: Long,
     val activeDuration: Long,
-    val minBPM: Int,
-    val maxBPM: Int,
-    val avgBPM: Int,
+    val minBPM: Int?,
+    val maxBPM: Int?,
+    val avgBPM: Int?,
     val calories: Int,
     val mood: String
 )

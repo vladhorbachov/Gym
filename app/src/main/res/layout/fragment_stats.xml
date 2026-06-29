@@ -1,10 +1,315 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/statsScroll"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <TextView
-        android:text="Stats Frag"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+    android:layout_height="match_parent"
+    android:background="@color/bgMain"
+    android:clipToPadding="false"
+    android:fillViewport="true"
+    android:overScrollMode="ifContentScrolls">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <LinearLayout
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="22dp"
+        android:paddingBottom="132dp">
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Progress"
+            android:textColor="@color/textPrimary"
+            android:textSize="32sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvSubtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:lineSpacingExtra="2dp"
+            android:text="Track your activity, body metrics, and strength trends"
+            android:textColor="@color/textSecondary"
+            android:textSize="14sp" />
+
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/rangeGroup"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:layout_marginTop="18dp"
+            android:background="@drawable/bg_progress_range"
+            android:padding="4dp"
+            app:checkedButton="@id/range30"
+            app:selectionRequired="true"
+            app:singleSelection="true">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/range7"
+                style="@style/Widget.Gym.RangeButton"
+                android:text="7D" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/range30"
+                style="@style/Widget.Gym.RangeButton"
+                android:text="30D" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/range3m"
+                style="@style/Widget.Gym.RangeButton"
+                android:text="3M" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/range1y"
+                style="@style/Widget.Gym.RangeButton"
+                android:text="1Y" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/rangeAll"
+                style="@style/Widget.Gym.RangeButton"
+                android:text="All" />
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+
+        <GridLayout
+            android:id="@+id/summaryGrid"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:columnCount="2"
+            android:rowCount="2">
+
+            <include
+                android:id="@+id/cardTime"
+                layout="@layout/item_progress_metric"
+                android:layout_width="0dp"
+                android:layout_height="116dp"
+                android:layout_columnWeight="1"
+                android:layout_margin="5dp" />
+
+            <include
+                android:id="@+id/cardWorkouts"
+                layout="@layout/item_progress_metric"
+                android:layout_width="0dp"
+                android:layout_height="116dp"
+                android:layout_columnWeight="1"
+                android:layout_margin="5dp" />
+
+            <include
+                android:id="@+id/cardCalories"
+                layout="@layout/item_progress_metric"
+                android:layout_width="0dp"
+                android:layout_height="116dp"
+                android:layout_columnWeight="1"
+                android:layout_margin="5dp" />
+
+            <include
+                android:id="@+id/cardBpm"
+                layout="@layout/item_progress_metric"
+                android:layout_width="0dp"
+                android:layout_height="116dp"
+                android:layout_columnWeight="1"
+                android:layout_margin="5dp" />
+        </GridLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:text="Performance trends"
+            android:textColor="@color/textPrimary"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <include
+            android:id="@+id/durationCard"
+            layout="@layout/item_progress_line_chart"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp" />
+
+        <include
+            android:id="@+id/caloriesCard"
+            layout="@layout/item_progress_line_chart"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp" />
+
+        <include
+            android:id="@+id/bpmCard"
+            layout="@layout/item_progress_line_chart"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp" />
+
+        <include
+            android:id="@+id/weightCard"
+            layout="@layout/item_progress_line_chart"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Strength balance"
+            android:textColor="@color/textPrimary"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/strengthCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            app:cardBackgroundColor="@color/surfaceCard"
+            app:cardCornerRadius="22dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/strokeSubtle"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:id="@+id/tvStrengthTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Max weight by category"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvStrengthMeta"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Best loaded set in each muscle group"
+                    android:textColor="@color/textSecondary"
+                    android:textSize="12sp" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="250dp"
+                    android:layout_marginTop="10dp">
+
+                    <com.github.mikephil.charting.charts.BarChart
+                        android:id="@+id/barStrength"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+
+                    <LinearLayout
+                        android:id="@+id/strengthEmpty"
+                        style="@style/Widget.Gym.ProgressEmptyState"
+                        android:visibility="gone">
+
+                        <TextView
+                            style="@style/Widget.Gym.ProgressEmptyIcon"
+                            android:text="+" />
+
+                        <TextView
+                            style="@style/Widget.Gym.ProgressEmptyTitle"
+                            android:text="Strength data is waiting" />
+
+                        <TextView
+                            style="@style/Widget.Gym.ProgressEmptyMessage"
+                            android:text="Complete weighted sets to compare your strongest categories." />
+                    </LinearLayout>
+                </FrameLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Insights"
+            android:textColor="@color/textPrimary"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:id="@+id/insightsPanel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_progress_card"
+            android:orientation="vertical"
+            android:padding="14dp">
+
+            <include
+                android:id="@+id/insightLongest"
+                layout="@layout/item_progress_insight" />
+
+            <include
+                android:id="@+id/insightBestDay"
+                layout="@layout/item_progress_insight"
+                android:layout_marginTop="8dp" />
+
+            <include
+                android:id="@+id/insightStreak"
+                layout="@layout/item_progress_insight"
+                android:layout_marginTop="8dp" />
+
+            <include
+                android:id="@+id/insightWeight"
+                layout="@layout/item_progress_insight"
+                android:layout_marginTop="8dp" />
+        </LinearLayout>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/recoveryCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardBackgroundColor="@color/surfaceCard"
+            app:cardCornerRadius="22dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/strokeSubtle"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:id="@+id/tvRecoveryTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Workout feeling"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvRecoverySummary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:textColor="@color/textSecondary"
+                    android:textSize="13sp"
+                    tools:text="Most sessions felt strong this week" />
+
+                <LinearLayout
+                    android:id="@+id/moodBars"
+                    android:layout_width="match_parent"
+                    android:layout_height="42dp"
+                    android:layout_marginTop="14dp"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

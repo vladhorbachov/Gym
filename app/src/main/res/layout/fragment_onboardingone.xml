@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.gymshark.utils.WaveView
+    <com.gymshark.utils.view.WaveView
         android:id="@+id/wave"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

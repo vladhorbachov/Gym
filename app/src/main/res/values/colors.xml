@@ -2,4 +2,102 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <color name="chip_bg">#F4F1FA</color>
+    <color name="chip_selected">#6E5ACD</color>
+    <color name="chip_text">#1C1B1F</color>
+
+
+    <color name="bgMain">#0F0E17</color>
+    <color name="surfaceCard">#1A1824</color>
+    <color name="surfaceElevated">#211F2D</color>
+
+    <color name="primaryPurple">#8B5CF6</color>
+    <color name="primaryPurpleGlow">#A78BFA</color>
+
+    <color name="textPrimary">#F4F4F5</color>
+    <color name="textSecondary">#B8B5C6</color>
+    <color name="textDisabled">#66FFFFFF</color>
+
+    <color name="strokeSubtle">#2A2738</color>
+    <color name="chartGrid">#3A3648</color>
+    <color name="chartBlue">#4CC9F0</color>
+    <color name="chartGreen">#22C55E</color>
+    <color name="chartAmber">#FBBF24</color>
+    <color name="chartRose">#FB7185</color>
+    <color name="chartViolet">#A78BFA</color>
+    <color name="chartTeal">#2DD4BF</color>
+    <color name="chartLime">#A3E635</color>
+    <color name="chartPeak">#FF6B6B</color>
+    <color name="trainingAction">#38BDF8</color>
+    <color name="trainingActionDark">#075985</color>
+    <color name="trainingActionSurface">#123044</color>
+    <color name="trainingOnAction">#04131D</color>
+    <color name="trainingStatus">#34D399</color>
+    <color name="trainingStatusDark">#047857</color>
+    <color name="trainingStatusSurface">#12382D</color>
+    <color name="trainingWarmup">#F59E0B</color>
+    <color name="trainingSurface">#181A25</color>
+    <color name="trainingSurfaceRaised">#202332</color>
+    <color name="trainingOutline">#334155</color>
+    <color name="trainingAccent">#38BDF8</color>
+    <color name="trainingAccentDark">#075985</color>
+    <color name="trainingProgress">#34D399</color>
+    <color name="trainingProgressDark">#047857</color>
+    <color name="bottom_nav_haze">#4D1A1824</color>
+    <color name="bottom_nav_haze_stroke">#402A2738</color>
+    <color name="profile_glass">#A61A1824</color>
+    <color name="profile_glass_soft">#66211F2D</color>
+    <color name="profile_glass_stroke">#38FFFFFF</color>
+    <color name="profile_accent_glow">#3338BDF8</color>
+    <color name="profile_status_glow">#3034D399</color>
+    <color name="profile_sheet_panel">#221F2D</color>
+    <color name="profile_sheet_panel_soft">#191724</color>
+    <color name="profile_sheet_divider">#2F2B3D</color>
+    <color name="md_theme_background">#0F0F17</color>
+    <color name="md_theme_surface">#171726</color>
+    <color name="md_theme_surfaceContainer">#1E1E30</color>
+
+    <color name="md_theme_primary">#38BDF8</color>
+    <color name="md_theme_onPrimary">#FFFFFF</color>
+
+    <color name="md_theme_onBackground">#F2F2F7</color>
+    <color name="md_theme_onSurface">#E6E6FA</color>
+
+    <color name="bg_primary">#0F0D17</color>
+    <color name="bg_surface">#161425</color>
+    <color name="bg_surface_2">#1D1A2E</color>
+
+    <color name="accent_700">#6A00F4</color>
+    <color name="accent_500">#9A3BFF</color>
+
+    <color name="emerald_700">#008F5A</color>
+    <color name="emerald_500">#00C878</color>
+
+    <color name="text_primary">#F1F0FF</color>
+    <color name="text_secondary">#A8A3C7</color>
+
+    <color name="danger">#FF5A6A</color>
+
+
+    <color name="Purple_Plum">#585CE5</color>
+    <color name="Titan_White">#FAFAFF</color>
+    <color name="White_Lilac">#F0F1F9</color>
+    <color name="Deep_Blue">#0F2851</color>
+    <color name="Light_Grey">#E5E6EE</color>
+    <color name="Violet">#A1A3F6</color>
+    <color name="Water_Light">#C9EBED</color>
+    <color name="Violet_Light">#D0D1FF</color>
+    <color name="Cold_grey">#415371</color>
+    <color name="Dust_Grey">#B0B2C3</color>
+    <color name="Lilac_Petals_Dark">#F0F1F9</color>
+    <color name="Dark_Grey">#898D9E</color>
+    <color name="Turquoise">#58C6CD</color>
+    <color name="Alert">#EF8B8B</color>
+    <color name="Peach_Light">#F5DEDE</color>
+    <color name="Sunny_Yellow">#F2D382</color>
+    <color name="transparent">#00000000</color>
+    <color name="Gray_Blue">#9E9E9E</color>
+    <color name="Deep_Blue_Light">#534bae</color>
+
 </resources>

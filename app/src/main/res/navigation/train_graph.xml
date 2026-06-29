@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/train_graph"
+    app:startDestination="@id/prepareFragment">
+
+    <fragment
+        android:id="@+id/prepareFragment"
+        android:name="com.gymshark.ui.home.training.PrepareFragment"
+        android:label="PrepareFragment">
+        <action
+            android:id="@+id/action_prepareFragment_to_trainingFragment"
+            app:destination="@id/trainingFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/trainingFragment"
+        android:name="com.gymshark.ui.home.training.TrainingFragment"
+        android:label="TrainingFragment">
+        <action
+            android:id="@+id/action_trainingFragment_to_finishFragment"
+            app:destination="@id/finishFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/finishFragment"
+        android:name="com.gymshark.ui.home.training.finish.FinishFragment"
+        android:label="FinishFragment">
+        <action
+            android:id="@+id/action_finishFragment_to_pulseFragment"
+            app:destination="@id/pulseFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/pulseFragment"
+        android:name="com.gymshark.ui.home.pulse.PulseFragment"
+        android:label="PulseFragment">
+        <action
+            android:id="@+id/action_pulseFragment_to_navStats"
+            app:destination="@id/navStats"
+            app:popUpTo="@id/prepareFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+</navigation>
