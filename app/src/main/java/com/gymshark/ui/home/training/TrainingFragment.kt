@@ -2,10 +2,8 @@ package com.gymshark.ui.home.training
 
 import android.os.Bundle
 import android.view.View
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -24,7 +22,6 @@ class TrainingFragment : BaseFragment<FragmentTrainingBinding>(FragmentTrainingB
 
     private val trainingVm: TrainingViewModel by activityViewModel()
     private val statVm: TrainingStatViewModel by activityViewModel()
-    private var isPaused = false
 
     private val adapter = ExerciseAdapter { item ->
         ExerciseActionsBottomSheet.newInstance(item.exerciseId)
@@ -44,14 +41,14 @@ class TrainingFragment : BaseFragment<FragmentTrainingBinding>(FragmentTrainingB
                 findNavController().navigateUp()
             }
 
-            btnPause.setOnClickListener {
+            btnPlayPause.setOnClickListener {
                 it.pressPulse()
                 togglePause()
             }
 
-            btnFinish.setOnClickListener {
+            btnStop.setOnClickListener {
                 it.pressPulse()
-                statVm.stop()
+                statVm.pause()
                 findNavController().navigate(R.id.finishFragment)
             }
         }
@@ -63,6 +60,11 @@ class TrainingFragment : BaseFragment<FragmentTrainingBinding>(FragmentTrainingB
                 launch {
                     statVm.elapsedSeconds.collect { seconds ->
                         binding.tvTimer.text = seconds.formatDuration()
+                    }
+                }
+                launch {
+                    statVm.isRunning.collect { isRunning ->
+                        renderRunningState(isRunning)
                     }
                 }
                 launch {
@@ -99,12 +101,6 @@ class TrainingFragment : BaseFragment<FragmentTrainingBinding>(FragmentTrainingB
         ViewCompat.setOnApplyWindowInsetsListener(root) { _, insets ->
             val nav = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
 
-            // Global bottom nav lives in HomeActivity as a glass overlay. Keep these controls
-            // above it with a visible gap instead of stacking two bars together.
-            workoutActionBar.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                bottomMargin = nav.bottom + CONTROL_BOTTOM_OFFSET_DP.dp
-            }
-
             // RecyclerView stays constrained to parent bottom, so exercise cards can scroll
             // behind the haze/blur nav. Padding only ensures the last card remains reachable.
             rvExercises.updatePadding(bottom = nav.bottom + SCROLL_BOTTOM_PADDING_DP.dp)
@@ -116,7 +112,7 @@ class TrainingFragment : BaseFragment<FragmentTrainingBinding>(FragmentTrainingB
     }
 
     private fun playIntro() = with(binding) {
-        listOf(header, rvExercises, workoutActionBar).forEachIndexed { index, target ->
+        listOf(header, rvExercises).forEachIndexed { index, target ->
             target.alpha = 0f
             target.translationY = 22f
             target.animate()
@@ -140,16 +136,25 @@ class TrainingFragment : BaseFragment<FragmentTrainingBinding>(FragmentTrainingB
         return "%02d:%02d".format(minutes, seconds)
     }
 
-    private fun togglePause() = with(binding) {
-        isPaused = !isPaused
-        if (isPaused) {
+    private fun togglePause() {
+        if (statVm.isRunning.value) {
             statVm.pause()
-            tvTrainingStatus.text = "Workout paused"
-            btnPause.text = "Resume"
         } else {
             statVm.start()
-            tvTrainingStatus.text = "Live workout"
-            btnPause.text = "Pause"
+        }
+    }
+
+    private fun renderRunningState(isRunning: Boolean) = with(binding) {
+        tvTrainingStatus.text = if (isRunning) "Live workout" else "Workout paused"
+
+        btnPlayPause.apply {
+            if (isRunning) {
+                setImageResource(R.drawable.ic_pause)
+                contentDescription = "Pause workout"
+            } else {
+                setImageResource(R.drawable.ic_play)
+                contentDescription = "Resume workout"
+            }
         }
     }
 
@@ -163,10 +168,7 @@ class TrainingFragment : BaseFragment<FragmentTrainingBinding>(FragmentTrainingB
         get() = (this * resources.displayMetrics.density).toInt()
 
     private companion object {
-        // Adjust with activity_home.xml bottom nav height/margin if the global nav changes.
-        const val CONTROL_BOTTOM_OFFSET_DP = 124
-
-        // Tune this for how high the last exercise can scroll above the floating controls.
-        const val SCROLL_BOTTOM_PADDING_DP = 188
+        // Tune this for how high the last exercise can scroll above the floating bottom nav.
+        const val SCROLL_BOTTOM_PADDING_DP = 116
     }
 }

@@ -18,6 +18,7 @@ class TrainingTimerService : Service() {
 
     companion object {
         val elapsedSeconds = MutableStateFlow(0L)
+        val isRunning = MutableStateFlow(false)
         const val CHANNEL_ID = "training_timer"
     }
 
@@ -50,6 +51,8 @@ class TrainingTimerService : Service() {
     private fun start() {
         if (running) return
         running = true
+        isRunning.value = true
+        accumulated = elapsedSeconds.value
         startRealtime = SystemClock.elapsedRealtime()
 
         job?.cancel()
@@ -67,16 +70,20 @@ class TrainingTimerService : Service() {
         if (!running) return
         accumulated += (SystemClock.elapsedRealtime() - startRealtime) / 1000
         running = false
+        isRunning.value = false
         job?.cancel()
     }
 
     private fun stop() {
         pause()
+        isRunning.value = false
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
     }
 
     override fun onDestroy() {
+        running = false
+        isRunning.value = false
         job?.cancel()
         super.onDestroy()
     }

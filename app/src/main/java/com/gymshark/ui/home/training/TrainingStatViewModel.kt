@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 class TrainingStatViewModel(app: Application) : AndroidViewModel(app) {
 
     val elapsedSeconds = TrainingTimerService.elapsedSeconds
+    val isRunning = TrainingTimerService.isRunning
     private val _startTime = MutableStateFlow<Long?>(null)
     val startTime = _startTime.asStateFlow()
     fun start() {
@@ -41,6 +42,7 @@ class TrainingStatViewModel(app: Application) : AndroidViewModel(app) {
         stop()
         _startTime.value = null
         TrainingTimerService.elapsedSeconds.value = 0L
+        TrainingTimerService.isRunning.value = false
 
         return st to durationSec
     }

@@ -29,25 +29,70 @@
             app:iconPadding="0dp"
             app:iconTint="@color/trainingAction" />
 
-        <TextView
-            android:id="@+id/tvTrainingStatus"
+        <LinearLayout
+            android:id="@+id/timerControlRow"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="Live workout"
-            android:textColor="@color/trainingStatus"
-            android:textSize="13sp"
-            android:textStyle="bold" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/tvTimer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:text="00:00"
-            android:textColor="@color/textPrimary"
-            android:textSize="36sp"
-            android:textStyle="bold" />
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvTrainingStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Live workout"
+                    android:textColor="@color/trainingStatus"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvTimer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="00:00"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="36sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:padding="8dp">
+
+                <ImageButton
+                    android:id="@+id/btnPlayPause"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:layout_marginEnd="12dp"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/ic_pause"
+                    android:contentDescription="Play Pause"
+                    android:scaleType="centerInside"
+                    android:padding="0dp" />
+
+                <ImageButton
+                    android:id="@+id/btnStop"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/ic_check"
+                    android:contentDescription="Stop"
+                    android:scaleType="centerInside"
+                    android:padding="0dp" />
+
+            </LinearLayout>
+        </LinearLayout>
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardProgress"
@@ -116,53 +161,4 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/header" />
-
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/workoutActionBar"
-        android:layout_width="0dp"
-        android:layout_height="64dp"
-        android:layout_marginStart="28dp"
-        android:layout_marginEnd="28dp"
-        android:layout_marginBottom="132dp"
-        app:cardBackgroundColor="@color/surfaceCard"
-        app:cardCornerRadius="26dp"
-        app:cardElevation="0dp"
-        app:strokeColor="@color/strokeSubtle"
-        app:strokeWidth="1dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:padding="8dp">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnPause"
-                style="@style/Widget.Material3.Button.TonalButton"
-                android:layout_width="0dp"
-                android:layout_height="48dp"
-                android:layout_marginEnd="8dp"
-                android:layout_weight="1"
-                android:text="Pause"
-                android:textAllCaps="false"
-                android:textColor="@color/training_secondary_button_text"
-                app:backgroundTint="@color/training_secondary_button_bg"
-                app:cornerRadius="26dp" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnFinish"
-                style="@style/Widget.Gym.PrimaryButton"
-                android:layout_width="0dp"
-                android:layout_height="48dp"
-                android:layout_weight="1"
-                android:text="Finish"
-                app:icon="@drawable/ic_chevron_right"
-                app:iconGravity="textEnd"
-                app:iconTint="@color/trainingOnAction" />
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.gymshark.data.exercises.ExercisesCatalog
 import com.gymshark.data.user.UserRepository
 import com.gymshark.domain.models.DaySlot
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -14,6 +16,12 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
+
+enum class PlanSaveState {
+    Idle,
+    Saving,
+    Saved
+}
 
 class TrainingSetsViewModel(
     private val userRepository: UserRepository,
@@ -57,6 +65,10 @@ class TrainingSetsViewModel(
 
     private val _displayedSlots = MutableStateFlow<List<DaySlot>>(emptyList())
     val displayedSlots: StateFlow<List<DaySlot>> = _displayedSlots
+    private val _saveState = MutableStateFlow(PlanSaveState.Idle)
+    val saveState: StateFlow<PlanSaveState> = _saveState
+    private var saveJob: Job? = null
+    private var draftLoaded = false
 
     fun resetDraft() {
         viewModelScope.launch {
@@ -66,6 +78,8 @@ class TrainingSetsViewModel(
                 weekOrder.filter { day -> savedSlots.any { it.day == day } }
             }
             _displayedSlots.value = normalizeSlots(savedSlots, selectedDays)
+            _saveState.value = PlanSaveState.Saved
+            draftLoaded = true
         }
     }
 
@@ -73,14 +87,16 @@ class TrainingSetsViewModel(
         val validTypes = categories.value.toSet()
         if (type !in validTypes) return
 
-        _displayedSlots.value = displayedSlots.value.map { slot ->
-            if (slot.id == slotId) {
-                val updatedTypes = (slot.types + type)
-                    .filter { it in validTypes }
-                    .distinct()
-                slot.copy(types = updatedTypes)
-            } else {
-                slot
+        updateSlots {
+            map { slot ->
+                if (slot.id == slotId) {
+                    val updatedTypes = (slot.types + type)
+                        .filter { it in validTypes }
+                        .distinct()
+                    slot.copy(types = updatedTypes)
+                } else {
+                    slot
+                }
             }
         }
     }
@@ -88,41 +104,49 @@ class TrainingSetsViewModel(
     fun setSlotTypes(slotId: Long, types: List<String>) {
         val validTypes = categories.value.toSet()
         val normalized = types.filter { it in validTypes }.distinct()
-        _displayedSlots.value = displayedSlots.value.map { slot ->
-            if (slot.id == slotId) slot.copy(types = normalized) else slot
+        updateSlots {
+            map { slot ->
+                if (slot.id == slotId) slot.copy(types = normalized) else slot
+            }
         }
     }
 
     fun clearSlot(slotId: Long) {
-        _displayedSlots.value = displayedSlots.value.map { slot ->
-            if (slot.id == slotId) slot.copy(types = emptyList()) else slot
+        updateSlots {
+            map { slot ->
+                if (slot.id == slotId) slot.copy(types = emptyList()) else slot
+            }
         }
     }
 
     fun removeSlotType(slotId: Long, type: String) {
-        _displayedSlots.value = displayedSlots.value.map { slot ->
-            if (slot.id == slotId) {
-                slot.copy(types = slot.types.filterNot { it == type })
-            } else {
-                slot
+        updateSlots {
+            map { slot ->
+                if (slot.id == slotId) {
+                    slot.copy(types = slot.types.filterNot { it == type })
+                } else {
+                    slot
+                }
             }
         }
     }
 
     fun commitChanges() {
         viewModelScope.launch {
-            val userId = userRepository.currentUserId() ?: return@launch
-            userRepository.setTrainingSlots(
-                userId,
-                normalizeSlots(displayedSlots.value, baseDays.value)
-            )
+            saveJob?.cancel()
+            saveNow()
         }
     }
 
     fun syncWithBase() {
+        if (!draftLoaded) return
         val selectedDays = baseDays.value
         if (selectedDays.isEmpty() && displayedSlots.value.isNotEmpty()) return
-        _displayedSlots.value = normalizeSlots(displayedSlots.value, selectedDays)
+        val normalized = normalizeSlots(displayedSlots.value, selectedDays)
+        if (normalized != displayedSlots.value) {
+            _displayedSlots.value = normalized
+            scheduleSave()
+        }
     }
 
     fun addNext() {
@@ -138,5 +162,37 @@ class TrainingSetsViewModel(
             byDay[day]?.copy(id = day.value.toLong(), day = day)
                 ?: DaySlot(id = day.value.toLong(), day = day, types = emptyList())
         }
+    }
+
+    private fun updateSlots(transform: List<DaySlot>.() -> List<DaySlot>) {
+        _displayedSlots.value = displayedSlots.value.transform()
+        if (draftLoaded) {
+            scheduleSave()
+        }
+    }
+
+    private fun scheduleSave() {
+        saveJob?.cancel()
+        saveJob = viewModelScope.launch {
+            _saveState.value = PlanSaveState.Saving
+            delay(AUTO_SAVE_DELAY_MS)
+            saveNow()
+        }
+    }
+
+    private suspend fun saveNow() {
+        val userId = userRepository.currentUserId() ?: run {
+            _saveState.value = PlanSaveState.Idle
+            return
+        }
+        userRepository.setTrainingSlots(
+            userId,
+            normalizeSlots(displayedSlots.value, baseDays.value)
+        )
+        _saveState.value = PlanSaveState.Saved
+    }
+
+    private companion object {
+        const val AUTO_SAVE_DELAY_MS = 300L
     }
 }
